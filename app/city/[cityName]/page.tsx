@@ -1,6 +1,7 @@
 interface Props {
   params: { cityName: string };
 }
+
 export default function CityPage({ params }: Props) {
   return (
     <main className="flex items-center justify-center h-screen bg-black text-white">
