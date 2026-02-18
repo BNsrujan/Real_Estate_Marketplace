@@ -1,4 +1,3 @@
-
 import { useRef } from "react";
 import { useFrame, useLoader, useThree } from "@react-three/fiber";
 import { TextureLoader } from "three";
