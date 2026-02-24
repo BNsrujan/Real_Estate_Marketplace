@@ -9,7 +9,7 @@ import {
 import { useEffect, useRef, useState } from "react";
 import { GLTFLoader, OrbitControls } from "three/examples/jsm/Addons.js";
 import * as THREE from "three";
-import { Stars } from "@react-three/drei";
+import { Stars, Text, Html, Billboard } from "@react-three/drei";
 import { type ThreeElement } from "@react-three/fiber";
 
 declare module "@react-three/fiber" {
@@ -92,26 +92,97 @@ function Karnataka({ visible }: { visible: boolean }) {
   return <primitive visible={visible} object={KarGLB.scene} />;
 }
 
+function NammaDharani({ controlsRef, showEarth }: any) {
+  const textRef = useRef<any>(null);
+  const matRef = useRef<any>(null);
+  const { camera } = useThree();
+
+  useFrame(() => {
+    if (!controlsRef.current || !textRef.current || !matRef.current) return;
+
+    const dist = camera.position.distanceTo(controlsRef.current.target);
+
+    if (showEarth && dist > 4.2) {
+      textRef.current.visible = true;
+
+      matRef.current.opacity = THREE.MathUtils.lerp(
+        matRef.current.opacity,
+        1,
+        0.04,
+      );
+    } else {
+      matRef.current.opacity = THREE.MathUtils.lerp(
+        matRef.current.opacity,
+        0,
+        0.04,
+      );
+
+      if (matRef.current.opacity < 0.05) {
+        textRef.current.visible = false;
+      }
+    }
+  });
+  return (
+    <Billboard follow={true} lockX={false} lockY={false} lockZ={false}>
+      <Text
+        ref={textRef}
+        position={[0, 2.2, 1.5]}
+        fontSize={0.5}
+        anchorX="center"
+        anchorY="middle"
+      >
+        <meshPhysicalMaterial
+          ref={matRef}
+          color="#e6f0ff"
+          emissive="#3d8bff"
+          emissiveIntensity={2.5}
+          metalness={0.5}
+          roughness={0.25}
+          transparent
+          opacity={1}
+        />
+        NAMMA DHARANI
+      </Text>
+    </Billboard>
+  );
+}
+
 function Zoom({ setEarth, setIndia, setKar, controlsRef }: any) {
   const { camera } = useThree();
+
+  const last = useRef("earth");
 
   useFrame(() => {
     if (!controlsRef.current) return;
 
     const dist = camera.position.distanceTo(controlsRef.current.target);
 
-    if (dist > 3.2) {
-      setEarth(true);
-      setIndia(false);
-      setKar(false);
-    } else if (dist > 2.0) {
-      setEarth(false);
-      setIndia(true);
-      setKar(false);
-    } else {
-      setEarth(false);
-      setIndia(false);
-      setKar(true);
+    if (last.current === "earth") {
+      if (dist < 3.4) {
+        last.current = "india";
+        setEarth(false);
+        setIndia(true);
+        setKar(false);
+      }
+    } else if (last.current === "india") {
+      if (dist > 3.8) {
+        last.current = "earth";
+        setEarth(true);
+        setIndia(false);
+        setKar(false);
+      } else if (dist < 2.2) {
+        last.current = "kar";
+        setEarth(false);
+        setIndia(false);
+        setKar(true);
+      }
+    } else if (last.current === "kar") {
+      if (dist > 2.5) {
+        last.current = "india";
+        setEarth(false);
+        setIndia(true);
+        setKar(false);
+      }
     }
   });
 
@@ -132,6 +203,7 @@ export default function LandingPage() {
         <directionalLight position={[5, 5, 5]} />
 
         <EarthModel visible={showEarth} />
+        <NammaDharani controlsRef={controlsRef} showEarth={showEarth} />
         <India visible={showIndia} />
         <Karnataka visible={showKar} />
 
