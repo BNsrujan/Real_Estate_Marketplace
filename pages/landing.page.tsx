@@ -64,86 +64,45 @@ function EarthModel({ visible }: { visible: boolean }) {
 }
 
 function India({ visible }: { visible: boolean }) {
-  const IndiaGLB = useLoader(GLTFLoader, "/india/India_Map/india_Full_Map.glb");
+  const gltf = useLoader(GLTFLoader, "/india/India_Map/India_Full_Map.glb");
 
   useEffect(() => {
-    const box = new THREE.Box3().setFromObject(IndiaGLB.scene);
+    const box = new THREE.Box3().setFromObject(gltf.scene);
     const center = box.getCenter(new THREE.Vector3());
-    IndiaGLB.scene.position.sub(center);
-    IndiaGLB.scene.scale.set(1.8, 1.8, 1.8);
-  }, []);
+    gltf.scene.position.sub(center);
+  }, [gltf]);
 
-  return <primitive visible={visible} object={IndiaGLB.scene} />;
+  return (
+    <group
+      visible={visible}
+      rotation={[Math.PI / 2, 0, 0]}
+      scale={[1.8, 1.8, 1.8]}
+    >
+      <primitive object={gltf.scene} />
+    </group>
+  );
 }
 
 function Karnataka({ visible }: { visible: boolean }) {
-  const KarGLB = useLoader(
+  const gltf = useLoader(
     GLTFLoader,
-    "/karnataka/Karnataka_map/karnataka_Map.glb",
+    "/karnataka/Karnataka_map/Karnataka_Map.glb",
   );
 
   useEffect(() => {
-    const box = new THREE.Box3().setFromObject(KarGLB.scene);
+    const box = new THREE.Box3().setFromObject(gltf.scene);
     const center = box.getCenter(new THREE.Vector3());
-    KarGLB.scene.position.sub(center);
-    KarGLB.scene.scale.set(3.5, 3.5, 3.5);
-  }, []);
+    gltf.scene.position.sub(center);
+  }, [gltf]);
 
-  return <primitive visible={visible} object={KarGLB.scene} />;
-}
-
-function NammaDharani({ controlsRef, showEarth }: any) {
-  const textRef = useRef<any>(null);
-  const matRef = useRef<any>(null);
-  const { camera } = useThree();
-
-  useFrame(() => {
-    if (!controlsRef.current || !textRef.current || !matRef.current) return;
-
-    const dist = camera.position.distanceTo(controlsRef.current.target);
-
-    if (showEarth && dist > 4.2) {
-      textRef.current.visible = true;
-
-      matRef.current.opacity = THREE.MathUtils.lerp(
-        matRef.current.opacity,
-        1,
-        0.04,
-      );
-    } else {
-      matRef.current.opacity = THREE.MathUtils.lerp(
-        matRef.current.opacity,
-        0,
-        0.04,
-      );
-
-      if (matRef.current.opacity < 0.05) {
-        textRef.current.visible = false;
-      }
-    }
-  });
   return (
-    <Billboard follow={true} lockX={false} lockY={false} lockZ={false}>
-      <Text
-        ref={textRef}
-        position={[0, 2.2, 1.5]}
-        fontSize={0.5}
-        anchorX="center"
-        anchorY="middle"
-      >
-        <meshPhysicalMaterial
-          ref={matRef}
-          color="#e6f0ff"
-          emissive="#3d8bff"
-          emissiveIntensity={2.5}
-          metalness={0.5}
-          roughness={0.25}
-          transparent
-          opacity={1}
-        />
-        NAMMA DHARANI
-      </Text>
-    </Billboard>
+    <group
+      visible={visible}
+      rotation={[Math.PI / 2, 0, 0]}
+      scale={[3.5, 3.5, 3.5]}
+    >
+      <primitive object={gltf.scene} />
+    </group>
   );
 }
 
@@ -203,7 +162,6 @@ export default function LandingPage() {
         <directionalLight position={[5, 5, 5]} />
 
         <EarthModel visible={showEarth} />
-        <NammaDharani controlsRef={controlsRef} showEarth={showEarth} />
         <India visible={showIndia} />
         <Karnataka visible={showKar} />
 
