@@ -9,7 +9,7 @@ import {
 import { useEffect, useRef, useState } from "react";
 import { GLTFLoader, OrbitControls } from "three/examples/jsm/Addons.js";
 import * as THREE from "three";
-import { Stars } from "@react-three/drei";
+import { Stars, Text, Html, Billboard } from "@react-three/drei";
 import { type ThreeElement } from "@react-three/fiber";
 
 declare module "@react-three/fiber" {
@@ -64,54 +64,84 @@ function EarthModel({ visible }: { visible: boolean }) {
 }
 
 function India({ visible }: { visible: boolean }) {
-  const IndiaGLB = useLoader(GLTFLoader, "/india/India_Map/india_Full_Map.glb");
+  const gltf = useLoader(GLTFLoader, "/india/India_Map/India_Full_Map.glb");
 
   useEffect(() => {
-    const box = new THREE.Box3().setFromObject(IndiaGLB.scene);
+    const box = new THREE.Box3().setFromObject(gltf.scene);
     const center = box.getCenter(new THREE.Vector3());
-    IndiaGLB.scene.position.sub(center);
-    IndiaGLB.scene.scale.set(1.8, 1.8, 1.8);
-  }, []);
+    gltf.scene.position.sub(center);
+  }, [gltf]);
 
-  return <primitive visible={visible} object={IndiaGLB.scene} />;
+  return (
+    <group
+      visible={visible}
+      rotation={[Math.PI / 2, 0, 0]}
+      scale={[1.8, 1.8, 1.8]}
+    >
+      <primitive object={gltf.scene} />
+    </group>
+  );
 }
 
 function Karnataka({ visible }: { visible: boolean }) {
-  const KarGLB = useLoader(
+  const gltf = useLoader(
     GLTFLoader,
-    "/karnataka/Karnataka_map/karnataka_Map.glb",
+    "/karnataka/Karnataka_map/Karnataka_Map.glb",
   );
 
   useEffect(() => {
-    const box = new THREE.Box3().setFromObject(KarGLB.scene);
+    const box = new THREE.Box3().setFromObject(gltf.scene);
     const center = box.getCenter(new THREE.Vector3());
-    KarGLB.scene.position.sub(center);
-    KarGLB.scene.scale.set(3.5, 3.5, 3.5);
-  }, []);
+    gltf.scene.position.sub(center);
+  }, [gltf]);
 
-  return <primitive visible={visible} object={KarGLB.scene} />;
+  return (
+    <group
+      visible={visible}
+      rotation={[Math.PI / 2, 0, 0]}
+      scale={[3.5, 3.5, 3.5]}
+    >
+      <primitive object={gltf.scene} />
+    </group>
+  );
 }
 
 function Zoom({ setEarth, setIndia, setKar, controlsRef }: any) {
   const { camera } = useThree();
+
+  const last = useRef("earth");
 
   useFrame(() => {
     if (!controlsRef.current) return;
 
     const dist = camera.position.distanceTo(controlsRef.current.target);
 
-    if (dist > 3.2) {
-      setEarth(true);
-      setIndia(false);
-      setKar(false);
-    } else if (dist > 2.0) {
-      setEarth(false);
-      setIndia(true);
-      setKar(false);
-    } else {
-      setEarth(false);
-      setIndia(false);
-      setKar(true);
+    if (last.current === "earth") {
+      if (dist < 3.4) {
+        last.current = "india";
+        setEarth(false);
+        setIndia(true);
+        setKar(false);
+      }
+    } else if (last.current === "india") {
+      if (dist > 3.8) {
+        last.current = "earth";
+        setEarth(true);
+        setIndia(false);
+        setKar(false);
+      } else if (dist < 2.2) {
+        last.current = "kar";
+        setEarth(false);
+        setIndia(false);
+        setKar(true);
+      }
+    } else if (last.current === "kar") {
+      if (dist > 2.5) {
+        last.current = "india";
+        setEarth(false);
+        setIndia(true);
+        setKar(false);
+      }
     }
   });
 
