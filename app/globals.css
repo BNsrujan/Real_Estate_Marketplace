@@ -18,7 +18,19 @@
     --foreground: #ededed;
   }
 }
-
+body {
+  margin: 0;
+  background: radial-gradient(circle at center, #0b1d3a 0%, #000814 70%);
+}
+body::after {
+  content: "";
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  background: url("https://www.transparenttextures.com/patterns/stardust.png");
+  opacity: 0.2;
+  pointer-events: none;
+}
 body {
   background: var(--background);
   color: var(--foreground);
@@ -28,19 +40,65 @@ body {
   height: 100%;
   width: 100%;
   overflow: hidden;
-  background: hsl(240,12%,9%);
+  background: hsl(240, 12%, 9%);
 }
 #kmzv-container {
   height: 100vh;
   width: 100vw;
 }
-    .mapboxgl-ctrl-logo, .logo-container, .logo, .kmz-logo, .kmz-logo * { display: none !important; }
-    
-    /* Hide floating bars and menus */
-    .topbar, .button-bar, .left-side-controls-inner, .right-side-controls-inner, 
-    .tree-control-outer, .layer-control-outer, .mobile-control-bar, .bottom-status,
-    .collapsed-control-button, .projection-control, [data-v-5a308a78],
-    .map-control-inner, .layer-control-inner { display: none !important; }
+.mapboxgl-ctrl-logo,
+.logo-container,
+.logo,
+.kmz-logo,
+.kmz-logo * {
+  display: none !important;
+}
 
-    /* Hide startup modal/card components */
-    .v-card, .v-card__loader, .v-card-item, .v-card-text, .v-card-actions, .startup-modal-row { display: none !important; }
+/* Hide floating bars and menus */
+.topbar,
+.button-bar,
+.left-side-controls-inner,
+.right-side-controls-inner,
+.tree-control-outer,
+.layer-control-outer,
+.mobile-control-bar,
+.bottom-status,
+.collapsed-control-button,
+.projection-control,
+[data-v-5a308a78],
+.map-control-inner,
+.layer-control-inner {
+  display: none !important;
+}
+
+/* Hide startup modal/card components */
+.v-card,
+.v-card__loader,
+.v-card-item,
+.v-card-text,
+.v-card-actions,
+.startup-modal-row {
+  display: none !important;
+}
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background: black;
+}
+
+/* Wrapper */
+.globe-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background: radial-gradient(circle at center, #0a0a0a 0%, #000000 80%);
+}
+
+/* Frame to control globe size */
+.map-frame {
+  width: 90vw;
+  max-width: 1200px;
+  height: 90vh;
+}
