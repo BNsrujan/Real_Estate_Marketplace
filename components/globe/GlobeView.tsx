@@ -1,12 +1,11 @@
 "use client";
-
 import { useEffect, useRef } from "react";
 import maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
-
 export default function GlobeView() {
   const mapContainer = useRef<HTMLDivElement | null>(null);
   const starsRef = useRef<HTMLDivElement | null>(null);
+  const titleRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     if (!mapContainer.current) return;
@@ -14,7 +13,7 @@ export default function GlobeView() {
     const map = new maplibregl.Map({
       container: mapContainer.current,
       center: [78.9629, 22.5937],
-      zoom: 2.5,
+      zoom: 2,
       minZoom: 1,
       maxZoom: 10,
 
@@ -94,17 +93,26 @@ export default function GlobeView() {
         },
         minzoom: 6,
       });
+      map.on("zoom", () => {
+        const zoom = map.getZoom();
+
+        if (!titleRef.current) return;
+
+        if (zoom >= 3) {
+          titleRef.current.style.opacity = "0";
+        } else {
+          titleRef.current.style.opacity = "1";
+        }
+      });
 
       let userInteracting = false;
 
       map.on("mousedown", () => (userInteracting = true));
       map.on("touchstart", () => (userInteracting = true));
       map.on("wheel", () => (userInteracting = true));
-
       map.on("mouseup", () => {
         setTimeout(() => (userInteracting = false), 200);
       });
-
       map.on("touchend", () => {
         setTimeout(() => (userInteracting = false), 200);
       });
@@ -112,17 +120,14 @@ export default function GlobeView() {
       const rotationSpeed = 0.02;
 
       function rotateGlobe() {
-        if (!userInteracting) {
+        const zoom = map.getZoom();
+        if (!userInteracting && zoom < 6) {
           const center = map.getCenter();
-
           center.lng -= rotationSpeed;
-
           map.setCenter(center);
         }
-
         requestAnimationFrame(rotateGlobe);
       }
-
       rotateGlobe();
 
       let dragging = false;
@@ -130,17 +135,14 @@ export default function GlobeView() {
       let lastY = 0;
       let starX = 0;
       let starY = 0;
-
       map.getCanvas().addEventListener("mousedown", (e) => {
         dragging = true;
         lastX = e.clientX;
         lastY = e.clientY;
       });
-
       window.addEventListener("mouseup", () => {
         dragging = false;
       });
-
       map.getCanvas().addEventListener("mousemove", (e) => {
         if (!dragging || !starsRef.current) return;
 
@@ -152,7 +154,6 @@ export default function GlobeView() {
 
         starX += dx * 0.8;
         starY += dy * 0.8;
-
         starsRef.current.style.backgroundPosition = `${starX}px ${starY}px`;
       });
     });
@@ -179,12 +180,33 @@ export default function GlobeView() {
           backgroundImage: "url('/pics/star.jpg')",
           backgroundSize: "1400px",
           backgroundRepeat: "repeat",
-
           backgroundPosition: "0px 0px",
-
           zIndex: 0,
         }}
       />
+
+      <div
+        ref={titleRef}
+        style={{
+          position: "absolute",
+          top: "15px",
+          width: "100%",
+          textAlign: "center",
+          fontSize: "clamp(36px, 6vw, 72px)",
+          fontWeight: "700",
+          letterSpacing: "10px",
+          color: "#f2fbff",
+          zIndex: 2,
+          fontFamily: "Orbitron, sans-serif",
+          textShadow:
+            "0 0 6px #a6e1ff, 0 0 18px #6ccfff, 0 0 35px #3aa7ff, 0 0 60px #3aa7ff",
+          pointerEvents: "none",
+          transition: "opacity 0.6s ease",
+        }}
+      >
+        NAMMA DHARANI
+      </div>
+
       <div
         ref={mapContainer}
         style={{
@@ -192,6 +214,7 @@ export default function GlobeView() {
           height: "100%",
           position: "relative",
           zIndex: 1,
+          paddingTop: "250px",
         }}
       />
     </div>
