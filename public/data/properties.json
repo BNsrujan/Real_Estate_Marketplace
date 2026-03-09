@@ -1,0 +1,26 @@
+[
+  {
+    "title": "Premium Land",
+    "type": "land",
+    "price": "45,00,000",
+    "size": "2400 sqft",
+    "lat": 12.972,
+    "lng": 77.595
+  },
+  {
+    "title": "Luxury House",
+    "type": "house",
+    "price": "1,20,00,000",
+    "size": "3500 sqft",
+    "lat": 12.975,
+    "lng": 77.6
+  },
+  {
+    "title": "Residential Site",
+    "type": "site",
+    "price": "30,00,000",
+    "size": "1200 sqft",
+    "lat": 12.969,
+    "lng": 77.59
+  }
+]
