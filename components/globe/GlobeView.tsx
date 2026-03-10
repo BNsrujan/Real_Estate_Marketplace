@@ -1,46 +1,113 @@
 "use client";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
+
+import StarField from "../space/StarField";
+import LoadingScreen from "../loading/LoadingScreen";
+import {
+  MAP_CONFIG,
+  ROTATION_CONFIG,
+  TILE_SOURCES,
+  TITLE_FADE_ZOOM,
+  type Property,
+} from "../../lib/globe/mapConfig";
+
+// ── Helpers ──────────────────────────────────────────────────────────────────
+
+function buildMarkerElement(prop: Property): HTMLElement {
+  const el = document.createElement("div");
+  el.className = "property-marker";
+  el.innerHTML = `
+    <div class="pm-icon">${prop.type === "house" ? "🏠" : prop.type === "land" ? "🌱" : "🏗️"}</div>
+    <div class="pm-pulse"></div>
+  `;
+  return el;
+}
+
+function buildPopupHTML(prop: Property): string {
+  return `
+    <div class="pp-content">
+      <div class="pp-type">${prop.type.toUpperCase()}</div>
+      <div class="pp-title">${prop.title}</div>
+      <div class="pp-price">₹${prop.price}</div>
+      <div class="pp-size">${prop.size}</div>
+    </div>
+  `;
+}
+
+// ── Component ────────────────────────────────────────────────────────────────
+
 export default function GlobeView() {
   const mapContainer = useRef<HTMLDivElement | null>(null);
-  const starsRef = useRef<HTMLDivElement | null>(null);
   const titleRef = useRef<HTMLDivElement | null>(null);
+  const markersRef = useRef<maplibregl.Marker[]>([]);
+  const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
     if (!mapContainer.current) return;
 
+    const loadStart = Date.now();
+
+    // ── Map initialisation ─────────────────────────────────────────────────
     const map = new maplibregl.Map({
       container: mapContainer.current,
-      center: [78.9629, 22.5937],
-      zoom: 2,
-      minZoom: 1,
-      maxZoom: 10,
-
+      center: MAP_CONFIG.center,
+      zoom: MAP_CONFIG.zoom,
+      minZoom: MAP_CONFIG.minZoom,
+      maxZoom: MAP_CONFIG.maxZoom,
+      // Transparent canvas so Three.js stars show through globe edges
       style: {
         version: 8,
         sources: {
-          satellite: {
-            type: "raster",
-            tiles: [
-              "https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
-            ],
-            tileSize: 256,
-          },
+          satellite: TILE_SOURCES.satellite,
+          roads: TILE_SOURCES.roads,
+          labels: TILE_SOURCES.labels,
         },
-
         layers: [
+          // Fully transparent background so space shows through
           {
             id: "background",
             type: "background",
-            paint: {
-              "background-color": "rgba(0,0,0,0)",
-            },
+            paint: { "background-color": "rgba(0,0,0,0)" },
           },
+          // Satellite imagery — always visible
           {
             id: "satellite",
             type: "raster",
             source: "satellite",
+          },
+          // Road network overlay (transparent PNG from ArcGIS Reference)
+          // Fades in from zoom 8 → 11
+          {
+            id: "roads",
+            type: "raster",
+            source: "roads",
+            paint: {
+              "raster-opacity": [
+                "interpolate",
+                ["linear"],
+                ["zoom"],
+                8, 0,
+                11, 0.9,
+                18, 1.0,
+              ],
+            },
+          },
+          // Place labels overlay — fades in from zoom 9 → 12
+          {
+            id: "labels",
+            type: "raster",
+            source: "labels",
+            paint: {
+              "raster-opacity": [
+                "interpolate",
+                ["linear"],
+                ["zoom"],
+                9, 0,
+                12, 0.95,
+              ],
+            },
           },
         ],
       },
@@ -48,9 +115,24 @@ export default function GlobeView() {
 
     map.addControl(new maplibregl.NavigationControl(), "top-right");
 
+    // ── style.load — globe projection + data layers ────────────────────────
     map.on("style.load", () => {
+      // Switch to 3-D globe projection
       map.setProjection({ type: "globe" });
 
+      // Atmospheric haze — gives the globe that "from space" look
+      try {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (map as any).setFog({
+          range: [-1, 2],
+          color: "rgba(6, 12, 34, 0.85)",
+          "horizon-blend": 0.06,
+        });
+      } catch {
+        // setFog is optional; ignore if unsupported
+      }
+
+      // ── India political boundary ─────────────────────────────────────────
       map.addSource("india", {
         type: "geojson",
         data: "/data/india.geojson",
@@ -62,11 +144,19 @@ export default function GlobeView() {
         source: "india",
         paint: {
           "line-color": "#e6f2ff",
-          "line-width": 2,
+          "line-width": 1.5,
+          // Fade in at India zoom, fade out once road labels take over
+          "line-opacity": [
+            "interpolate", ["linear"], ["zoom"],
+            4, 0,
+            5, 0.9,
+            12, 0.2,
+          ],
         },
         minzoom: 4,
       });
 
+      // ── City boundaries ──────────────────────────────────────────────────
       map.addSource("cities", {
         type: "geojson",
         data: "/data/cities.json",
@@ -78,7 +168,12 @@ export default function GlobeView() {
         source: "cities",
         paint: {
           "fill-color": "#9ef0c4",
-          "fill-opacity": 0.15,
+          "fill-opacity": [
+            "interpolate", ["linear"], ["zoom"],
+            6, 0,
+            7, 0.08,
+            12, 0,
+          ],
         },
         minzoom: 6,
       });
@@ -89,117 +184,155 @@ export default function GlobeView() {
         source: "cities",
         paint: {
           "line-color": "#9ef0c4",
-          "line-width": 2,
+          "line-width": 1.5,
+          "line-opacity": [
+            "interpolate", ["linear"], ["zoom"],
+            6, 0,
+            7, 0.7,
+            13, 0.1,
+          ],
         },
         minzoom: 6,
       });
+
+      // ── Property markers (visible only at city-level zoom) ───────────────
+      const MARKER_MIN_ZOOM = 12;
+
+      function updateMarkerVisibility() {
+        const visible = map.getZoom() >= MARKER_MIN_ZOOM;
+        markersRef.current.forEach((m) => {
+          (m.getElement() as HTMLElement).style.display = visible
+            ? "flex"
+            : "none";
+        });
+      }
+
+      fetch("/data/properties.json")
+        .then((r) => r.json())
+        .then((properties: Property[]) => {
+          properties.forEach((prop) => {
+            const el = buildMarkerElement(prop);
+            // Hidden by default — revealed when zoomed in
+            el.style.display = "none";
+
+            const popup = new maplibregl.Popup({
+              offset: 28,
+              className: "property-popup",
+            }).setHTML(buildPopupHTML(prop));
+
+            const marker = new maplibregl.Marker({ element: el })
+              .setLngLat([prop.lng, prop.lat])
+              .setPopup(popup)
+              .addTo(map);
+
+            markersRef.current.push(marker);
+          });
+
+          // Run once after markers are added so current zoom is respected
+          updateMarkerVisibility();
+        })
+        .catch(() => {
+          // Properties are optional; fail silently
+        });
+
+      // ── Title fade + marker visibility on zoom ────────────────────────────
       map.on("zoom", () => {
-        const zoom = map.getZoom();
-
-        if (!titleRef.current) return;
-
-        if (zoom >= 3) {
-          titleRef.current.style.opacity = "0";
-        } else {
-          titleRef.current.style.opacity = "1";
+        if (titleRef.current) {
+          titleRef.current.style.opacity =
+            map.getZoom() >= TITLE_FADE_ZOOM ? "0" : "1";
         }
+        updateMarkerVisibility();
       });
 
+      // ── Auto-rotation — pauses at India level ────────────────────────────
       let userInteracting = false;
 
-      map.on("mousedown", () => (userInteracting = true));
-      map.on("touchstart", () => (userInteracting = true));
-      map.on("wheel", () => (userInteracting = true));
-      map.on("mouseup", () => {
-        setTimeout(() => (userInteracting = false), 200);
-      });
-      map.on("touchend", () => {
-        setTimeout(() => (userInteracting = false), 200);
-      });
+      const onInteractStart = () => { userInteracting = true; };
+      const onInteractEnd = () => {
+        setTimeout(() => { userInteracting = false; }, 250);
+      };
+      const onWheel = () => {
+        userInteracting = true;
+        setTimeout(() => { userInteracting = false; }, 600);
+      };
 
-      const rotationSpeed = 0.02;
+      map.on("mousedown", onInteractStart);
+      map.on("touchstart", onInteractStart);
+      map.on("wheel", onWheel);
+      map.on("mouseup", onInteractEnd);
+      map.on("touchend", onInteractEnd);
 
+      let rafId: number;
       function rotateGlobe() {
-        const zoom = map.getZoom();
-        if (!userInteracting && zoom < 6) {
+        if (!userInteracting && map.getZoom() < ROTATION_CONFIG.pauseAtZoom) {
           const center = map.getCenter();
-          center.lng -= rotationSpeed;
+          center.lng -= ROTATION_CONFIG.speed;
           map.setCenter(center);
         }
-        requestAnimationFrame(rotateGlobe);
+        rafId = requestAnimationFrame(rotateGlobe);
       }
       rotateGlobe();
 
-      let dragging = false;
-      let lastX = 0;
-      let lastY = 0;
-      let starX = 0;
-      let starY = 0;
-      map.getCanvas().addEventListener("mousedown", (e) => {
-        dragging = true;
-        lastX = e.clientX;
-        lastY = e.clientY;
-      });
-      window.addEventListener("mouseup", () => {
-        dragging = false;
-      });
-      map.getCanvas().addEventListener("mousemove", (e) => {
-        if (!dragging || !starsRef.current) return;
-
-        const dx = e.clientX - lastX;
-        const dy = e.clientY - lastY;
-
-        lastX = e.clientX;
-        lastY = e.clientY;
-
-        starX += dx * 0.8;
-        starY += dy * 0.8;
-        starsRef.current.style.backgroundPosition = `${starX}px ${starY}px`;
-      });
+      // Expose cancellation via closure
+      (map as maplibregl.Map & { _rotationRafId?: number })._rotationRafId =
+        rafId!;
     });
 
-    return () => map.remove();
+    // ── Mark loaded once tiles are rendered ────────────────────────────────
+    map.on("load", () => {
+      // Small extra delay so the globe has painted before we fade the loader
+      const elapsed = Date.now() - loadStart;
+      const delay = Math.max(0, 200 - elapsed);
+      setTimeout(() => setIsLoaded(true), delay);
+    });
+
+    // ── Cleanup ────────────────────────────────────────────────────────────
+    return () => {
+      markersRef.current.forEach((m) => m.remove());
+      markersRef.current = [];
+      map.remove();
+    };
   }, []);
 
   return (
     <div
       style={{
-        width: "100%",
+        width: "100vw",
         height: "100vh",
         position: "relative",
         overflow: "hidden",
         backgroundColor: "#000",
       }}
     >
+      {/* ── Layer 0: Three.js 3-D star field ─────────────────────────────── */}
+      <StarField />
+
+      {/* ── Layer 1: MapLibre globe (transparent canvas edges = stars show) */}
       <div
-        ref={starsRef}
+        ref={mapContainer}
         style={{
           position: "absolute",
-          width: "100%",
-          height: "100%",
-          backgroundImage: "url('/pics/star.jpg')",
-          backgroundSize: "1400px",
-          backgroundRepeat: "repeat",
-          backgroundPosition: "0px 0px",
-          zIndex: 0,
+          inset: 0,
+          zIndex: 1,
         }}
       />
 
+      {/* ── Layer 2: Title ───────────────────────────────────────────────── */}
       <div
         ref={titleRef}
         style={{
           position: "absolute",
-          top: "15px",
+          top: "16px",
           width: "100%",
           textAlign: "center",
-          fontSize: "clamp(36px, 6vw, 72px)",
+          fontSize: "clamp(30px, 5.5vw, 68px)",
           fontWeight: "700",
           letterSpacing: "10px",
           color: "#f2fbff",
-          zIndex: 2,
+          zIndex: 0,
           fontFamily: "Orbitron, sans-serif",
           textShadow:
-            "0 0 6px #a6e1ff, 0 0 18px #6ccfff, 0 0 35px #3aa7ff, 0 0 60px #3aa7ff",
+            "",
           pointerEvents: "none",
           transition: "opacity 0.6s ease",
         }}
@@ -207,16 +340,103 @@ export default function GlobeView() {
         NAMMA DHARANI
       </div>
 
-      <div
-        ref={mapContainer}
-        style={{
-          width: "100%",
-          height: "100%",
-          position: "relative",
-          zIndex: 1,
-          paddingTop: "250px",
-        }}
-      />
+      {/* ── Layer 3: Loading overlay ──────────────────────────────────────── */}
+      <LoadingScreen isLoaded={isLoaded} />
+
+      {/* ── Inline styles for markers, popups and map controls ───────────── */}
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap');
+
+        /* ── Property marker ── */
+        .property-marker {
+          position: relative;
+          cursor: pointer;
+          width: 32px;
+          height: 32px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+        .pm-icon {
+          font-size: 22px;
+          filter: drop-shadow(0 0 5px rgba(108,207,255,0.9));
+          transition: transform 0.2s ease;
+          position: relative;
+          z-index: 1;
+        }
+        .property-marker:hover .pm-icon {
+          transform: scale(1.25);
+        }
+        .pm-pulse {
+          position: absolute;
+          inset: -4px;
+          border-radius: 50%;
+          background: rgba(108, 207, 255, 0.15);
+          animation: pmPulse 2.2s ease-out infinite;
+        }
+        @keyframes pmPulse {
+          0%   { transform: scale(0.7); opacity: 0.9; }
+          100% { transform: scale(2.2); opacity: 0; }
+        }
+
+        /* ── Property popup ── */
+        .property-popup .maplibregl-popup-content {
+          background: rgba(6, 12, 34, 0.96);
+          border: 1px solid rgba(108, 207, 255, 0.25);
+          border-radius: 10px;
+          padding: 0;
+          box-shadow: 0 4px 24px rgba(58, 167, 255, 0.18);
+        }
+        .property-popup .maplibregl-popup-tip {
+          border-top-color: rgba(6, 12, 34, 0.96) !important;
+        }
+        .pp-content {
+          padding: 14px 18px;
+          font-family: 'Orbitron', sans-serif;
+          min-width: 155px;
+        }
+        .pp-type {
+          font-size: 9px;
+          color: #6ccfff;
+          letter-spacing: 2.5px;
+          margin-bottom: 5px;
+          opacity: 0.8;
+        }
+        .pp-title {
+          font-size: 13px;
+          color: #f2fbff;
+          font-weight: 700;
+          margin-bottom: 10px;
+          line-height: 1.3;
+        }
+        .pp-price {
+          font-size: 15px;
+          color: #9ef0c4;
+          font-weight: 700;
+          margin-bottom: 4px;
+        }
+        .pp-size {
+          font-size: 10px;
+          color: rgba(242, 251, 255, 0.45);
+          letter-spacing: 1px;
+        }
+
+        /* ── Navigation controls ── */
+        .maplibregl-ctrl-group {
+          background: rgba(6, 12, 34, 0.82) !important;
+          border: 1px solid rgba(108, 207, 255, 0.18) !important;
+          border-radius: 8px !important;
+        }
+        .maplibregl-ctrl-group button {
+          color: #6ccfff !important;
+        }
+        .maplibregl-ctrl-group button:hover {
+          background: rgba(108, 207, 255, 0.1) !important;
+        }
+        .maplibregl-ctrl-attrib {
+          display: none !important;
+        }
+      `}</style>
     </div>
   );
 }
