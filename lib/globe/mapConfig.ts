@@ -2,7 +2,7 @@ export const MAP_CENTER: [number, number] = [78.9629, 22.5937];
 export const MAP_CONFIG = {
   center: MAP_CENTER,
   zoom: 2.5,
-  minZoom: 2.3,
+  minZoom: 2.8,
   maxZoom: 18,
 };
 
