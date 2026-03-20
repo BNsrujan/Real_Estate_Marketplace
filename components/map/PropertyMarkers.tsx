@@ -1,6 +1,10 @@
 import maplibregl from "maplibre-gl";
 
-export function addPropertyMarkers(map: maplibregl.Map, properties: any[]) {
+export function addPropertyMarkers(
+  map: maplibregl.Map,
+  properties: any[],
+  onClick?: (prop: any) => void,
+) {
   const markers: maplibregl.Marker[] = [];
 
   properties.forEach((prop) => {
@@ -8,32 +12,20 @@ export function addPropertyMarkers(map: maplibregl.Map, properties: any[]) {
     el.className = "property-marker";
 
     el.innerHTML = `
-      <div style="
-        background:${prop.type === "house" ? "#00ff9d" : "#ffcc00"};
-        padding:8px;
-        border-radius:50%;
-        box-shadow:0 0 12px rgba(0,255,255,0.8);
-        font-size:14px;
-      ">
-        ${prop.type === "house" ? "🏠" : "🌱"}
-      </div>
+      <div class="pm-icon">${
+        prop.type === "house" ? "🏠" : prop.type === "land" ? "🌱" : "🏗️"
+      }</div>
+      <div class="pm-pulse"></div>
     `;
-
-    const popup = new maplibregl.Popup({
-      offset: 25,
-      closeButton: false,
-    }).setHTML(`
-      <div style="color:white;font-family:Orbitron">
-        <b>${prop.title}</b><br/>
-        ₹${prop.price}<br/>
-        ${prop.size}
-      </div>
-    `);
 
     const marker = new maplibregl.Marker(el)
       .setLngLat([prop.lng, prop.lat])
-      .setPopup(popup)
       .addTo(map);
+
+    el.addEventListener("click", (e) => {
+      e.stopPropagation();
+      if (onClick) onClick(prop);
+    });
 
     markers.push(marker);
   });

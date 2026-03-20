@@ -1,18 +1,19 @@
 export function enableDistrictClick(map: any, onClick: (name: string) => void) {
+  if (!map) return;
+
   map.on("click", (e: any) => {
+    if (!map.getLayer("cities-fill")) return;
+
     const features = map.queryRenderedFeatures(e.point, {
       layers: ["cities-fill"],
     });
 
     if (!features.length) return;
 
-    const feature = features[0];
-    const district = feature?.properties?.NAME_2;
+    const name = features[0].properties?.NAME_2;
 
-    if (!district) return;
-
-    console.log("Clicked district:", district);
-
-    onClick(district);
+    if (name) {
+      onClick(name);
+    }
   });
 }

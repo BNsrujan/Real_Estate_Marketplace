@@ -56,6 +56,7 @@ export default function GlobeView() {
   const isDistrictViewRef = useRef(false);
 
   const propertiesRef = useRef<any[]>([]);
+
   function renderMarkersSafe(map: maplibregl.Map, data: any[], mode: any) {
     const zoom = map.getZoom();
 
@@ -65,7 +66,39 @@ export default function GlobeView() {
     markersRef.current.forEach((m) => m.remove());
     markersRef.current = [];
 
-    markersRef.current = addPropertyMarkers(map, data);
+    markersRef.current = addPropertyMarkers(map, data, (prop) => {
+      const districtName = prop.district;
+
+      markerModeRef.current = "filtered";
+      cameFromDistrictRef.current = true;
+
+      markersRef.current.forEach((m) => m.remove());
+      markersRef.current = [];
+
+      const filtered = propertiesRef.current.filter(
+        (p) => p.district?.toLowerCase() === districtName.toLowerCase(),
+      );
+
+      const features = map.querySourceFeatures("district-centers");
+
+      const match = features.find(
+        (f: any) =>
+          f.properties?.NAME_2?.toLowerCase() === districtName.toLowerCase(),
+      );
+
+      if (match) {
+        const coords = (match.geometry as any).coordinates;
+
+        map.flyTo({
+          center: coords,
+          zoom: 11.5,
+          speed: 0.8,
+        });
+      }
+
+      renderMarkersSafe(map, filtered, "filtered");
+    });
+
     markerModeRef.current = mode;
   }
 
@@ -166,7 +199,6 @@ export default function GlobeView() {
         });
       } catch {}
 
-      // INDIA
       map.addSource("india", {
         type: "geojson",
         data: "/data/india.geojson",
@@ -344,9 +376,23 @@ export default function GlobeView() {
           (p) => p.district?.toLowerCase() === districtName.toLowerCase(),
         );
 
+        const features = map.querySourceFeatures("district-centers");
+
+        const match = features.find(
+          (f: any) =>
+            f.properties?.NAME_2?.toLowerCase() === districtName.toLowerCase(),
+        );
+
+        if (match) {
+          map.flyTo({
+            center: (match.geometry as any).coordinates,
+            zoom: 11.5,
+            speed: 0.8,
+          });
+        }
+
         renderMarkersSafe(map, filtered, "filtered");
       });
-
       map.on("zoom", () => {
         const zoom = map.getZoom();
         const MIN_ZOOM = 5.5;
