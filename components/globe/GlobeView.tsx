@@ -152,7 +152,7 @@ export default function GlobeView() {
 
     (mapContainer.current as any)._mapInstance = map;
 
-    map.setZoom(1.8);
+    map.setZoom(2.1);
     map.addControl(new maplibregl.NavigationControl(), "top-right");
 
     map.on("style.load", () => {
@@ -398,7 +398,7 @@ export default function GlobeView() {
     <div style={{ width: "100vw", height: "100vh", position: "relative" }}>
       <StarField />
       {showButton && <StartExploreButton onClick={handleZoomToKarnataka} />}
-      <div ref={mapContainer} style={{ position: "absolute", inset: 0 }} />
+      <div ref={mapContainer} style={{ position: "absolute", inset: 0, zIndex:1 }} />
 
       <div
         ref={titleRef}
