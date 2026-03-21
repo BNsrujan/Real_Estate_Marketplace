@@ -38,18 +38,18 @@ Namma Dharani ("Our Land" in Kannada) is a **map-first real estate discovery pla
 
 ## Tech Stack
 
-| Layer | Technology |
-|---|---|
-| Framework | Next.js 16 (App Router, React 19) |
-| Language | TypeScript 5 (strict mode) |
-| 3D Map | MapLibre GL 5 (globe projection) |
-| 3D Graphics | Three.js 0.182 + React Three Fiber |
-| Animations | GSAP 3 |
-| Styling | Tailwind CSS 4 + inline styles |
-| Map Tiles | ArcGIS Online (satellite, roads, labels) |
-| Fonts | Google Fonts — Inter, Orbitron |
-| Data | Static JSON (public/data/) |
-| Hosting | Vercel (recommended) |
+| Layer       | Technology                               |
+| ----------- | ---------------------------------------- |
+| Framework   | Next.js 16 (App Router, React 19)        |
+| Language    | TypeScript 5 (strict mode)               |
+| 3D Map      | MapLibre GL 5 (globe projection)         |
+| 3D Graphics | Three.js 0.182 + React Three Fiber       |
+| Animations  | GSAP 3                                   |
+| Styling     | Tailwind CSS 4 + inline styles           |
+| Map Tiles   | ArcGIS Online (satellite, roads, labels) |
+| Fonts       | Google Fonts — Inter, Orbitron          |
+| Data        | Static JSON (public/data/)               |
+| Hosting     | Vercel (recommended)                     |
 
 ---
 
@@ -117,6 +117,7 @@ Real_Estate_Marketplace_Frontend/
 ## Features
 
 ### Globe & Map
+
 - **3D globe rendering** with MapLibre globe projection
 - **Satellite + road + label tile layers** from ArcGIS Online (no API key required)
 - **Karnataka and India GeoJSON overlays** with cyan boundary lines
@@ -126,6 +127,7 @@ Real_Estate_Marketplace_Frontend/
 - **Zoom-aware UI** — title fades, button appears/disappears based on zoom level
 
 ### Property Listings
+
 - **Responsive property card grid** (auto-fill, 280px min columns)
 - **Static property detail pages** generated at build time (SSG)
 - **Type badges** — house, land, apartment, commercial with icons
@@ -135,12 +137,14 @@ Real_Estate_Marketplace_Frontend/
 - **Marker → district filter** — clicking a marker zooms into its district
 
 ### Visual Experience
+
 - **3D starfield background** — 7,000 procedurally placed stars (Three.js)
 - **Mouse parallax** on the starfield
 - **Orbital loading animation** — three concentric spinning rings
 - **Space-themed color system** — cyan accents, deep black background
 
 ### Architecture
+
 - **Next.js App Router** with server components + SSG
 - **Feature-sliced structure** — features/, hooks/, services/ separation
 - **SSR-disabled map wrapper** — MapLibre + Three.js require browser APIs
@@ -206,13 +210,13 @@ Both variables are optional. The app runs fully on static data without them.
 
 All data lives in `public/data/` and is served as static assets:
 
-| File | Description |
-|---|---|
-| `properties.json` | Property listings (id, title, type, price, size, lat, lng, district) |
-| `cities.json` | District center GeoJSON points |
-| `district-centers.json` | District center coordinates for fly animations |
-| `karnataka.geojson` | Karnataka state boundary polygon |
-| `india.geojson` | India country boundary |
+| File                      | Description                                                          |
+| ------------------------- | -------------------------------------------------------------------- |
+| `properties.json`       | Property listings (id, title, type, price, size, lat, lng, district) |
+| `cities.json`           | District center GeoJSON points                                       |
+| `district-centers.json` | District center coordinates for fly animations                       |
+| `karnataka.geojson`     | Karnataka state boundary polygon                                     |
+| `india.geojson`         | India country boundary                                               |
 
 ### Property Schema
 
@@ -259,20 +263,21 @@ public/data/properties.json
 
 ### Zoom Behavior
 
-| Zoom Level | UI State |
-|---|---|
-| < 3 | Title "NAMMA DHARANI" visible |
-| < 4 | "Explore Karnataka" button visible |
-| 3–5.5 | Karnataka overview, no markers |
-| 5.5–9 | Property markers visible |
-| > 9 | Markers hidden (too zoomed in) |
-| 11.5 | District detail level (set on district click) |
+| Zoom Level | UI State                                      |
+| ---------- | --------------------------------------------- |
+| < 3        | Title "NAMMA DHARANI" visible                 |
+| < 4        | "Explore Karnataka" button visible            |
+| 3–5.5     | Karnataka overview, no markers                |
+| 5.5–9     | Property markers visible                      |
+| > 9        | Markers hidden (too zoomed in)                |
+| 11.5       | District detail level (set on district click) |
 
 ---
 
 ## Roadmap
 
 ### Phase 2 — Core Product
+
 - [ ] User authentication (email/OTP + Google OAuth)
 - [ ] Property images (gallery per listing)
 - [ ] Search bar with filters (price, size, type, district)
@@ -282,6 +287,7 @@ public/data/properties.json
 - [ ] Favorites / saved listings
 
 ### Phase 3 — Growth
+
 - [ ] Agent / seller dashboard
 - [ ] Verified listings badge (RERA)
 - [ ] Map clustering for high-density areas
@@ -292,6 +298,7 @@ public/data/properties.json
 - [ ] Kannada language support
 
 ### Phase 4 — Monetization
+
 - [ ] Paid featured pins on globe
 - [ ] Agent subscription tiers
 - [ ] Lead management CRM
@@ -310,12 +317,4 @@ public/data/properties.json
 
 ---
 
-## License
-
-MIT License — see [LICENSE](LICENSE) for details.
-
----
-
-<div align="center">
-  <strong>Namma Dharani</strong> — Built with Next.js, MapLibre, and Three.js
-</div>
+**Namma Dharani** — Built with Next.js, MapLibre, and Three.js
