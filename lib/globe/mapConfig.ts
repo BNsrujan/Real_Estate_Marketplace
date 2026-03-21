@@ -42,11 +42,5 @@ export const TILE_SOURCES = {
   },
 };
 
-export interface Property {
-  title: string;
-  type: string;
-  price: string;
-  size: string;
-  lat: number;
-  lng: number;
-}
+// Property type has moved to types/index.ts — import from there.
+export type { Property } from "@/types";
