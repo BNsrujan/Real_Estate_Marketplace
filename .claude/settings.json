@@ -5,7 +5,8 @@
       "Bash(find /c/Users/Arora/Documents/Earth/Real_Estate_Marketplace_Frontend -maxdepth 3 -type d ! -path */node_modules* ! -path */.next*)",
       "Bash(grep -v \"^\\\\.\\\\.$\")",
       "Bash(grep -v \"^\\\\.$\")",
-      "Bash(npx tsc:*)"
+      "Bash(npx tsc:*)",
+      "Bash(ls -la /c/Users/Arora/Documents/Earth/Real_Estate_Marketplace_Frontend/*.*)"
     ]
   }
 }
