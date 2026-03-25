@@ -50,6 +50,10 @@ export function useMapInstance({
       container: containerRef.current,
       center: MAP_CONFIG.center,
       zoom: MAP_CONFIG.zoom,
+      touchZoomRotate: true,
+      dragPan: true,
+      dragRotate: false,
+
       pitch: 0,
       bearing: 0,
       minZoom: MAP_CONFIG.minZoom,
