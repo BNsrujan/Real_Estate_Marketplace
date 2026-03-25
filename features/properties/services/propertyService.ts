@@ -1,20 +1,30 @@
 import type { Property } from "@/types";
 
-// Raw shape from the JSON file (no id field yet)
 type RawProperty = Omit<Property, "id">;
 
-/**
- * Fetches all properties and normalises them.
- * Works both server-side (Next.js server components) and client-side.
- */
 export async function fetchProperties(): Promise<Property[]> {
-  const res = await fetch("/data/properties.json");
+  // ✅ Detect server vs client
+  const isServer = typeof window === "undefined";
 
-  if (!res.ok) {
-    throw new Error(`Failed to fetch properties: ${res.status}`);
+  let data: RawProperty[];
+
+  if (isServer) {
+    const fs = await import("fs/promises");
+    const path = await import("path");
+
+    const filePath = path.join(process.cwd(), "public/data/properties.json");
+    const file = await fs.readFile(filePath, "utf-8");
+
+    data = JSON.parse(file);
+  } else {
+    const res = await fetch("/data/properties.json");
+
+    if (!res.ok) {
+      throw new Error(`Failed to fetch properties: ${res.status}`);
+    }
+
+    data = await res.json();
   }
-
-  const data: RawProperty[] = await res.json();
 
   return data.map((p, i) => ({ id: String(i), ...p }));
 }
