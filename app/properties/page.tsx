@@ -14,7 +14,7 @@ export default async function PropertiesPage() {
   return (
     <main className="min-h-screen surface overflow-y-auto">
       {/* ── NAV ───────────────────────── */}
-      <nav className="sticky top-0 z-50 glass px-4 sm:px-6 h-16 flex items-center justify-between">
+      <nav className="sticky top-0 z-50 glass px-4 sm:px-6 h-16 flex items-center justify-between flex-wrap gap-2">
         <Link href="/" className="display text-sm flex items-center gap-2">
           {/* <span className="w-7 h-7 rounded bg-[var(--primary)] text-white flex items-center justify-center text-xs font-bold">
             N

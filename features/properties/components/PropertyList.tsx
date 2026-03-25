@@ -5,9 +5,6 @@ interface PropertyListProps {
   properties: Property[];
 }
 
-/**
- * Server component — pure layout, no state.
- */
 export function PropertyList({ properties }: PropertyListProps) {
   if (properties.length === 0) {
     return (
@@ -27,7 +24,7 @@ export function PropertyList({ properties }: PropertyListProps) {
   }
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
       {properties.map((p) => (
         <PropertyCard key={p.id} property={p} />
       ))}
