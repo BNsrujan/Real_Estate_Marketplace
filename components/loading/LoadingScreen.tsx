@@ -71,8 +71,7 @@ export default function LoadingScreen({ isLoaded }: LoadingScreenProps) {
           letterSpacing: "10px",
           color: "#f2fbff",
           fontFamily: "Orbitron, sans-serif",
-          textShadow:
-            "0 0 6px #a6e1ff, 0 0 18px #6ccfff, 0 0 35px #3aa7ff",
+          textShadow: "0 0 6px #a6e1ff, 0 0 18px #6ccfff, 0 0 35px #3aa7ff",
           marginBottom: "52px",
           zIndex: 1,
         }}
