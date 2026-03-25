@@ -5,26 +5,37 @@ interface LoadingScreenProps {
   isLoaded: boolean;
 }
 
-const MIN_DISPLAY_MS = 1800;
+const MIN_DISPLAY_MS = 2200;
 
 export default function LoadingScreen({ isLoaded }: LoadingScreenProps) {
   const [visible, setVisible] = useState(true);
   const [fading, setFading] = useState(false);
   const [startTime] = useState(() => Date.now());
+  const [progress, setProgress] = useState(0);
+
+  // Fake progress bar that fills to ~85% then jumps to 100 on load
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setProgress((p) => {
+        if (p >= 85) {
+          clearInterval(interval);
+          return p;
+        }
+        return p + Math.random() * 6;
+      });
+    }, 120);
+    return () => clearInterval(interval);
+  }, []);
 
   useEffect(() => {
     if (!isLoaded) return;
+    setProgress(100);
 
     const elapsed = Date.now() - startTime;
     const remaining = Math.max(0, MIN_DISPLAY_MS - elapsed);
 
-    const fadeTimer = setTimeout(() => {
-      setFading(true);
-    }, remaining);
-
-    const hideTimer = setTimeout(() => {
-      setVisible(false);
-    }, remaining + 900);
+    const fadeTimer = setTimeout(() => setFading(true), remaining);
+    const hideTimer = setTimeout(() => setVisible(false), remaining + 1000);
 
     return () => {
       clearTimeout(fadeTimer);
@@ -39,129 +50,185 @@ export default function LoadingScreen({ isLoaded }: LoadingScreenProps) {
       style={{
         position: "fixed",
         inset: 0,
-        backgroundColor: "#000814",
         zIndex: 200,
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
         justifyContent: "center",
         opacity: fading ? 0 : 1,
-        transition: "opacity 0.9s cubic-bezier(0.4, 0, 0.2, 1)",
+        transition: "opacity 1s cubic-bezier(0.4, 0, 0.2, 1)",
         pointerEvents: fading ? "none" : "all",
+        background:
+          "radial-gradient(ellipse at 50% 40%, #060f2a 0%, #020510 50%, #000000 100%)",
+        overflow: "hidden",
       }}
     >
-      {/* Ambient glow behind spinner */}
+      {/* Animated grid lines */}
       <div
         style={{
           position: "absolute",
-          width: "300px",
-          height: "300px",
-          borderRadius: "50%",
-          background:
-            "radial-gradient(circle, rgba(58,167,255,0.08) 0%, transparent 70%)",
-          animation: "ambientPulse 3s ease-in-out infinite",
+          inset: 0,
+          backgroundImage: `
+          linear-gradient(rgba(56,189,248,0.03) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(56,189,248,0.03) 1px, transparent 1px)
+        `,
+          backgroundSize: "60px 60px",
+          animation: "gridMove 8s linear infinite",
         }}
       />
 
-      {/* Title */}
+      {/* Radial glow */}
       <div
         style={{
-          fontSize: "clamp(22px, 4.5vw, 52px)",
-          fontWeight: "700",
-          letterSpacing: "10px",
-          color: "#f2fbff",
-          fontFamily: "Orbitron, sans-serif",
-          textShadow: "0 0 6px #a6e1ff, 0 0 18px #6ccfff, 0 0 35px #3aa7ff",
-          marginBottom: "52px",
-          zIndex: 1,
+          position: "absolute",
+          width: "500px",
+          height: "500px",
+          borderRadius: "50%",
+          background:
+            "radial-gradient(circle, rgba(56,189,248,0.06) 0%, transparent 65%)",
+          animation: "pulse 4s ease-in-out infinite",
         }}
-      >
-        NAMMA DHARANI
-      </div>
+      />
 
-      {/* Orbital spinner */}
+      {/* Logo mark */}
       <div
         style={{
           position: "relative",
-          width: "76px",
-          height: "76px",
-          marginBottom: "32px",
+          width: "80px",
+          height: "80px",
+          marginBottom: "40px",
           zIndex: 1,
         }}
       >
-        {/* Outer orbit */}
+        {/* Outer ring */}
         <div
           style={{
             position: "absolute",
             inset: 0,
-            border: "1.5px solid rgba(108, 207, 255, 0.15)",
-            borderTop: "1.5px solid #6ccfff",
             borderRadius: "50%",
-            animation: "spinA 1.4s linear infinite",
+            border: "1.5px solid rgba(56,189,248,0.15)",
+            borderTopColor: "#38bdf8",
+            animation: "spin 2s linear infinite",
           }}
         />
-        {/* Mid orbit */}
+        {/* Mid ring */}
         <div
           style={{
             position: "absolute",
-            inset: "14px",
-            border: "1.5px solid rgba(58, 167, 255, 0.15)",
-            borderBottom: "1.5px solid #3aa7ff",
+            inset: "12px",
             borderRadius: "50%",
-            animation: "spinB 1.0s linear infinite reverse",
+            border: "1.5px solid rgba(99,210,255,0.1)",
+            borderBottomColor: "#63d2ff",
+            animation: "spin 1.4s linear infinite reverse",
           }}
         />
-        {/* Inner orbit */}
+        {/* Inner ring */}
         <div
           style={{
             position: "absolute",
-            inset: "28px",
-            border: "1.5px solid rgba(158, 240, 196, 0.15)",
-            borderLeft: "1.5px solid #9ef0c4",
+            inset: "24px",
             borderRadius: "50%",
-            animation: "spinA 0.7s linear infinite",
+            border: "1.5px solid rgba(74,222,128,0.15)",
+            borderLeftColor: "#4ade80",
+            animation: "spin 0.9s linear infinite",
           }}
         />
-        {/* Center dot */}
+        {/* Core */}
         <div
           style={{
             position: "absolute",
-            inset: "34px",
-            backgroundColor: "#6ccfff",
+            inset: "35px",
             borderRadius: "50%",
-            boxShadow: "0 0 8px #6ccfff, 0 0 16px #3aa7ff",
+            background: "#38bdf8",
+            boxShadow: "0 0 12px #38bdf8, 0 0 24px #38bdf830",
           }}
         />
       </div>
 
-      {/* Status text */}
+      {/* Title */}
       <div
         style={{
-          color: "#6ccfff",
-          fontFamily: "Orbitron, sans-serif",
-          fontSize: "10px",
-          letterSpacing: "4px",
-          opacity: 0.55,
-          textTransform: "uppercase",
           zIndex: 1,
+          textAlign: "center",
+          marginBottom: "48px",
         }}
       >
-        Loading Earth...
+        <div
+          style={{
+            fontSize: "clamp(20px, 4vw, 42px)",
+            fontWeight: "900",
+            letterSpacing: "12px",
+            color: "#f0f9ff",
+            fontFamily: "Orbitron, sans-serif",
+            textShadow:
+              "0 0 40px rgba(56,189,248,0.5), 0 0 80px rgba(56,189,248,0.2)",
+            marginBottom: "6px",
+          }}
+        >
+          NAMMA DHARANI
+        </div>
+        <div
+          style={{
+            color: "rgba(56,189,248,0.45)",
+            fontSize: "10px",
+            letterSpacing: "5px",
+            fontFamily: "Orbitron, sans-serif",
+            fontWeight: "400",
+          }}
+        >
+          KARNATAKA REAL ESTATE PLATFORM
+        </div>
+      </div>
+      <div
+        style={{
+          zIndex: 1,
+          width: "min(280px, 70vw)",
+          marginBottom: "16px",
+        }}
+      >
+        <div
+          style={{
+            height: "2px",
+            background: "rgba(255,255,255,0.06)",
+            borderRadius: "2px",
+            overflow: "hidden",
+          }}
+        >
+          <div
+            style={{
+              height: "100%",
+              width: `${Math.min(progress, 100)}%`,
+              background: "linear-gradient(90deg, #38bdf8, #63d2ff)",
+              borderRadius: "2px",
+              transition: "width 0.3s ease",
+              boxShadow: "0 0 8px #38bdf8",
+            }}
+          />
+        </div>
+      </div>
+
+      <div
+        style={{
+          zIndex: 1,
+          color: "rgba(56,189,248,0.35)",
+          fontFamily: "Orbitron, sans-serif",
+          fontSize: "9px",
+          letterSpacing: "3px",
+        }}
+      >
+        {progress < 100 ? "INITIALISING GLOBE..." : "READY"}
       </div>
 
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap');
-        @keyframes spinA {
-          from { transform: rotate(0deg); }
-          to   { transform: rotate(360deg); }
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
+        @keyframes spin { to { transform: rotate(360deg); } }
+        @keyframes pulse {
+          0%, 100% { transform: scale(1); opacity: 0.6; }
+          50% { transform: scale(1.1); opacity: 1; }
         }
-        @keyframes spinB {
-          from { transform: rotate(0deg); }
-          to   { transform: rotate(360deg); }
-        }
-        @keyframes ambientPulse {
-          0%, 100% { opacity: 0.5; transform: scale(1); }
-          50%       { opacity: 1;   transform: scale(1.15); }
+        @keyframes gridMove {
+          from { transform: translateY(0); }
+          to { transform: translateY(60px); }
         }
       `}</style>
     </div>

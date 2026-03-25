@@ -5,23 +5,15 @@ import { useRef, useState, useCallback } from "react";
 import StarField from "@/components/space/StarField";
 import LoadingScreen from "@/components/loading/LoadingScreen";
 import StartExploreButton from "@/components/ui/startbtn";
+import PropertyPopup from "@/components/map/PropertyPopup";
 
 import { useMapInstance } from "../hooks/useMapInstance";
 import { useMarkerSync } from "../hooks/useMarkerSync";
 import { useDistrictZoom } from "../hooks/useDistrictZoom";
 
 import { TITLE_FADE_ZOOM } from "@/lib/globe/mapConfig";
+import type { Property } from "@/types";
 
-/**
- * MapCanvas — the single orchestrator for the interactive globe.
- *
- * Responsibilities (intentionally limited):
- *   - Wire hooks together
- *   - Own UI state (loading flag, show/hide explore button, title opacity)
- *   - Render the container div for MapLibre and the overlay UI
- *
- * All map logic lives in hooks; all data logic lives in services.
- */
 export function MapCanvas() {
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const titleRef = useRef<HTMLDivElement>(null);
@@ -29,8 +21,20 @@ export function MapCanvas() {
   const [isLoaded, setIsLoaded] = useState(false);
   const [showButton, setShowButton] = useState(true);
 
-  // Stable ref so the district-click handler in useMapInstance always calls
-  // the latest filterByDistrict without becoming a stale closure
+  // ✅ popup state
+  const [activeProperty, setActiveProperty] = useState<Property | null>(null);
+
+  // ✅ NEW: delay-safe handler
+  const handleMarkerClick = useCallback((prop: Property) => {
+    console.log("🔥 POPUP STATE SET:", prop);
+
+    setActiveProperty(null); // reset first (IMPORTANT)
+
+    setTimeout(() => {
+      setActiveProperty({ ...prop });
+    }, 0);
+  }, []);
+
   const filterByDistrictRef = useRef<(name: string) => void>(() => {});
 
   const handleZoomChange = useCallback((zoom: number) => {
@@ -40,40 +44,44 @@ export function MapCanvas() {
     setShowButton(zoom < 4);
   }, []);
 
-  // ── Map lifecycle ─────────────────────────────────────────────────────────
+  // ── MAP ─────────────────────────────────────────────────────
   const { mapRef, isStyleLoaded } = useMapInstance({
     containerRef: mapContainerRef,
     onLoad: () => setIsLoaded(true),
     onZoom: handleZoomChange,
-    // Delegate to the ref so it always reaches the latest filterByDistrict
     onDistrictClick: (name) => filterByDistrictRef.current(name),
   });
 
-  // ── Marker management ─────────────────────────────────────────────────────
-  const { filterByDistrict } = useMarkerSync({ mapRef, isStyleLoaded });
+  // ── MARKERS ─────────────────────────────────────────────────
+  const { filterByDistrict } = useMarkerSync({
+    mapRef,
+    isStyleLoaded,
 
-  // Keep ref in sync with the latest function
+    // ✅ IMPORTANT FIX HERE
+    onMarkerClick: handleMarkerClick,
+  });
+
   filterByDistrictRef.current = filterByDistrict;
 
-  // ── Navigation ────────────────────────────────────────────────────────────
+  // ── NAVIGATION ──────────────────────────────────────────────
   const { zoomToKarnataka } = useDistrictZoom({ mapRef });
 
-  // ── Render ────────────────────────────────────────────────────────────────
+  // ── UI ─────────────────────────────────────────────────────
   return (
     <div style={{ width: "100vw", height: "100vh", position: "relative" }}>
-      {/* 3D starfield background — rendered behind everything */}
       <StarField />
 
-      {/* "Explore Karnataka" button — visible only at low zoom */}
       {showButton && <StartExploreButton onClick={zoomToKarnataka} />}
 
-      {/* MapLibre target — fills the full viewport above the starfield */}
       <div
         ref={mapContainerRef}
-        style={{ position: "absolute", inset: 0, zIndex: 1 }}
+        style={{
+          position: "absolute",
+          inset: 0,
+          zIndex: 0, // 🔥 LOWER THIS
+        }}
       />
 
-      {/* Title overlay — fades out as the user zooms in */}
       <div
         ref={titleRef}
         style={{
@@ -94,9 +102,83 @@ export function MapCanvas() {
       >
         NAMMA DHARANI
       </div>
+      {/* <div
+        style={{
+          position: "absolute",
+          top: 0,
+          left: 0,
+          width: "100%",
+          padding: "20px 40px",
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          zIndex: 20,
+          background: "rgba(255,255,255,0.8)",
+          backdropFilter: "blur(12px)",
+        }}
+      >
+        <div
+          style={{
+            fontFamily: "Plus Jakarta Sans",
+            fontWeight: 600,
+            letterSpacing: "2px",
+          }}
+        >
+          NAMMA DHARANI
+        </div>
 
-      {/* Loading overlay — auto-dismisses once map tiles are ready */}
+        <div style={{ fontSize: "12px", opacity: 0.6 }}>
+          Karnataka Real Estate
+        </div>
+      </div> */}
+      {showButton && (
+        <div
+          style={{
+            position: "absolute",
+            bottom: "150px",
+            width: "100%",
+            textAlign: "center",
+            color: "#aaa",
+            fontSize: "14px",
+            letterSpacing: "2px",
+            zIndex: 4,
+          }}
+        >
+          Click to explore → Select a district → View properties
+        </div>
+      )}
+
       <LoadingScreen isLoaded={isLoaded} />
+
+      {/* ✅ POPUP */}
+      {/* {activeProperty && (
+        <div
+          style={{
+            position: "fixed",
+            bottom: 0,
+            left: 0,
+            width: "100%",
+            zIndex: 9999999,
+            pointerEvents: "auto",
+          }}
+        > */}
+      {activeProperty && (
+        <div
+          style={{
+            position: "fixed",
+            bottom: 0,
+            left: 0,
+            width: "100%",
+            zIndex: 2147483647, // 🔥 MAX possible z-index
+            pointerEvents: "auto",
+          }}
+        >
+          <PropertyPopup
+            property={activeProperty}
+            onClose={() => setActiveProperty(null)}
+          />
+        </div>
+      )}
 
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap');

@@ -20,16 +20,14 @@ export async function fetchProperties(): Promise<Property[]> {
 }
 
 export async function fetchPropertiesByDistrict(
-  district: string
+  district: string,
 ): Promise<Property[]> {
   const all = await fetchProperties();
-  return all.filter(
-    (p) => p.district.toLowerCase() === district.toLowerCase()
-  );
+  return all.filter((p) => p.district.toLowerCase() === district.toLowerCase());
 }
 
 export async function fetchPropertyById(
-  id: string
+  id: string,
 ): Promise<Property | undefined> {
   const all = await fetchProperties();
   return all.find((p) => p.id === id);

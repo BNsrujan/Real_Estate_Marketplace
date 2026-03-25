@@ -74,8 +74,15 @@ export function useMapInstance({
             source: "roads",
             paint: {
               "raster-opacity": [
-                "interpolate", ["linear"], ["zoom"],
-                8, 0, 11, 0.9, 18, 1,
+                "interpolate",
+                ["linear"],
+                ["zoom"],
+                8,
+                0,
+                11,
+                0.9,
+                18,
+                1,
               ],
             },
           },
@@ -85,8 +92,13 @@ export function useMapInstance({
             source: "labels",
             paint: {
               "raster-opacity": [
-                "interpolate", ["linear"], ["zoom"],
-                9, 0, 12, 0.95,
+                "interpolate",
+                ["linear"],
+                ["zoom"],
+                9,
+                0,
+                12,
+                0.95,
               ],
             },
           },
