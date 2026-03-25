@@ -7,7 +7,7 @@ import dynamic from "next/dynamic";
 // App Router pattern — it cannot live directly in a server component.
 const MapCanvas = dynamic(
   () => import("./MapCanvas").then((m) => m.MapCanvas),
-  { ssr: false }
+  { ssr: false },
 );
 
 export function MapCanvasLoader() {

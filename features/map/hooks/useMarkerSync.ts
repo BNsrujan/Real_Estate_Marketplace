@@ -5,47 +5,44 @@ import maplibregl from "maplibre-gl";
 
 import { addPropertyMarkers } from "@/components/map/PropertyMarkers";
 import type { Property } from "@/types";
-
+import rawData from "@/public/data/properties.json";
 const MARKER_MIN_ZOOM = 5.5;
-const MARKER_MAX_ZOOM = 9;
-const DISTRICT_ZOOM = 11.5;
+const MARKER_MAX_ZOOM = 16;
+const DISTRICT_ZOOM = 11;
 
 interface UseMarkerSyncOptions {
   mapRef: React.RefObject<maplibregl.Map | null>;
-  /** True once map's style.load has fired — safe to add markers */
   isStyleLoaded: boolean;
+  onMarkerClick?: (property: Property) => void;
 }
 
-/**
- * Manages the full marker lifecycle:
- *   - Fetches property data once
- *   - Shows all markers when zoom enters [5.5, 9]
- *   - Clears markers when zoom drops below 5.5
- *   - Filters to a single district when filterByDistrict() is called
- *
- * Returns filterByDistrict so callers (district labels, other markers) can trigger it.
- */
-export function useMarkerSync({ mapRef, isStyleLoaded }: UseMarkerSyncOptions) {
+export function useMarkerSync({
+  mapRef,
+  isStyleLoaded,
+  onMarkerClick,
+}: UseMarkerSyncOptions) {
   const markersRef = useRef<maplibregl.Marker[]>([]);
   const propertiesRef = useRef<Property[]>([]);
 
-  // Tracks current display mode to prevent redundant re-renders
   const markerModeRef = useRef<"all" | "filtered" | null>(null);
-  // True after filtering by district — prevents re-showing "all" on zoom out+in
   const cameFromDistrictRef = useRef(false);
-  // Gates rendering during fly animations
   const blockMarkerRenderRef = useRef(false);
 
-  // Ref so the marker click callback always calls the latest filterByDistrict
-  const filterByDistrictRef = useRef<(name: string) => void>(() => {});
+  // Always-fresh refs — avoids stale closures inside marker DOM handlers
+  const onMarkerClickRef = useRef(onMarkerClick);
+  onMarkerClickRef.current = onMarkerClick;
 
-  // ── Fetch properties once ─────────────────────────────────────────────────
+  const filterByDistrictRef = useRef<(name: string) => void>(() => {});
   useEffect(() => {
-    fetch("/data/properties.json")
-      .then((res) => res.json())
-      .then((data: Omit<Property, "id">[]) => {
-        propertiesRef.current = data.map((p, i) => ({ id: String(i), ...p }));
-      });
+    propertiesRef.current = rawData.map((p, i) => ({
+      id: String(i),
+      ...p,
+
+      type:
+        p.type === "site"
+          ? "land"
+          : (p.type as "house" | "land" | "apartment" | "commercial"),
+    }));
   }, []);
 
   // ── Helpers ───────────────────────────────────────────────────────────────
@@ -56,20 +53,28 @@ export function useMarkerSync({ mapRef, isStyleLoaded }: UseMarkerSyncOptions) {
 
   const placeMarkers = useCallback(
     (map: maplibregl.Map, data: Property[], mode: "all" | "filtered") => {
+      // if (blockMarkerRenderRef.current) return;
       const zoom = map.getZoom();
-      if (zoom < MARKER_MIN_ZOOM || zoom > MARKER_MAX_ZOOM) return;
-      if (blockMarkerRenderRef.current) return;
-
+      // if (zoom < MARKER_MIN_ZOOM || zoom > MARKER_MAX_ZOOM) return;
+      if (zoom < MARKER_MIN_ZOOM) return;
       clearMarkers();
 
-      markersRef.current = addPropertyMarkers(map, data, (prop) => {
-        // Marker clicked → filter to that property's district
-        filterByDistrictRef.current(prop.district);
-      });
+      // markersRef.current = addPropertyMarkers(map, data, (prop) => {
+      //   // ① Fire popup FIRST — before anything clears markers
+      //   onMarkerClickRef.current?.(prop);
 
+      //   // ② Then filter district with a small delay so popup state is committed
+      //   setTimeout(() => {
+      //     filterByDistrictRef.current(prop.district);
+      //   }, 80);
+      // });
+
+      markersRef.current = addPropertyMarkers(map, data, (prop) => {
+        onMarkerClickRef.current?.(prop);
+      });
       markerModeRef.current = mode;
     },
-    [clearMarkers]
+    [clearMarkers],
   );
 
   // ── filterByDistrict ──────────────────────────────────────────────────────
@@ -80,39 +85,44 @@ export function useMarkerSync({ mapRef, isStyleLoaded }: UseMarkerSyncOptions) {
 
       markerModeRef.current = "filtered";
       cameFromDistrictRef.current = true;
-      clearMarkers();
 
       const filtered = propertiesRef.current.filter(
-        (p) => p.district?.toLowerCase() === districtName.toLowerCase()
+        (p) => p.district?.toLowerCase() === districtName.toLowerCase(),
       );
 
-      // Fly to district center (looked up from the GeoJSON source)
+      // Fly to district center
       const features = map.querySourceFeatures("district-centers");
       const match = features.find(
         (f) =>
-          f.properties?.NAME_2?.toLowerCase() === districtName.toLowerCase()
+          f.properties?.NAME_2?.toLowerCase() === districtName.toLowerCase(),
       );
+      clearMarkers();
 
       if (match) {
         map.flyTo({
           center: (match.geometry as GeoJSON.Point).coordinates as [
             number,
-            number
+            number,
           ],
           zoom: DISTRICT_ZOOM,
-          speed: 0.8,
+          speed: 0.75,
         });
-      }
 
-      placeMarkers(map, filtered, "filtered");
+        // Place filtered markers once flight lands
+        map.once("moveend", () => {
+          placeMarkers(map, filtered, "filtered");
+        });
+      } else {
+        blockMarkerRenderRef.current = false;
+        placeMarkers(map, filtered, "filtered");
+      }
     },
-    [mapRef, clearMarkers, placeMarkers]
+    [mapRef, clearMarkers, placeMarkers],
   );
 
-  // Keep ref pointing at latest function (avoids stale closures in marker clicks)
   filterByDistrictRef.current = filterByDistrict;
 
-  // ── Zoom listener (set up once style is loaded) ───────────────────────────
+  // ── Zoom listener ─────────────────────────────────────────────────────────
   useEffect(() => {
     const map = mapRef.current;
     if (!map || !isStyleLoaded) return;
@@ -142,8 +152,10 @@ export function useMarkerSync({ mapRef, isStyleLoaded }: UseMarkerSyncOptions) {
     };
 
     map.on("zoom", onZoom);
-    return () => { map.off("zoom", onZoom); };
-  }, [isStyleLoaded, clearMarkers, placeMarkers]); // re-run if style reloads
+    return () => {
+      map.off("zoom", onZoom);
+    };
+  }, [isStyleLoaded, clearMarkers, placeMarkers]);
 
   return { filterByDistrict };
 }

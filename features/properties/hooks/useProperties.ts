@@ -20,7 +20,7 @@ interface UsePropertiesResult {
  * Re-runs automatically when `district` changes.
  */
 export function useProperties(
-  options: UsePropertiesOptions = {}
+  options: UsePropertiesOptions = {},
 ): UsePropertiesResult {
   const [properties, setProperties] = useState<Property[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -38,8 +38,7 @@ export function useProperties(
         const filtered = options.district
           ? data.filter(
               (p) =>
-                p.district.toLowerCase() ===
-                options.district!.toLowerCase()
+                p.district.toLowerCase() === options.district!.toLowerCase(),
             )
           : data;
         setProperties(filtered);

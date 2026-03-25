@@ -1,6 +1,29 @@
-@import "tailwindcss";
+/* @import "tailwindcss";
 
-/* ── Reset ───────────────────────────────────────────────────────────────── */
+:root {
+  --background: #fcf9f8;
+  --primary: #c00015;
+  --primary-dim: #ff4d5e;
+  --on-primary: #ffffff;
+  --surface: #fcf9f8;
+  --surface-container-low: #f5f3f2;
+  --surface-container: #ede9e8;
+  --surface-container-high: #e4e2e2;
+  --surface-container-highest: #dcdad9;
+  --surface-container-lowest: #ffffff;
+  --on-surface: #323233;
+  --on-surface-variant: #888888;
+  --outline-variant: rgba(50, 50, 51, 0.12);
+  --font-display: "Plus Jakarta Sans", sans-serif;
+  --font-body: "Manrope", sans-serif;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
 html,
 body {
   margin: 0;
@@ -8,13 +31,179 @@ body {
   width: 100%;
   height: 100%;
   overflow: hidden;
-  background: #000;
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--background);
+  color: var(--on-surface);
+  font-family: var(--font-body);
 }
 
-/* ── Hide MapLibre attribution & logo ───────────────────────────────────── */
+body.scrollable {
+  overflow: auto;
+}
+
 .maplibregl-ctrl-logo,
 .maplibregl-ctrl-attrib,
 .mapboxgl-ctrl-logo {
+  display: none !important;
+}
+
+.maplibregl-canvas,
+.maplibregl-canvas-container {
+  z-index: 0 !important;
+}
+
+@media (max-width: 768px) {
+  button,
+  a {
+    min-height: 44px;
+  }
+} */
+/* @import "tailwindcss"; */
+
+/* ── DESIGN TOKENS (DESIGN.md aligned) ── */
+/* :root {
+  --background: #fcf9f8;
+  --primary: #c00015;
+  --primary-dim: #ff4d5e;
+
+  --surface: #fcf9f8;
+  --surface-low: #f5f3f2;
+  --surface-mid: #ede9e8;
+  --surface-high: #e4e2e2;
+  --surface-top: #ffffff;
+
+  --on-surface: #323233;
+  --on-muted: #888888;
+
+  --outline-ghost: rgba(50, 50, 51, 0.08);
+} */
+
+/* ── BASE ── */
+/* body {
+  background: var(--background);
+  color: var(--on-surface);
+  font-family: var(--font-manrope);
+} */
+
+/* ── SURFACE SYSTEM ── */
+/* .surface {
+  background: var(--surface);
+}
+.surface-low {
+  background: var(--surface-low);
+}
+.surface-top {
+  background: var(--surface-top);
+} */
+
+/* ── GLASS ── */
+/* .glass {
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(16px);
+} */
+
+/* ── TYPOGRAPHY ── */
+/* .display {
+  font-family: var(--font-jakarta);
+  font-weight: 800;
+  letter-spacing: -0.5px;
+}
+
+.label {
+  font-size: 10px;
+  letter-spacing: 2px;
+  color: var(--on-muted);
+  text-transform: uppercase;
+} */
+
+/* ── MOBILE FIX ── */
+/* @media (max-width: 768px) {
+  body {
+    overflow-x: hidden;
+  }
+} */
+
+@import "tailwindcss";
+
+/* ── THEME TOKENS ───────────────────────────────────────── */
+:root {
+  --background: #fcf9f8;
+  --primary: #c00015;
+
+  --surface: #fcf9f8;
+  --surface-low: #f5f3f2;
+  --surface-high: #e4e2e2;
+  --surface-top: #ffffff;
+
+  --text: #323233;
+  --text-muted: #888;
+
+  --font-display: "Plus Jakarta Sans", sans-serif;
+  --font-body: "Manrope", sans-serif;
+}
+
+/* ── RESET ─────────────────────────────────────────────── */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background: var(--background);
+  color: var(--text);
+  font-family: var(--font-body);
+
+  overflow-x: hidden;
+}
+
+/* ── TYPOGRAPHY ────────────────────────────────────────── */
+.display {
+  font-family: var(--font-display);
+  font-weight: 800;
+  letter-spacing: -0.5px;
+}
+
+.label {
+  font-size: 10px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  font-weight: 700;
+}
+
+/* ── SURFACES ──────────────────────────────────────────── */
+.surface {
+  background: var(--surface);
+}
+
+.surface-low {
+  background: var(--surface-low);
+}
+
+.surface-top {
+  background: var(--surface-top);
+}
+
+.glass {
+  backdrop-filter: blur(16px);
+  background: rgba(255, 255, 255, 0.75);
+}
+
+/* ── RESPONSIVE FIXES ─────────────────────────────────── */
+button,
+a {
+  min-height: 44px;
+}
+
+body {
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── MAP FIX ─────────────────────────────────────────── */
+.maplibregl-ctrl-logo,
+.maplibregl-ctrl-attrib {
   display: none !important;
 }
