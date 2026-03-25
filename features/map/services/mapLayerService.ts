@@ -17,8 +17,15 @@ export function addMapLayers(map: maplibregl.Map): void {
       "line-color": "#e6f2ff",
       "line-width": 1.5,
       "line-opacity": [
-        "interpolate", ["linear"], ["zoom"],
-        4, 0, 5, 0.9, 12, 0.2,
+        "interpolate",
+        ["linear"],
+        ["zoom"],
+        4,
+        0,
+        5,
+        0.9,
+        12,
+        0.2,
       ],
     },
     minzoom: 4,
@@ -51,27 +58,31 @@ export function addMapLayers(map: maplibregl.Map): void {
     paint: {
       "fill-color": "#9ef0c4",
       "fill-opacity": [
-        "interpolate", ["linear"], ["zoom"],
-        6, 0, 7, 0.08, 12, 0,
+        "interpolate",
+        ["linear"],
+        ["zoom"],
+        6,
+        0,
+        7,
+        0.08,
+        12,
+        0,
       ],
     },
     minzoom: 6,
   });
 
-  map.addLayer({
-    id: "cities-line",
-    type: "line",
-    source: "cities",
-    paint: {
-      "line-color": "#c8faff",
-      "line-width": [
-        "interpolate", ["linear"], ["zoom"],
-        6, 1.5, 10, 3, 14, 6,
-      ],
-      "line-opacity": 1,
-    },
-    minzoom: 6,
-  });
+  // map.addLayer({
+  //   id: "cities-line",
+  //   type: "line",
+  //   source: "cities",
+  //   paint: {
+  //     "line-color": "#c8faff",
+  //     "line-width": ["interpolate", ["linear"], ["zoom"], 6, 1.5, 10, 3, 14, 6],
+  //     "line-opacity": 1,
+  //   },
+  //   minzoom: 6,
+  // });
 
   map.addLayer({
     id: "city-labels",
@@ -82,10 +93,7 @@ export function addMapLayers(map: maplibregl.Map): void {
       "text-allow-overlap": true,
       "text-ignore-placement": true,
       "text-justify": "center",
-      "text-size": [
-        "interpolate", ["linear"], ["zoom"],
-        5, 12, 8, 18, 12, 24,
-      ],
+      "text-size": ["interpolate", ["linear"], ["zoom"], 5, 12, 8, 18, 12, 24],
       "text-font": ["Open Sans Bold", "Arial Unicode MS Bold"],
     },
     paint: {
@@ -97,22 +105,26 @@ export function addMapLayers(map: maplibregl.Map): void {
     minzoom: 4.9,
   });
 
-  map.addLayer({
-    id: "cities-glow",
-    type: "line",
-    source: "cities",
-    paint: {
-      "line-color": "#00ffff",
-      "line-width": [
-        "interpolate", ["linear"], ["zoom"],
-        8, 2, 12, 10, 14, 18,
-      ],
-      "line-opacity": [
-        "interpolate", ["linear"], ["zoom"],
-        8, 0, 10, 0.3, 14, 0.6,
-      ],
-      "line-blur": 1.5,
-    },
-    minzoom: 8,
-  });
+  // map.addLayer({
+  //   id: "cities-glow",
+  //   type: "line",
+  //   source: "cities",
+  //   paint: {
+  //     "line-color": "#00ffff",
+  //     "line-width": ["interpolate", ["linear"], ["zoom"], 8, 2, 12, 10, 14, 18],
+  //     "line-opacity": [
+  //       "interpolate",
+  //       ["linear"],
+  //       ["zoom"],
+  //       8,
+  //       0,
+  //       10,
+  //       0.3,
+  //       14,
+  //       0.6,
+  //     ],
+  //     "line-blur": 1.5,
+  //   },
+  //   minzoom: 8,
+  // });
 }

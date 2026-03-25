@@ -4,10 +4,11 @@
  */
 
 export async function fetchGeoJSON(
-  path: string
+  path: string,
 ): Promise<GeoJSON.FeatureCollection> {
   const res = await fetch(path);
-  if (!res.ok) throw new Error(`Failed to load GeoJSON from ${path}: ${res.status}`);
+  if (!res.ok)
+    throw new Error(`Failed to load GeoJSON from ${path}: ${res.status}`);
   return res.json();
 }
 
@@ -23,6 +24,6 @@ export async function fetchDistrictCenters(): Promise<GeoJSON.FeatureCollection>
   return fetchGeoJSON("/data/district-centers.json");
 }
 
-export async function fetchCities(): Promise<GeoJSON.FeatureCollection> {
-  return fetchGeoJSON("/data/cities.json");
-}
+// export async function fetchCities(): Promise<GeoJSON.FeatureCollection> {
+//   return fetchGeoJSON("/data/cities.json");
+// }
