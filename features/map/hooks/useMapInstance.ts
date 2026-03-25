@@ -46,18 +46,24 @@ export function useMapInstance({
 
     const loadStart = Date.now();
 
+    const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
+
     const map = new maplibregl.Map({
       container: containerRef.current,
       center: MAP_CONFIG.center,
-      zoom: MAP_CONFIG.zoom,
+
+      zoom: isMobile ? 1.6 : MAP_CONFIG.zoom,
+
       touchZoomRotate: true,
       dragPan: true,
       dragRotate: false,
 
       pitch: 0,
       bearing: 0,
-      minZoom: MAP_CONFIG.minZoom,
-      maxZoom: MAP_CONFIG.maxZoom,
+
+      minZoom: 1.2,
+      maxZoom: 6,
+
       style: {
         version: 8,
         sources: {
@@ -111,25 +117,22 @@ export function useMapInstance({
     });
 
     mapRef.current = map;
-    map.setZoom(2.1);
+
     map.addControl(new maplibregl.NavigationControl(), "top-right");
 
     map.on("style.load", () => {
-      // Globe projection + atmosphere
       map.setProjection({ type: "globe" });
+
       try {
         (map as any).setFog({
           range: [-1, 2],
           color: "rgba(6, 12, 34, 0.85)",
           "horizon-blend": 0.06,
         });
-      } catch {
-        // setFog not available in all maplibre versions — safe to ignore
-      }
+      } catch {}
 
       addMapLayers(map);
 
-      // District label click
       map.on("click", (e) => {
         if (!map.getLayer("cities-fill")) return;
         const features = map.queryRenderedFeatures(e.point, {

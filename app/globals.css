@@ -68,7 +68,6 @@ body {
   background: rgba(255, 255, 255, 0.75);
 }
 
-/* ── RESPONSIVE FIXES ─────────────────────────────────── */
 button,
 a {
   min-height: 44px;
@@ -78,12 +77,10 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* ── MAP FIX ─────────────────────────────────────────── */
 .maplibregl-ctrl-logo,
 .maplibregl-ctrl-attrib {
   display: none !important;
 }
-/* ── MOBILE OPTIMIZATION ───────────────── */
 
 @media (max-width: 768px) {
   .display {
@@ -100,8 +97,29 @@ body {
   }
 }
 
-/* Improve touch feel */
 button,
 a {
   touch-action: manipulation;
+}
+.maplibregl-ctrl-group {
+  transform: scale(0.85);
+}
+
+@media (max-width: 768px) {
+  .maplibregl-ctrl-group {
+    transform: scale(0.7);
+    right: 10px !important;
+    top: 120px !important;
+  }
+}
+.maplibregl-ctrl-group {
+  transform: scale(0.85);
+}
+
+@media (max-width: 768px) {
+  .maplibregl-ctrl-group {
+    transform: scale(0.65);
+    margin-top: 80px;
+    margin-right: 10px;
+  }
 }

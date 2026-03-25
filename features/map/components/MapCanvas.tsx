@@ -59,8 +59,9 @@ export function MapCanvas() {
   // ── NAVIGATION ──────────────────────────────────────────────
   const { zoomToKarnataka } = useDistrictZoom({ mapRef });
   return (
-    <div style={{ width: "100vw", height: "100vh", position: "relative" }}>
+    <div style={{ width: "100vw", height: "100dvh", position: "relative" }}>
       <StarField />
+      <LoadingScreen isLoaded={isLoaded} />
 
       {showButton && <StartExploreButton onClick={zoomToKarnataka} />}
 
@@ -81,8 +82,8 @@ export function MapCanvas() {
           width: "100%",
           textAlign: "center",
           fontSize: "clamp(28px, 7vw, 110px)",
-          letterSpacing: window.innerWidth < 768 ? "6px" : "14px",
-
+          // letterSpacing: window.innerWidth < 768 ? "6px" : "14px",
+          letterSpacing: "clamp(4px, 2vw, 14px)",
           color: "#e6f7ff",
           zIndex: 0,
           fontFamily: "Orbitron",
