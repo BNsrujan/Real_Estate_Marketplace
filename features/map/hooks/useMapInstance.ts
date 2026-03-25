@@ -52,18 +52,15 @@ export function useMapInstance({
       container: containerRef.current,
       center: MAP_CONFIG.center,
 
-      // ✅ RESPONSIVE ZOOM
       zoom: isMobile ? 1.6 : MAP_CONFIG.zoom,
 
       touchZoomRotate: true,
       dragPan: true,
       dragRotate: false,
 
-      // ✅ KEEP GLOBE CLEAN
       pitch: 0,
       bearing: 0,
 
-      // ✅ LIMIT ZOOM (prevents huge globe)
       minZoom: 1.2,
       maxZoom: 6,
 
@@ -121,10 +118,6 @@ export function useMapInstance({
 
     mapRef.current = map;
 
-    // ❌ REMOVE this line (VERY IMPORTANT)
-    // map.setZoom(2.1);
-
-    // ✅ SMALLER CONTROLS POSITION
     map.addControl(new maplibregl.NavigationControl(), "top-right");
 
     map.on("style.load", () => {
