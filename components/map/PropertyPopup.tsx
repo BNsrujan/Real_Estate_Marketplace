@@ -30,7 +30,6 @@ export default function PropertyPopup({
   const [mounted, setMounted] = useState(false);
   const prevProp = useRef<Property | null>(null);
 
-  // ✅ FIXED — inside component
   const startY = useRef<number | null>(null);
   const currentY = useRef(0);
 
@@ -52,7 +51,6 @@ export default function PropertyPopup({
     return () => window.removeEventListener("keydown", onKey);
   }, [visible, onClose]);
 
-  // ✅ Swipe handlers
   const handleTouchStart = (e: React.TouchEvent) => {
     startY.current = e.touches[0].clientY;
   };
