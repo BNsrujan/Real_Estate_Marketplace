@@ -1,3 +1,338 @@
+// "use client";
+
+// import { useEffect, useRef, useState } from "react";
+// import maplibregl from "maplibre-gl";
+// import "maplibre-gl/dist/maplibre-gl.css";
+
+// import { MAP_CONFIG, TILE_SOURCES } from "@/lib/globe/mapConfig";
+// import { addMapLayers } from "../services/mapLayerService";
+
+// interface UseMapInstanceOptions {
+//   containerRef: React.RefObject<HTMLDivElement | null>;
+//   onLoad: () => void;
+//   onZoom: (zoom: number) => void;
+//   onDistrictClick: (districtName: string) => void;
+// }
+
+// export function useMapInstance({
+//   containerRef,
+//   onLoad,
+//   onZoom,
+//   onDistrictClick,
+// }: UseMapInstanceOptions) {
+//   const mapRef = useRef<maplibregl.Map | null>(null);
+//   const [isStyleLoaded, setIsStyleLoaded] = useState(false);
+
+//   const onLoadRef = useRef(onLoad);
+//   const onZoomRef = useRef(onZoom);
+//   const onDistrictClickRef = useRef(onDistrictClick);
+
+//   onLoadRef.current = onLoad;
+//   onZoomRef.current = onZoom;
+//   onDistrictClickRef.current = onDistrictClick;
+
+//   useEffect(() => {
+//     if (!containerRef.current || mapRef.current) return;
+
+//     let loadTimeoutId: ReturnType<typeof setTimeout> | null = null;
+//     let hasCalledOnLoad = false;
+
+//     const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
+
+//     const map = new maplibregl.Map({
+//       container: containerRef.current,
+//       center: MAP_CONFIG.center,
+
+//       // ✅ smaller globe on mobile
+//       zoom: isMobile ? 1.6 : MAP_CONFIG.zoom,
+
+//       touchZoomRotate: true,
+//       dragPan: true,
+//       dragRotate: false,
+
+//       pitch: 0,
+//       bearing: 0,
+
+//       minZoom: 1.2,
+//       maxZoom: 6,
+
+//       style: {
+//         version: 8,
+//         sources: {
+//           satellite: TILE_SOURCES.satellite,
+//           roads: TILE_SOURCES.roads,
+//           labels: TILE_SOURCES.labels,
+//         },
+//         layers: [
+//           {
+//             id: "background",
+//             type: "background",
+//             paint: { "background-color": "rgba(0,0,0,0)" },
+//           },
+//           { id: "satellite", type: "raster", source: "satellite" },
+//           {
+//             id: "roads",
+//             type: "raster",
+//             source: "roads",
+//             paint: {
+//               "raster-opacity": [
+//                 "interpolate",
+//                 ["linear"],
+//                 ["zoom"],
+//                 8,
+//                 0,
+//                 11,
+//                 0.9,
+//                 18,
+//                 1,
+//               ],
+//             },
+//           },
+//           {
+//             id: "labels",
+//             type: "raster",
+//             source: "labels",
+//             paint: {
+//               "raster-opacity": [
+//                 "interpolate",
+//                 ["linear"],
+//                 ["zoom"],
+//                 9,
+//                 0,
+//                 12,
+//                 0.95,
+//               ],
+//             },
+//           },
+//         ],
+//       },
+//     });
+
+//     mapRef.current = map;
+
+//     // ✅ Navigation control
+//     map.addControl(new maplibregl.NavigationControl(), "top-right");
+
+//     // ── STYLE LOAD ───────────────────────────────
+//     map.on("style.load", () => {
+//       map.setProjection({ type: "globe" });
+
+//       try {
+//         (map as any).setFog({
+//           range: [-1, 2],
+//           color: "rgba(6, 12, 34, 0.85)",
+//           "horizon-blend": 0.06,
+//         });
+//       } catch {}
+
+//       addMapLayers(map);
+
+//       // ✅ FIX: reliable district click binding
+//       map.on("click", "cities-fill", (e) => {
+//         const feature = e.features?.[0];
+//         if (!feature) return;
+
+//         const name = feature.properties?.NAME_2;
+//         if (!name) return;
+
+//         onDistrictClickRef.current(name as string);
+//       });
+
+//       setIsStyleLoaded(true);
+//     });
+
+//     // ── LOADING FIX ─────────────────────────────
+//     map.on("idle", () => {
+//       if (hasCalledOnLoad) return;
+//       hasCalledOnLoad = true;
+
+//       loadTimeoutId = setTimeout(() => {
+//         onLoadRef.current();
+//       }, 800); // smooth loading screen
+//     });
+
+//     // ── ZOOM LISTENER ───────────────────────────
+//     map.on("zoom", () => {
+//       onZoomRef.current(map.getZoom());
+//     });
+
+//     return () => {
+//       if (loadTimeoutId) clearTimeout(loadTimeoutId);
+//       map.remove();
+//       mapRef.current = null;
+//     };
+//   }, []);
+
+//   return { mapRef, isStyleLoaded };
+// }
+
+// "use client";
+
+// import { useEffect, useRef, useState } from "react";
+// import maplibregl from "maplibre-gl";
+// import "maplibre-gl/dist/maplibre-gl.css";
+
+// import { MAP_CONFIG, TILE_SOURCES } from "@/lib/globe/mapConfig";
+// import { addMapLayers } from "../services/mapLayerService";
+
+// interface UseMapInstanceOptions {
+//   containerRef: React.RefObject<HTMLDivElement | null>;
+//   /** Called when map tiles are fully loaded (triggers loading screen removal) */
+//   onLoad: () => void;
+//   /** Called on every zoom change with the current zoom level */
+//   onZoom: (zoom: number) => void;
+//   /** Called when a district label is clicked */
+//   onDistrictClick: (districtName: string) => void;
+// }
+
+// /**
+//  * Owns the full MapLibre lifecycle: create → configure → add layers → clean up.
+//  *
+//  * Returns:
+//  *   mapRef        — stable ref to the maplibre Map instance
+//  *   isStyleLoaded — true once style.load has fired (safe to query features)
+//  */
+// export function useMapInstance({
+//   containerRef,
+//   onLoad,
+//   onZoom,
+//   onDistrictClick,
+// }: UseMapInstanceOptions) {
+//   const mapRef = useRef<maplibregl.Map | null>(null);
+//   const [isStyleLoaded, setIsStyleLoaded] = useState(false);
+
+//   // Store callbacks in refs so the useEffect closure never goes stale
+//   const onLoadRef = useRef(onLoad);
+//   const onZoomRef = useRef(onZoom);
+//   const onDistrictClickRef = useRef(onDistrictClick);
+//   onLoadRef.current = onLoad;
+//   onZoomRef.current = onZoom;
+//   onDistrictClickRef.current = onDistrictClick;
+
+//   useEffect(() => {
+//     if (!containerRef.current || mapRef.current) return;
+
+//     const loadStart = Date.now();
+
+//     const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
+
+//     const map = new maplibregl.Map({
+//       container: containerRef.current,
+//       center: MAP_CONFIG.center,
+
+//       zoom: isMobile ? 1.6 : MAP_CONFIG.zoom,
+
+//       touchZoomRotate: true,
+//       dragPan: true,
+//       dragRotate: false,
+
+//       pitch: 0,
+//       bearing: 0,
+
+//       minZoom: 1.2,
+//       maxZoom: 6,
+
+//       style: {
+//         version: 8,
+//         sources: {
+//           satellite: TILE_SOURCES.satellite,
+//           roads: TILE_SOURCES.roads,
+//           labels: TILE_SOURCES.labels,
+//         },
+//         layers: [
+//           {
+//             id: "background",
+//             type: "background",
+//             paint: { "background-color": "rgba(0,0,0,0)" },
+//           },
+//           { id: "satellite", type: "raster", source: "satellite" },
+//           {
+//             id: "roads",
+//             type: "raster",
+//             source: "roads",
+//             paint: {
+//               "raster-opacity": [
+//                 "interpolate",
+//                 ["linear"],
+//                 ["zoom"],
+//                 8,
+//                 0,
+//                 11,
+//                 0.9,
+//                 18,
+//                 1,
+//               ],
+//             },
+//           },
+//           {
+//             id: "labels",
+//             type: "raster",
+//             source: "labels",
+//             paint: {
+//               "raster-opacity": [
+//                 "interpolate",
+//                 ["linear"],
+//                 ["zoom"],
+//                 9,
+//                 0,
+//                 12,
+//                 0.95,
+//               ],
+//             },
+//           },
+//         ],
+//       },
+//     });
+
+//     mapRef.current = map;
+
+//     map.addControl(new maplibregl.NavigationControl(), "top-right");
+
+//     map.on("style.load", () => {
+//       map.setProjection({ type: "globe" });
+
+//       try {
+//         (map as any).setFog({
+//           range: [-1, 2],
+//           color: "rgba(6, 12, 34, 0.85)",
+//           "horizon-blend": 0.06,
+//         });
+//       } catch {}
+
+//       addMapLayers(map);
+
+//       map.on("click", (e) => {
+//         if (!map.getLayer("cities-fill")) return;
+//         const features = map.queryRenderedFeatures(e.point, {
+//           layers: ["cities-fill"],
+//         });
+//         if (!features.length) return;
+//         const name = features[0].properties?.NAME_2;
+//         if (name) onDistrictClickRef.current(name);
+//       });
+
+//       setIsStyleLoaded(true);
+//     });
+
+//     map.on("load", () => {
+//       const elapsed = Date.now() - loadStart;
+//       const delay = Math.max(0, 200 - elapsed);
+//       setTimeout(() => onLoadRef.current(), delay);
+//     });
+
+//     map.on("zoom", () => {
+//       onZoomRef.current(map.getZoom());
+//     });
+
+//     return () => {
+//       map.remove();
+//       mapRef.current = null;
+//     };
+//   }, []); // intentionally empty — MapLibre is imperative
+
+//   return { mapRef, isStyleLoaded };
+// }
+
 "use client";
 
 import { useEffect, useRef, useState } from "react";

@@ -3,7 +3,6 @@ import type { Property } from "@/types";
 type RawProperty = Omit<Property, "id">;
 
 export async function fetchProperties(): Promise<Property[]> {
-  // ✅ Detect server vs client
   const isServer = typeof window === "undefined";
 
   let data: RawProperty[];

@@ -1,7 +1,6 @@
 "use client";
 
 import { useRef, useState, useCallback } from "react";
-
 import StarField from "@/components/space/StarField";
 import LoadingScreen from "@/components/loading/LoadingScreen";
 import StartExploreButton from "@/components/ui/startbtn";
@@ -20,15 +19,10 @@ export function MapCanvas() {
 
   const [isLoaded, setIsLoaded] = useState(false);
   const [showButton, setShowButton] = useState(true);
-
-  // ✅ popup state
   const [activeProperty, setActiveProperty] = useState<Property | null>(null);
 
-  // ✅ NEW: delay-safe handler
   const handleMarkerClick = useCallback((prop: Property) => {
-    console.log("🔥 POPUP STATE SET:", prop);
-
-    setActiveProperty(null); // reset first (IMPORTANT)
+    setActiveProperty(null);
 
     setTimeout(() => {
       setActiveProperty({ ...prop });
@@ -57,7 +51,6 @@ export function MapCanvas() {
     mapRef,
     isStyleLoaded,
 
-    // ✅ IMPORTANT FIX HERE
     onMarkerClick: handleMarkerClick,
   });
 
@@ -65,11 +58,10 @@ export function MapCanvas() {
 
   // ── NAVIGATION ──────────────────────────────────────────────
   const { zoomToKarnataka } = useDistrictZoom({ mapRef });
-
-  // ── UI ─────────────────────────────────────────────────────
   return (
-    <div style={{ width: "100vw", height: "100vh", position: "relative" }}>
+    <div style={{ width: "100vw", height: "100dvh", position: "relative" }}>
       <StarField />
+      <LoadingScreen isLoaded={isLoaded} />
 
       {showButton && <StartExploreButton onClick={zoomToKarnataka} />}
 
@@ -78,7 +70,7 @@ export function MapCanvas() {
         style={{
           position: "absolute",
           inset: 0,
-          zIndex: 0, // 🔥 LOWER THIS
+          zIndex: 0,
         }}
       />
 
@@ -89,9 +81,9 @@ export function MapCanvas() {
           top: "20px",
           width: "100%",
           textAlign: "center",
-          fontSize: "clamp(48px, 8vw, 110px)",
-          fontWeight: "700",
-          letterSpacing: "14px",
+          fontSize: "clamp(28px, 7vw, 110px)",
+          // letterSpacing: window.innerWidth < 768 ? "6px" : "14px",
+          letterSpacing: "clamp(4px, 2vw, 14px)",
           color: "#e6f7ff",
           zIndex: 0,
           fontFamily: "Orbitron",
@@ -102,66 +94,7 @@ export function MapCanvas() {
       >
         NAMMA DHARANI
       </div>
-      {/* <div
-        style={{
-          position: "absolute",
-          top: 0,
-          left: 0,
-          width: "100%",
-          padding: "20px 40px",
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          zIndex: 20,
-          background: "rgba(255,255,255,0.8)",
-          backdropFilter: "blur(12px)",
-        }}
-      >
-        <div
-          style={{
-            fontFamily: "Plus Jakarta Sans",
-            fontWeight: 600,
-            letterSpacing: "2px",
-          }}
-        >
-          NAMMA DHARANI
-        </div>
 
-        <div style={{ fontSize: "12px", opacity: 0.6 }}>
-          Karnataka Real Estate
-        </div>
-      </div> */}
-      {showButton && (
-        <div
-          style={{
-            position: "absolute",
-            bottom: "150px",
-            width: "100%",
-            textAlign: "center",
-            color: "#aaa",
-            fontSize: "14px",
-            letterSpacing: "2px",
-            zIndex: 4,
-          }}
-        >
-          Click to explore → Select a district → View properties
-        </div>
-      )}
-
-      <LoadingScreen isLoaded={isLoaded} />
-
-      {/* ✅ POPUP */}
-      {/* {activeProperty && (
-        <div
-          style={{
-            position: "fixed",
-            bottom: 0,
-            left: 0,
-            width: "100%",
-            zIndex: 9999999,
-            pointerEvents: "auto",
-          }}
-        > */}
       {activeProperty && (
         <div
           style={{
@@ -169,7 +102,7 @@ export function MapCanvas() {
             bottom: 0,
             left: 0,
             width: "100%",
-            zIndex: 2147483647, // 🔥 MAX possible z-index
+            zIndex: 2147483647,
             pointerEvents: "auto",
           }}
         >
