@@ -11,7 +11,7 @@ A geospatial real estate marketplace for Karnataka, India. Built around an immer
 - [Overview](#overview)
 - [Live Demo](#live-demo)
 - [Tech Stack](#tech-stack)
-- [Project Structure](#project-structure)
+- [Project structure](#project-structure)
 - [Features](#features)
 - [Getting Started](#getting-started)
 - [Environment Variables](#environment-variables)
@@ -47,7 +47,7 @@ Namma Dharani ("Our Land" in Kannada) is a **map-first real estate discovery pla
 | Animations  | GSAP 3                                   |
 | Styling     | Tailwind CSS 4 + inline styles           |
 | Map Tiles   | ArcGIS Online (satellite, roads, labels) |
-| Fonts       | Google Fonts — Inter, Orbitron          |
+| Fonts       | Google Fonts — Inter, Orbitron           |
 | Data        | Static JSON (public/data/)               |
 | Hosting     | Vercel (recommended)                     |
 
@@ -210,8 +210,8 @@ Both variables are optional. The app runs fully on static data without them.
 
 All data lives in `public/data/` and is served as static assets:
 
-| File                      | Description                                                          |
-| ------------------------- | -------------------------------------------------------------------- |
+| File                    | Description                                                          |
+| ----------------------- | -------------------------------------------------------------------- |
 | `properties.json`       | Property listings (id, title, type, price, size, lat, lng, district) |
 | `cities.json`           | District center GeoJSON points                                       |
 | `district-centers.json` | District center coordinates for fly animations                       |
@@ -225,8 +225,8 @@ interface Property {
   id: string;
   title: string;
   type: "house" | "land" | "apartment" | "commercial";
-  price: string;    // e.g. "1.2 Cr", "35 Lakhs"
-  size: string;     // e.g. "2400 sqft", "2 Acres"
+  price: string; // e.g. "1.2 Cr", "35 Lakhs"
+  size: string; // e.g. "2400 sqft", "2 Acres"
   lat: number;
   lng: number;
   district: string;
@@ -267,8 +267,8 @@ public/data/properties.json
 | ---------- | --------------------------------------------- |
 | < 3        | Title "NAMMA DHARANI" visible                 |
 | < 4        | "Explore Karnataka" button visible            |
-| 3–5.5     | Karnataka overview, no markers                |
-| 5.5–9     | Property markers visible                      |
+| 3–5.5      | Karnataka overview, no markers                |
+| 5.5–9      | Property markers visible                      |
 | > 9        | Markers hidden (too zoomed in)                |
 | 11.5       | District detail level (set on district click) |
 
