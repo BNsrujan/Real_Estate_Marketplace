@@ -152,7 +152,7 @@ export function useMapInstance({
       map.remove();
       mapRef.current = null;
     };
-  }, []); // intentionally empty — MapLibre is imperative
+  }, []);
 
   return { mapRef, isStyleLoaded };
 }

@@ -32,7 +32,7 @@ const NavBar = () => {
   }, []);
 
   return (
-    <div className="relative z-50 w-full h-24 flex justify-between items-center px-6">
+    <div className="relative z-50 w-full h-24 flex justify-between items-center ">
    
       <div className="relative">
         <input
