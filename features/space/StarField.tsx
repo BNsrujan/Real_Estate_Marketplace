@@ -53,7 +53,7 @@ function Stars3D() {
 
 export default function StarField() {
   return (
-    <div style={{ position: "absolute", inset: 0, zIndex: 0 }}>
+    <div style={{ position: "absolute", inset: 0, zIndex: -10 }}>
       <Canvas>
         <Stars3D />
       </Canvas>

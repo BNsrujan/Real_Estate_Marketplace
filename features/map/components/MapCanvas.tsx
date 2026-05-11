@@ -65,7 +65,7 @@ export function MapCanvas() {
       {showButton && <StartExploreButton onClick={zoomToKarnataka} />}
 
       {/* Map container */}
-      <div ref={mapContainerRef} className="absolute inset-0 z-0" />
+      <div ref={mapContainerRef} className="absolute inset-0 z-[1]" />
       <MapControls map={mapInstance.current} />
   
       {!showButton && (
@@ -79,7 +79,7 @@ export function MapCanvas() {
       <div
         ref={titleRef}
         className="
-          absolute top-5 left-0 w-full z-0
+          absolute top-5 left-0 w-full z-[5]
           text-center pointer-events-none
           text-[clamp(28px,7vw,110px)]
           tracking-[clamp(4px,2vw,14px)]
