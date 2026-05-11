@@ -4,9 +4,15 @@ import dynamic from "next/dynamic";
 
 const MapCanvas = dynamic(
   () => import("./MapCanvas").then((m) => m.MapCanvas),
-  { ssr: false },
+  {
+    ssr: false,
+  }
 );
 
-export function MapCanvasLoader() {
-  return <MapCanvas />;
+interface Props {
+  setIsLoaded: React.Dispatch<React.SetStateAction<boolean>>;
+}
+
+export function MapCanvasLoader({ setIsLoaded }: Props) {
+  return <MapCanvas setIsLoaded={setIsLoaded} />;
 }

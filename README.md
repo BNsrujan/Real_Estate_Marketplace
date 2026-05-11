@@ -17,3 +17,6 @@ z-[1] — MapLibre map container
 z-[5] — Title and UI elements
 z-[10] — UI overlays (navbar, sidebar)
 z-[9999] — Loading screen
+
+
+features/map/components/MapCanvas.tsx
