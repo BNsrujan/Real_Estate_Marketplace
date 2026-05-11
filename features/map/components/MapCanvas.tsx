@@ -55,41 +55,48 @@ export function MapCanvas() {
   const { zoomToKarnataka } = useDistrictZoom({ mapRef: mapInstance });
 
   return (
-    <div className="relative w-screen h-dvh">
-      {/* Google Fonts — Orbitron */}
-      <style>{`@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap');`}</style>
+    <div className="relative w-full h-full overflow-hidden">
+      <style>{`
+        ${!isLoaded ? '[role="region"][aria-label="Sidebar"] { display: none !important; }' : ''}
+      `}</style>
+      
+      <div className="absolute inset-0 z-0">
+        <StarField />
+      </div>
+      <div className="absolute inset-0 z-[1]">
+        <LoadingScreen isLoaded={isLoaded} />
 
-      <StarField />
-      <LoadingScreen isLoaded={isLoaded} />
+        {showButton && <StartExploreButton onClick={zoomToKarnataka} />}
 
-      {showButton && <StartExploreButton onClick={zoomToKarnataka} />}
+        {/* Map container */}
+        <div ref={mapContainerRef} className="absolute inset-0" />
+        <MapControls map={mapInstance.current} />
+    
+        {!showButton && (
+          <div className="absolute flex inset-0 z-10 pointer-events-none">
+            <DetailPanel activeMenu="map" /> 
+            <div className="w-full flex flex-col justify-between h-screen p-6">          
+            <NavBar />
+            <BottomBar  />
+            </div>  
+          </div>
+        )}
 
-      {/* Map container */}
-      <div ref={mapContainerRef} className="absolute inset-0 z-[1]" />
-      <MapControls map={mapInstance.current} />
-  
-      {!showButton && (
-        <div className="absolute inset-0 z-10 pointer-events-none">
-          <NavBar />
-          <DetailPanel activeMenu="map" />
-          <BottomBar  />
+        <div
+          ref={titleRef}
+          className="
+            absolute top-5 left-0 w-full z-[5]
+            text-center pointer-events-none
+            text-[clamp(28px,7vw,110px)]
+            tracking-[clamp(4px,2vw,14px)]
+            text-[#e6f7ff]
+            transition-opacity duration-[400ms] ease-in-out
+            [text-shadow:0_0_40px_rgba(108,207,255,0.6)]
+            [font-family:'Orbitron',sans-serif]
+          "
+        >
+          NAMMA DHARANI
         </div>
-      )}
-
-      <div
-        ref={titleRef}
-        className="
-          absolute top-5 left-0 w-full z-[5]
-          text-center pointer-events-none
-          text-[clamp(28px,7vw,110px)]
-          tracking-[clamp(4px,2vw,14px)]
-          text-[#e6f7ff]
-          transition-opacity duration-[400ms] ease-in-out
-          [text-shadow:0_0_40px_rgba(108,207,255,0.6)]
-          [font-family:'Orbitron',sans-serif]
-        "
-      >
-        NAMMA DHARANI
       </div>
 
       {activeProperty && (

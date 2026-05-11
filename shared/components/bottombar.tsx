@@ -60,7 +60,7 @@ const BottomBar = () => {
   };
 
   return (
-    <div className="absolute bottom-5 left-5 z-500 flex items-end gap-4">
+    <div className="relative  w-full z-500 flex items-end gap-4">
       {/* Main Layer System */}
       <div className="relative">
         {/* Active Layer */}

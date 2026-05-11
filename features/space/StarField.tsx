@@ -1,5 +1,5 @@
 "use client";
-import { useRef, useMemo, useEffect } from "react";
+import { useRef, useMemo, useEffect, useState } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 
@@ -45,16 +45,34 @@ function Stars3D() {
   });
 
   return (
-    <points ref={pointsRef} geometry={geometry}>
-      <pointsMaterial size={0.6} color="#9ddcff" transparent opacity={0.8} />
-    </points>
+    <>
+      <color attach="background" args={["#000000"]} />
+      <points ref={pointsRef} geometry={geometry}>
+        <pointsMaterial size={1.2} color="#9ddcff" transparent opacity={1} sizeAttenuation />
+      </points>
+    </>
   );
 }
 
 export default function StarField() {
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  if (!isMounted) {
+    return null;
+  }
+
   return (
-    <div style={{ position: "absolute", inset: 0, zIndex: -10 }}>
-      <Canvas>
+    <div style={{ position: "fixed", inset: 0, zIndex: 0, pointerEvents: "none" }}>
+      <Canvas
+        camera={{ position: [0, 0, 100], fov: 75, far: 10000 }}
+        style={{ width: "100%", height: "100%", display: "block" }}
+        dpr={typeof window !== "undefined" ? window.devicePixelRatio : 1}
+        gl={{ antialias: true, alpha: false, stencil: false }}
+      >
         <Stars3D />
       </Canvas>
     </div>

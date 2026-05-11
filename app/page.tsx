@@ -6,7 +6,7 @@ export default function HomePage() {
   return (
     <main className="w-screen h-screen bg-black flex">
       <AppSidebar />
-      <div className=" relative overflow-hidden h-screen">
+      <div className="relative h-screen flex-1 overflow-hidden">
         <MapCanvasLoader />
       </div>
     </main>

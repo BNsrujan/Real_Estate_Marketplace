@@ -21,7 +21,7 @@ export type DetailPanelProps = {
 export function DetailPanel({ activeMenu, activeData }: DetailPanelProps) {
   return (
     <aside
-      className="absolute w-105 overflow-hidden border-r border-white/10 p-7 backdrop-blur-3xl z-100"
+      className="relative w-105 overflow-hidden border-r h-screen border-white/10 p-7 backdrop-blur-3xl z-100"
       style={{ backgroundColor: "rgba(20,20,20,0.7)" }}
     >
       {/* Background glow */}
