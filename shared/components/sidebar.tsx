@@ -69,6 +69,13 @@ const SIDEBAR_MENUS: SidebarMenu[] = [
   },
 ];
 
+const properties = [
+  { id: 1, image: "/property/image.png", alt: "Property 1" },
+  { id: 2, image: "/property/image.png", alt: "Property 2" },
+  { id: 3, image: "/property/image.png", alt: "Property 3" },
+  { id: 4, image: "/property/image.png", alt: "Property 4" },
+];
+
 function SidebarMenuItem({
   item,
   active,
@@ -88,7 +95,7 @@ function SidebarMenuItem({
         <button
           aria-label={item.title}
           title={item.title}
-          onClick={() => onActivate(item.id)}
+          // onClick={() => onActivate(item.id)}
           className={`group relative flex h-14 w-14 items-center justify-center overflow-hidden rounded-2xl transition-all duration-200 active:scale-[0.98] ${
             active
               ? "border border-white/20 bg-white/[0.06]"
@@ -199,7 +206,7 @@ export function AppSidebar() {
       <Sidebar
         className={`${
           collapsed ? "w-22" : "w-22"
-        } border-r border-white/10 bg-black/50 backdrop-blur-3xl transition-all duration-300`}
+        } border-r border-white/10 bg-black/50 backdrop-blur-3xl transition-all duration-300 flex flex-col justify-self-start items-center py-4`}
       >
         
         <SidebarContent className="px-4 py-4">
@@ -224,7 +231,7 @@ export function AppSidebar() {
 
           
           {!collapsed && (
-            <SidebarGroup className="mt-6">
+            <SidebarGroup className="mt-6 py-6">
               <div className="mb-2 px-2">
                 <p className="text-[11px] uppercase tracking-[0.25em] text-white/40">
                   Quick Access
@@ -238,20 +245,20 @@ export function AppSidebar() {
               </div>
             </SidebarGroup>
           )}
-        </SidebarContent>
+        <Separator className="my-4"/>
 
-        <Separator className="self items-end-safe"/>
-        <div className="p-4">
-          {/* // watch list property cards */}
-          <SidebarCard className="p-3 cursor-pointer">
-            <img
-              src="https://via.placeholder.com/150"
-              alt="Property Image"
-              className="h-20 w-full rounded-md object-cover"
+    <div className="gap-4 flex flex-col h-full w-full overflow-y-auto">
+      {properties.map((property) => (
+        <SidebarCard key={property.id} className="p-0  cursor-pointer">
+          <img
+            src={property.image}
+            alt={property.alt}
+            className="h-10 w-full rounded-md object-cover"
             />
-          </SidebarCard>
-            
-        </div>
+        </SidebarCard>
+      ))}
+    </div>
+      </SidebarContent>
       </Sidebar>
     </div>
   );
