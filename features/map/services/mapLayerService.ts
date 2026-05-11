@@ -1,13 +1,7 @@
 import maplibregl from "maplibre-gl";
 
-/**
- * Adds all GeoJSON sources and map layers to the map.
- * Called once inside map's "style.load" event.
- *
- * Extracted from GlobeView so MapCanvas stays declarative.
- */
+
 export function addMapLayers(map: maplibregl.Map): void {
-  // ── India boundary ──────────────────────────────────────────────────────────
   map.addSource("india", { type: "geojson", data: "/data/india.geojson" });
   map.addLayer({
     id: "india-line",
@@ -31,7 +25,6 @@ export function addMapLayers(map: maplibregl.Map): void {
     minzoom: 4,
   });
 
-  // ── Karnataka boundary ──────────────────────────────────────────────────────
   map.addSource("karnataka", {
     type: "geojson",
     data: "/data/karnataka.geojson",
@@ -61,28 +54,13 @@ export function addMapLayers(map: maplibregl.Map): void {
         "interpolate",
         ["linear"],
         ["zoom"],
-        6,
-        0,
-        7,
-        0.08,
-        12,
-        0,
+        6, 0,
+        7, 0.08,
+        12, 0,
       ],
     },
     minzoom: 6,
   });
-
-  // map.addLayer({
-  //   id: "cities-line",
-  //   type: "line",
-  //   source: "cities",
-  //   paint: {
-  //     "line-color": "#c8faff",
-  //     "line-width": ["interpolate", ["linear"], ["zoom"], 6, 1.5, 10, 3, 14, 6],
-  //     "line-opacity": 1,
-  //   },
-  //   minzoom: 6,
-  // });
 
   map.addLayer({
     id: "city-labels",
@@ -104,27 +82,4 @@ export function addMapLayers(map: maplibregl.Map): void {
     },
     minzoom: 4.9,
   });
-
-  // map.addLayer({
-  //   id: "cities-glow",
-  //   type: "line",
-  //   source: "cities",
-  //   paint: {
-  //     "line-color": "#00ffff",
-  //     "line-width": ["interpolate", ["linear"], ["zoom"], 8, 2, 12, 10, 14, 18],
-  //     "line-opacity": [
-  //       "interpolate",
-  //       ["linear"],
-  //       ["zoom"],
-  //       8,
-  //       0,
-  //       10,
-  //       0.3,
-  //       14,
-  //       0.6,
-  //     ],
-  //     "line-blur": 1.5,
-  //   },
-  //   minzoom: 8,
-  // });
 }

@@ -45,7 +45,7 @@ export function useMarkerSync({
     }));
   }, []);
 
-  // ── Helpers ───────────────────────────────────────────────────────────────
+
   const clearMarkers = useCallback(() => {
     markersRef.current.forEach((m) => m.remove());
     markersRef.current = [];
@@ -53,22 +53,9 @@ export function useMarkerSync({
 
   const placeMarkers = useCallback(
     (map: maplibregl.Map, data: Property[], mode: "all" | "filtered") => {
-      // if (blockMarkerRenderRef.current) return;
       const zoom = map.getZoom();
-      // if (zoom < MARKER_MIN_ZOOM || zoom > MARKER_MAX_ZOOM) return;
       if (zoom < MARKER_MIN_ZOOM) return;
       clearMarkers();
-
-      // markersRef.current = addPropertyMarkers(map, data, (prop) => {
-      //   // ① Fire popup FIRST — before anything clears markers
-      //   onMarkerClickRef.current?.(prop);
-
-      //   // ② Then filter district with a small delay so popup state is committed
-      //   setTimeout(() => {
-      //     filterByDistrictRef.current(prop.district);
-      //   }, 80);
-      // });
-
       markersRef.current = addPropertyMarkers(map, data, (prop) => {
         onMarkerClickRef.current?.(prop);
       });
@@ -77,7 +64,6 @@ export function useMarkerSync({
     [clearMarkers],
   );
 
-  // ── filterByDistrict ──────────────────────────────────────────────────────
   const filterByDistrict = useCallback(
     (districtName: string) => {
       const map = mapRef.current;
@@ -90,7 +76,7 @@ export function useMarkerSync({
         (p) => p.district?.toLowerCase() === districtName.toLowerCase(),
       );
 
-      // Fly to district center
+      
       const features = map.querySourceFeatures("district-centers");
       const match = features.find(
         (f) =>
@@ -108,7 +94,7 @@ export function useMarkerSync({
           speed: 0.75,
         });
 
-        // Place filtered markers once flight lands
+
         map.once("moveend", () => {
           placeMarkers(map, filtered, "filtered");
         });

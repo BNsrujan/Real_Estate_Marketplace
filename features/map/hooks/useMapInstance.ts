@@ -9,21 +9,12 @@ import { addMapLayers } from "../services/mapLayerService";
 
 interface UseMapInstanceOptions {
   containerRef: React.RefObject<HTMLDivElement | null>;
-  /** Called when map tiles are fully loaded (triggers loading screen removal) */
   onLoad: () => void;
-  /** Called on every zoom change with the current zoom level */
   onZoom: (zoom: number) => void;
-  /** Called when a district label is clicked */
   onDistrictClick: (districtName: string) => void;
 }
 
-/**
- * Owns the full MapLibre lifecycle: create → configure → add layers → clean up.
- *
- * Returns:
- *   mapRef        — stable ref to the maplibre Map instance
- *   isStyleLoaded — true once style.load has fired (safe to query features)
- */
+
 export function useMapInstance({
   containerRef,
   onLoad,
@@ -56,6 +47,7 @@ export function useMapInstance({
       maxZoom: MAP_CONFIG.maxZoom,
       style: {
         version: 8,
+        projection: { type: "globe" },
         sources: {
           satellite: TILE_SOURCES.satellite,
           roads: TILE_SOURCES.roads,
@@ -77,12 +69,9 @@ export function useMapInstance({
                 "interpolate",
                 ["linear"],
                 ["zoom"],
-                8,
-                0,
-                11,
-                0.9,
-                18,
-                1,
+                8, 0,
+                11, 0.9,
+                18, 1,
               ],
             },
           },
@@ -95,23 +84,22 @@ export function useMapInstance({
                 "interpolate",
                 ["linear"],
                 ["zoom"],
-                9,
-                0,
-                12,
-                0.95,
+                9, 0,
+                12, 0.95,
               ],
             },
           },
         ],
-      },
+      } as maplibregl.StyleSpecification,
     });
 
     mapRef.current = map;
-    map.setZoom(2.1);
 
     map.on("style.load", () => {
-      // Globe projection + atmosphere
-      map.setProjection({ type: "globe" });
+      try { map.setProjection("globe"); } catch {
+
+        }
+
       try {
         (map as any).setFog({
           range: [-1, 2],
@@ -119,12 +107,10 @@ export function useMapInstance({
           "horizon-blend": 0.06,
         });
       } catch {
-        // setFog not available in all maplibre versions — safe to ignore
       }
 
       addMapLayers(map);
 
-      // District label click
       map.on("click", (e) => {
         if (!map.getLayer("cities-fill")) return;
         const features = map.queryRenderedFeatures(e.point, {
