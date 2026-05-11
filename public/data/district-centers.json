@@ -1,0 +1,35 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": { "NAME_2": "Bangalore" },
+      "geometry": { "type": "Point", "coordinates": [77.5946, 12.9716] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "NAME_2": "Bellary" },
+      "geometry": { "type": "Point", "coordinates": [76.9214, 15.1394] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "NAME_2": "Chitradurga" },
+      "geometry": { "type": "Point", "coordinates": [76.4018, 14.2306] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "NAME_2": "Davanagere" },
+      "geometry": { "type": "Point", "coordinates": [75.9211, 14.4661] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "NAME_2": "Dharwad" },
+      "geometry": { "type": "Point", "coordinates": [75.0078, 15.4589] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "NAME_2": "Mysore" },
+      "geometry": { "type": "Point", "coordinates": [76.6394, 12.2958] }
+    }
+  ]
+}

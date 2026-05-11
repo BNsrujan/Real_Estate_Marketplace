@@ -1,0 +1,56 @@
+[
+  {
+    "title": "Luxury Villa",
+    "type": "house",
+    "price": "1.2 Cr",
+    "size": "2400 sqft",
+    "lat": 14.2306,
+    "lng": 76.4018,
+    "district": "Chitradurga"
+  },
+  {
+    "title": "Farmland",
+    "type": "land",
+    "price": "35 Lakhs",
+    "size": "2 Acres",
+    "lat": 14.4661,
+    "lng": 75.9211,
+    "district": "Davanagere"
+  },
+  {
+    "title": "City Apartment",
+    "type": "house",
+    "price": "80 Lakhs",
+    "size": "1200 sqft",
+    "lat": 12.9716,
+    "lng": 77.5946,
+    "district": "Bangalore"
+  },
+  {
+    "title": "Mysore Villa",
+    "type": "house",
+    "price": "95 Lakhs",
+    "size": "1800 sqft",
+    "lat": 12.2958,
+    "lng": 76.6394,
+    "district": "Mysore"
+  },
+  {
+    "title": "Dharwad Plot",
+    "type": "land",
+    "price": "20 Lakhs",
+    "size": "1500 sqft",
+    "lat": 15.4589,
+    "lng": 75.0078,
+    "district": "Dharwad"
+  },
+  {
+    "title": "Bellary Farm",
+    "type": "land",
+    "price": "40 Lakhs",
+    "size": "3 Acres",
+    "lat": 15.1394,
+    "lng": 76.9214,
+    "district": "Bellary"
+  }
+]
