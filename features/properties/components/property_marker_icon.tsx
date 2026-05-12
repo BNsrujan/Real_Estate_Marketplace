@@ -4,8 +4,8 @@ import React from "react";
 import {
   Home,
   Building2,
-  Trees,
-  Warehouse,
+  TreePine,
+  ShoppingCart,
   Grid3X3,
   MapPin,
 } from "lucide-react";
@@ -16,16 +16,19 @@ interface PropertyMarkerIconProps {
   isActive?: boolean;
 }
 
-
+/**
+ * Lucide-based marker icon component for properties
+ * Renders different icons based on property type
+ */
 export function PropertyMarkerIcon({
   property,
   isActive = false,
 }: PropertyMarkerIconProps) {
   const iconProps = {
-    size: isActive ? 32 : 28,
-    strokeWidth: 1.5,
-    className: `transition-all duration-300 ${
-      isActive ? "scale-125" : "scale-100"
+    size: isActive ? 28 : 24,
+    strokeWidth: 2.5,
+    className: `transition-all duration-200 ${
+      isActive ? "scale-110" : "scale-100"
     }`,
   };
 
@@ -36,9 +39,9 @@ export function PropertyMarkerIcon({
       case "apartment":
         return <Building2 {...iconProps} />;
       case "agriculture land":
-        return <Trees {...iconProps} />;
+        return <TreePine {...iconProps} />;
       case "commercial space":
-        return <Warehouse {...iconProps} />;
+        return <ShoppingCart {...iconProps} />;
       case "commercial plots":
         return <Grid3X3 {...iconProps} />;
       case "site":
@@ -51,19 +54,19 @@ export function PropertyMarkerIcon({
   const getColorForType = (type: Property["type"]): string => {
     switch (type) {
       case "house":
-        return "#10B981"; // Emerald
+        return "#00FF88"; // Lime green
       case "apartment":
-        return "#3B82F6"; // Blue
+        return "#00DDFF"; // Cyan
       case "agriculture land":
-        return "#6FCF97"; // Green
+        return "#88FF00"; // Yellow-green
       case "commercial space":
-        return "#F59E0B"; // Amber
+        return "#FF6B00"; // Orange
       case "commercial plots":
-        return "#EC4899"; // Pink
+        return "#FFD700"; // Gold
       case "site":
-        return "#8B5CF6"; // Purple
+        return "#FF00FF"; // Magenta
       default:
-        return "#FFFFFF";
+        return "#FFFFFF"; // White
     }
   };
 
@@ -74,31 +77,25 @@ export function PropertyMarkerIcon({
       className={`
         flex items-center justify-center
         rounded-full
-        backdrop-blur-lg
-        border
-        transition-all duration-300
+        backdrop-blur-md
+        border-2
+        shadow-lg
+        transition-all duration-200
         ${
           isActive
-            ? "bg-gradient-to-br from-gray-900 to-black border-2 shadow-2xl ring-2"
-            : "bg-gradient-to-br from-gray-800/90 to-black/80 border shadow-lg hover:shadow-xl"
+            ? "bg-black/70 border-white scale-110 shadow-2xl"
+            : "bg-black/50 border-white/40 hover:border-white/80"
         }
-        p-3
+        p-2
       `}
       style={{
-        borderColor: isActive ? color : "rgba(255, 255, 255, 0.3)",
+        borderColor: isActive ? color : "rgba(255, 255, 255, 0.4)",
         boxShadow: isActive
-          ? `0 0 32px ${color}60, 0 0 16px ${color}30, inset 0 0 16px ${color}20`
-          : `0 8px 24px rgba(0, 0, 0, 0.4), 0 0 16px ${color}30`,
+          ? `0 0 24px ${color}80, 0 0 12px ${color}40`
+          : "0 4px 12px rgba(0, 0, 0, 0.3)",
       }}
     >
-      <div
-        style={{
-          color,
-          textShadow: `0 0 8px ${color}80`,
-        }}
-      >
-        {getIconForType(property.type)}
-      </div>
+      <div style={{ color }}>{getIconForType(property.type)}</div>
     </div>
   );
 }
