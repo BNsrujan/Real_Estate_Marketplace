@@ -74,7 +74,7 @@ export function MapCanvas({ setIsLoaded }: Props) {
   return (
     <div className="relative w-full h-full overflow-hidden">
       {/* Map */}
-      <div ref={mapContainerRef} style={{ position: "absolute", inset: 0, width: "100%", height: "100%" }} />
+      <div ref={mapContainerRef} style={{ position: "absolute", inset: 0, width: "100%", height: "100%" , zIndex: "2" }} />
 
       {/* Stars */}
       <div
@@ -87,7 +87,6 @@ export function MapCanvas({ setIsLoaded }: Props) {
       {/* Controls */}
       <div className="absolute inset-0 z-2">
         {showButton && <StartExploreButton onClick={zoomToKarnataka} />}
-
         <MapControls map={mapInstance.current} />
       </div>
 
@@ -95,7 +94,7 @@ export function MapCanvas({ setIsLoaded }: Props) {
       <div
         ref={titleRef}
         className="
-          absolute top-5 left-0 w-full z-[3]
+          absolute top-5 left-0 w-full z-3
           text-center pointer-events-none
           text-[clamp(28px,7vw,110px)]
           tracking-[clamp(4px,2vw,14px)]
@@ -110,10 +109,12 @@ export function MapCanvas({ setIsLoaded }: Props) {
 
       {/* UI Panels */}
       {!showButton && (
-        <div className="absolute flex inset-0 z-[4] pointer-events-none">
-          <DetailPanel activeMenu="map" />
+        <div className="absolute flex inset-0 z-4 pointer-events-none flex-col md:flex-row">
+          <div className="hidden md:block">
+            <DetailPanel activeMenu="map" />
+          </div>
 
-          <div className="w-full flex flex-col justify-between h-screen p-6">
+          <div className="w-full flex flex-col justify-between h-screen p-3 md:p-4 lg:p-6">
             <NavBar />
             <BottomBar />
           </div>

@@ -67,7 +67,7 @@ export function SidebarDetailPanel() {
 
   return (
     <aside
-      className={`fixed left-22.5 top-0 h-screen w-105 border-r border-white/10 bg-black/70 backdrop-blur-3xl overflow-y-auto transition-transform duration-300 z-40 ${
+      className={`fixed left-16 md:left-22.5 top-0 h-screen w-80 md:w-96 lg:w-105 border-r border-white/10 bg-black/70 backdrop-blur-3xl overflow-y-auto transition-transform duration-300 z-40 ${
         isPanelOpen ? "translate-x-0" : "-translate-x-full"
       }`}
       style={{ backgroundColor: "rgba(20,20,20,0.7)" }}
@@ -76,7 +76,7 @@ export function SidebarDetailPanel() {
       <div className="absolute -top-20 right-0 h-72 w-72 rounded-full bg-white/2 opacity-5 blur-3xl pointer-events-none" />
 
       {/* Content */}
-      <div className="relative z-10 p-7">
+      <div className="relative z-10 p-4 md:p-5 lg:p-7">
         {/* Hero Section */}
         <div className="mb-8">
           <div className="relative mb-5 flex h-20 w-20 items-center justify-center rounded-3xl border border-white/10 bg-white/2 backdrop-blur-xl">

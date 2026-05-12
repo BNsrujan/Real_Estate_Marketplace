@@ -7,10 +7,6 @@ interface UseDistrictZoomOptions {
   mapRef: React.RefObject<maplibregl.Map | null>;
 }
 
-/**
- * Provides navigation helpers:
- *   zoomToKarnataka — flies the camera to the Karnataka overview
- */
 export function useDistrictZoom({ mapRef }: UseDistrictZoomOptions) {
   const zoomToKarnataka = useCallback(() => {
     mapRef.current?.flyTo({

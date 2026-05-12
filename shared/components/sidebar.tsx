@@ -140,7 +140,7 @@ export function AppSidebar() {
   );
 
   return (
-    <div className="flex h-screen overflow-hidden bg-black text-white w-22">
+    <div className="hidden md:flex h-screen overflow-hidden bg-black text-white w-22">
       {/* ── Sidebar ── */}
       <Sidebar
         className={`${
