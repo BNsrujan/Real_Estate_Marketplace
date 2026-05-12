@@ -1,6 +1,6 @@
 // this file will contain a list of properties that will be displayed beside the side bar and when user clicks on the property in the side bar it self
 
-import SideBar2 from "@/shared/components/comman/sideBar2";
+import SideBar2 from "@/shared/components/comman/side_bar2";
 import Link from "next/link";
 
 export interface Property {

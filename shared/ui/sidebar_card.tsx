@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { GlassCard } from "./GlassCard";
+import { GlassCard } from "./glass_card";
 
 export type SidebarCardProps = React.HTMLAttributes<HTMLDivElement> & {
   title?: string;

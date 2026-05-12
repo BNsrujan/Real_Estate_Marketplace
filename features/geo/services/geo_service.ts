@@ -1,8 +1,3 @@
-/**
- * Loads GeoJSON files from the public/data directory.
- * All functions are async and cache-friendly.
- */
-
 export async function fetchGeoJSON(
   path: string,
 ): Promise<GeoJSON.FeatureCollection> {

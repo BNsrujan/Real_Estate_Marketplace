@@ -1,6 +1,18 @@
 import { create } from "zustand";
+import { DUMMY_PROPERTIES } from "@/features/properties/data/dummy_properties";
 
 export type SidebarMenuId = "map" | "search" | "saved" | "messages" | "profile";
+
+export interface Property {
+  id: string;
+  title: string;
+  type: string;
+  price: string;
+  size: string;
+  lat: number;
+  lng: number;
+  district: string;
+}
 
 interface SidebarStore {
   // Currently active menu
@@ -16,6 +28,12 @@ interface SidebarStore {
   // Selected property (for showing details in the panel)
   selectedPropertyId: string | null;
   setSelectedPropertyId: (id: string | null) => void;
+
+  // Saved properties (bookmarks)
+  savedProperties: Property[];
+  setSavedProperties: (props: Property[]) => void;
+  addSavedProperty: (prop: Property) => void;
+  removeSavedProperty: (id: string) => void;
 }
 
 export const useSidebarStore = create<SidebarStore>((set) => ({
@@ -29,4 +47,12 @@ export const useSidebarStore = create<SidebarStore>((set) => ({
 
   selectedPropertyId: null,
   setSelectedPropertyId: (id) => set({ selectedPropertyId: id }),
+
+  // initialize savedProperties with a small set of dummy properties
+  savedProperties: DUMMY_PROPERTIES.slice(0, 6),
+  setSavedProperties: (props) => set({ savedProperties: props }),
+  addSavedProperty: (prop) =>
+    set((state) => ({ savedProperties: [...state.savedProperties, prop] })),
+  removeSavedProperty: (id) =>
+    set((state) => ({ savedProperties: state.savedProperties.filter((p) => p.id !== id) })),
 }));

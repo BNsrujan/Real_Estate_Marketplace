@@ -13,8 +13,8 @@ import {
   TrendingUp,
 } from "lucide-react";
 
-import { useSidebarStore } from "@/store/sidebar-store";
-import { SidebarCard } from "@/shared/ui/SidebarCard";
+import { useSidebarStore } from "@/store/sidebar_store";
+import { SidebarCard } from "@/shared/ui/sidebar_card";
 
 type MenuContent = {
   id: string;

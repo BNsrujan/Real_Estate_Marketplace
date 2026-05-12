@@ -28,10 +28,7 @@ const MENU_ITEMS: MenuIconItem[] = [
   { id: "profile", Icon: User, label: "Profile" },
 ];
 
-/**
- * SidebarIconRail — Fixed left sidebar with icon buttons only (90px width).
- * Clicking an icon activates the menu and opens the detail panel.
- */
+
 export function SidebarIconRail() {
   const { activeMenu, setActiveMenu } = useSidebarStore();
 

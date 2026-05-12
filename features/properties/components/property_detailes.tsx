@@ -1,7 +1,7 @@
 // in the side bar it will show the property detailes like the price and the size and the location and the type of the property and also a image of the property and a button to contact the owner of the property
 // he can buy, rent or lease the property and also a button to contact the owner of the property
 
-import SideBar2 from "@/shared/components/comman/sideBar2";
+import SideBar2 from "@/shared/components/comman/side_bar2";
 import type { Property } from "@/shared/types";
 
 export function PropertyDetailes({ property }: { property: Property }) {

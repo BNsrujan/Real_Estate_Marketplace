@@ -2,7 +2,9 @@
 
 import React from "react";
 import { Search } from "lucide-react";
-import { SidebarCard } from "@/shared/ui/SidebarCard";
+import { SidebarCard } from "@/shared/ui/sidebar_card";
+import { useSidebarStore } from "@/store/sidebar_store";
+import { PropertyCard } from "@/features/properties/components/property_card";
 
 type MenuId = "map" | "search" | "saved" | "messages" | "profile";
 
@@ -14,11 +16,14 @@ type SidebarMenu = {
 };
 
 export type DetailPanelProps = {
-  activeMenu: MenuId;
+  activeMenu?: MenuId;
   activeData?: SidebarMenu | null;
 };
 
-export function DetailPanel({ activeMenu, activeData }: DetailPanelProps) {
+export function DetailPanel({ activeMenu: propActiveMenu, activeData }: DetailPanelProps) {
+  const storeActiveMenu = useSidebarStore((s) => s.activeMenu);
+  const savedProperties = useSidebarStore((s) => s.savedProperties);
+  const activeMenu = propActiveMenu ?? storeActiveMenu;
   return (
     <aside
       className="relative w-105 overflow-hidden border-r h-screen border-white/10 p-7 backdrop-blur-3xl z-100"
@@ -87,12 +92,20 @@ export function DetailPanel({ activeMenu, activeData }: DetailPanelProps) {
           )}
 
           {activeMenu === "saved" && (
-            <SidebarCard className="p-5">
-              <p className="text-sm text-white/50">
-                No saved properties yet. Start exploring the map to bookmark
-                listings.
-              </p>
-            </SidebarCard>
+            <div className="space-y-3">
+              {savedProperties.length === 0 ? (
+                <SidebarCard className="p-5">
+                  <p className="text-sm text-white/50">
+                    No saved properties yet. Start exploring the map to
+                    bookmark listings.
+                  </p>
+                </SidebarCard>
+              ) : (
+                savedProperties.map((property) => (
+                  <PropertyCard key={property.id} property={property as any} />
+                ))
+              )}
+            </div>
           )}
 
           {activeMenu === "messages" && (

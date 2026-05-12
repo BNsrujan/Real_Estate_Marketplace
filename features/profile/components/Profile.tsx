@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import ProfileModel from "./ProfileModel";
+import ProfileModel from "./profile_model";
 
 const Profile = () => {
 const [profileMenuOpen, setProfileMenuOpen] = useState(false);

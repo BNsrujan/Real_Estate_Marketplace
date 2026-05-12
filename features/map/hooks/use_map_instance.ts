@@ -4,8 +4,8 @@ import { useEffect, useRef, useState } from "react";
 import maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 
-import { MAP_CONFIG, TILE_SOURCES, getResponsiveMapConfig } from "@/lib/globe/mapConfig";
-import { addMapLayers } from "../services/mapLayerService";
+import { MAP_CONFIG, TILE_SOURCES, getResponsiveMapConfig } from "@/lib/globe/map_config";
+import { addMapLayers } from "../services/map_layer_service";
 
 interface UseMapInstanceOptions {
   containerRef: React.RefObject<HTMLDivElement | null>;

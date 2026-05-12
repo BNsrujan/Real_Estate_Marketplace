@@ -17,6 +17,7 @@ export default function MapControls({ map }: MapControlsProps) {
 
   const locationMarkerRef = useRef<maplibregl.Marker | null>(null);
   const watchIdRef = useRef<number | null>(null);
+  const locateTimeoutRef = useRef<number | null>(null);
 
   // Track map rotation
   useEffect(() => {
@@ -53,25 +54,18 @@ export default function MapControls({ map }: MapControlsProps) {
     });
   }, [map]);
 
-  // Reset Compass
-  const handleCompass = useCallback(() => {
-    if (!map) return;
-
-    map.easeTo({
-      bearing: 0,
-      pitch: 0,
-      duration: 500,
-    });
-  }, [map]);
-
   // Current Location
   const handleLocation = useCallback(() => {
     if (!map) return;
-
-    // Stop tracking
+    // If already active, stop watching and remove marker
     if (locationState === "active") {
       if (watchIdRef.current !== null) {
         navigator.geolocation.clearWatch(watchIdRef.current);
+      }
+
+      if (locateTimeoutRef.current !== null) {
+        window.clearTimeout(locateTimeoutRef.current);
+        locateTimeoutRef.current = null;
       }
 
       locationMarkerRef.current?.remove();
@@ -96,7 +90,9 @@ export default function MapControls({ map }: MapControlsProps) {
 
     setLocationState("locating");
 
-    // Custom location marker
+    const ACCURACY_THRESHOLD = 30; 
+    const LOCATE_TIMEOUT = 25000; 
+
     const markerElement = document.createElement("div");
 
     markerElement.className = `
@@ -111,12 +107,29 @@ export default function MapControls({ map }: MapControlsProps) {
       <div class="h-4 w-4 rounded-full border-2 border-white bg-cyan-400 shadow-[0_0_20px_rgba(34,211,238,0.9)]"></div>
     `;
 
+    if (watchIdRef.current !== null) {
+      navigator.geolocation.clearWatch(watchIdRef.current);
+      watchIdRef.current = null;
+    }
+
+    if (locateTimeoutRef.current !== null) {
+      window.clearTimeout(locateTimeoutRef.current);
+      locateTimeoutRef.current = null;
+    }
+
+  
     watchIdRef.current = navigator.geolocation.watchPosition(
       (position) => {
         const lng = position.coords.longitude;
         const lat = position.coords.latitude;
+        const accuracy = position.coords.accuracy ?? Infinity;
 
-        setLocationState("active");
+      
+        if (accuracy <= ACCURACY_THRESHOLD) {
+          setLocationState("active");
+        } else {
+          setLocationState("locating");
+        }
 
         if (!locationMarkerRef.current) {
           locationMarkerRef.current = new maplibregl.Marker({
@@ -126,15 +139,20 @@ export default function MapControls({ map }: MapControlsProps) {
             .setLngLat([lng, lat])
             .addTo(map);
 
-          map.flyTo({
-            center: [lng, lat],
-            zoom: Math.max(map.getZoom(), 14),
-            speed: 1.2,
-            curve: 1.5,
-            essential: true,
-          });
+          if (accuracy <= ACCURACY_THRESHOLD) {
+            map.flyTo({
+              center: [lng, lat],
+              zoom: Math.max(map.getZoom(), 14),
+              speed: 1.2,
+              curve: 1.5,
+              essential: true,
+            });
+          }
         } else {
           locationMarkerRef.current.setLngLat([lng, lat]);
+          if (accuracy <= ACCURACY_THRESHOLD) {
+            map.easeTo({ center: [lng, lat], duration: 400 });
+          }
         }
       },
       () => {
@@ -146,16 +164,34 @@ export default function MapControls({ map }: MapControlsProps) {
       },
       {
         enableHighAccuracy: true,
-        timeout: 10000,
+        timeout: 20000,
+        maximumAge: 0,
       },
     );
+
+    locateTimeoutRef.current = window.setTimeout(() => {
+      setLocationState("error");
+      if (watchIdRef.current !== null) {
+        navigator.geolocation.clearWatch(watchIdRef.current);
+      }
+      watchIdRef.current = null;
+      if (locationMarkerRef.current) {
+        locationMarkerRef.current.remove();
+        locationMarkerRef.current = null;
+      }
+      locateTimeoutRef.current = null;
+    }, LOCATE_TIMEOUT);
   }, [map, locationState]);
 
-  // Cleanup
   useEffect(() => {
     return () => {
       if (watchIdRef.current !== null) {
         navigator.geolocation.clearWatch(watchIdRef.current);
+      }
+
+      if (locateTimeoutRef.current !== null) {
+        window.clearTimeout(locateTimeoutRef.current);
+        locateTimeoutRef.current = null;
       }
 
       locationMarkerRef.current?.remove();

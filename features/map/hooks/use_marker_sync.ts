@@ -3,7 +3,7 @@
 import { useEffect, useRef, useCallback } from "react";
 import maplibregl from "maplibre-gl";
 
-import { addPropertyMarkers } from "@/features/properties/components/PropertyMarkers";
+import { addPropertyMarkers } from "@/features/properties/components/property_markers";
 import type { Property } from "@/shared/types";
 import rawData from "@/public/data/properties.json";
 const MARKER_MIN_ZOOM = 5.5;

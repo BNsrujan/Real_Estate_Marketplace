@@ -2,22 +2,18 @@
 
 import { useRef, useState, useCallback } from "react";
 
-import StarField from "@/features/space/StarField";
+import StarField from "@/features/space/star_field";
 import StartExploreButton from "@/shared/components/ui/startbtn";
-import PropertyPopup from "@/shared/components/map/PropertyPopup";
-
-import { useMapInstance } from "../hooks/useMapInstance";
-import { useMarkerSync } from "../hooks/useMarkerSync";
-import { useDistrictZoom } from "../hooks/useDistrictZoom";
-
-import { TITLE_FADE_ZOOM } from "@/lib/globe/mapConfig";
-
+import PropertyPopup from "@/shared/components/map/property_popup";
+import { useMapInstance } from "../hooks/use_map_instance";
+import { useMarkerSync } from "../hooks/use_marker_sync";
+import { useDistrictZoom } from "../hooks/use_district_zoom";
+import { usePropertyMarkers } from "@/features/properties/hooks/use_property_markers";
+import { TITLE_FADE_ZOOM } from "@/lib/globe/map_config";
 import type { Property } from "@/shared/types";
-
 import NavBar from "@/shared/components/navbar";
-import DetailPanel from "@/shared/components/sidebardetails";
 import BottomBar from "@/shared/components/bottombar";
-import MapControls from "@/shared/components/ui/MapControls";
+import MapControls from "@/features/map/components/map_contoler";
 import Profile from "@/features/profile/components/Profile";
 
 interface Props {
@@ -62,6 +58,12 @@ export function MapCanvas({ setIsLoaded }: Props) {
   });
 
   const { filterByDistrict } = useMarkerSync({
+    mapRef: mapInstance,
+    isStyleLoaded,
+    onMarkerClick: handleMarkerClick,
+  });
+
+  usePropertyMarkers({
     mapRef: mapInstance,
     isStyleLoaded,
     onMarkerClick: handleMarkerClick,
@@ -118,11 +120,6 @@ export function MapCanvas({ setIsLoaded }: Props) {
       {/* UI Panels */}
       {!showButton && (
         <div className="absolute inset-0 z-4 pointer-events-none flex ">
-          <div className="hidden md:block pointer-events-auto">
-            <DetailPanel activeMenu="map" />
-          </div>
-        
-
           <div className="relative">
           <div className="absolute top-0 left-0 right-0 pointer-events-auto p-3 md:px-4 lg:px-6 ">
             <NavBar />
@@ -141,7 +138,7 @@ export function MapCanvas({ setIsLoaded }: Props) {
 
       {/* Property Popup */}
       {activeProperty && (
-        <div className="fixed bottom-0 w-full z-[2147483647] pointer-events-auto">
+        <div className="fixed bottom-0 w-full z-2147483647 pointer-events-auto">
           <PropertyPopup
             property={activeProperty}
             onClose={() => setActiveProperty(null)}
