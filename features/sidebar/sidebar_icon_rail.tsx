@@ -11,8 +11,8 @@ import {
   Sparkles,
 } from "lucide-react";
 
-import { useSidebarStore, type SidebarMenuId } from "@/store/sidebar-store";
-import { FloatingButton } from "@/shared/ui/FloatingButton";
+import { useSidebarStore, type SidebarMenuId } from "@/store/sidebar_store";
+import { FloatingButton } from "@/shared/ui/floating_button";
 
 type MenuIconItem = {
   id: SidebarMenuId;

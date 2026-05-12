@@ -229,7 +229,6 @@ export default function MapControls({ map }: MapControlsProps) {
           shadow-[0_10px_50px_rgba(0,0,0,0.45)]
           transition-all duration-300
           active:scale-95
-
           ${
             locationState === "active"
               ? "border-cyan-400/40 bg-cyan-400/10 text-cyan-300"

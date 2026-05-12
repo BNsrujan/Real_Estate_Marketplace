@@ -43,7 +43,7 @@ const mapLayers: LayerType[] = [
   },
 ];
 
-const BottomBar = () => {
+const MapLayerSelector = () => {
   const [activeLayer, setActiveLayer] = useState<LayerType>(mapLayers[0]);
   const [isExpanded, setIsExpanded] = useState(false);
 
@@ -124,7 +124,6 @@ const BottomBar = () => {
           </div>
         </button>
 
-        {/* Other Layers */}
         <div
           className={`
             absolute bottom-0 left-full ml-2 md:ml-4
@@ -194,4 +193,4 @@ const BottomBar = () => {
   );
 };
 
-export default BottomBar;
+export default MapLayerSelector;

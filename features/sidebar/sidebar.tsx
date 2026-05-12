@@ -8,7 +8,7 @@ import {
   SidebarGroup,
 } from "@/shared/components/ui/sidebar";
 import { SidebarCard } from "@/shared/ui/sidebar_card";
-import { Separator } from "./ui/separator";
+import { Separator } from "@/shared/components/ui/separator";
 import React from "react";
 import { useSidebarStore } from "@/store/sidebar_store";
 

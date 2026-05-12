@@ -4,9 +4,12 @@ import { useEffect, useRef } from "react";
 import maplibregl from "maplibre-gl";
 import { PropertyMarkerService } from "@/features/properties/services/property_marker_service";
 import { DUMMY_PROPERTIES } from "@/features/properties/data/dummy_properties";
+import { useSidebarStore } from "@/store/sidebar_store";
 import type { Property } from "@/shared/types";
 
 const PROPERTY_MARKER_MIN_ZOOM = 5.5;
+const MARKER_ZOOM_LEVEL = 12; // Zoom level when clicking a marker
+const MARKER_ZOOM_DURATION = 1000; // Animation duration in ms
 
 interface UsePropertyMarkersOptions {
   mapRef: React.RefObject<maplibregl.Map | null>;
@@ -15,8 +18,8 @@ interface UsePropertyMarkersOptions {
 }
 
 /**
- * Hook to manage property markers on the map
- * Renders dummy property markers using the PropertyMarkerService
+ * Hook to manage property markers on the map with zoom and selection
+ * Renders premium property markers and handles click interactions
  */
 export function usePropertyMarkers({
   mapRef,
@@ -25,6 +28,11 @@ export function usePropertyMarkers({
 }: UsePropertyMarkersOptions) {
   const markerServiceRef = useRef<PropertyMarkerService | null>(null);
   const activeMarkerRef = useRef<string | null>(null);
+  const selectedPropertyIdRef = useRef<string | null>(null);
+
+  // Get store actions
+  const setSelectedPropertyId = useSidebarStore((s) => s.setSelectedPropertyId);
+  const setActiveMenu = useSidebarStore((s) => s.setActiveMenu);
 
   // Initialize markers when map is ready
   useEffect(() => {
@@ -39,18 +47,37 @@ export function usePropertyMarkers({
       const zoom = map.getZoom();
       if (zoom >= PROPERTY_MARKER_MIN_ZOOM) {
         markerServiceRef.current?.addMarkers(DUMMY_PROPERTIES, (prop) => {
-          onMarkerClick?.(prop);
-          // Update active marker visual state
-          if (activeMarkerRef.current) {
-            markerServiceRef.current?.updateMarkerActive(
-              activeMarkerRef.current,
-              false
-            );
-          }
-          activeMarkerRef.current = prop.id;
-          markerServiceRef.current?.updateMarkerActive(prop.id, true);
+          // Handle marker click: zoom, select, and update UI
+          handleMarkerClick(prop, map);
         });
       }
+    };
+
+    const handleMarkerClick = (property: Property, map: maplibregl.Map) => {
+      // Zoom to property location
+      map.flyTo({
+        center: [property.lng, property.lat],
+        zoom: MARKER_ZOOM_LEVEL,
+        duration: MARKER_ZOOM_DURATION,
+        curve: 1.42,
+      });
+
+      // Update active marker visual state
+      if (activeMarkerRef.current) {
+        markerServiceRef.current?.updateMarkerActive(activeMarkerRef.current, false);
+      }
+      activeMarkerRef.current = property.id;
+      markerServiceRef.current?.updateMarkerActive(property.id, true);
+
+      // Update store: set selected property and switch to details view
+      selectedPropertyIdRef.current = property.id;
+      setSelectedPropertyId(property.id);
+
+      // Switch to details panel (optional, can show details in map popup or sidebar)
+      // setActiveMenu("saved"); // Or keep current menu if you want a dedicated property details view
+
+      // Call the optional callback
+      onMarkerClick?.(property);
     };
 
     // Add markers on zoom change
@@ -74,7 +101,7 @@ export function usePropertyMarkers({
       markerServiceRef.current?.dispose();
       markerServiceRef.current = null;
     };
-  }, [mapRef, isStyleLoaded, onMarkerClick]);
+  }, [mapRef, isStyleLoaded, onMarkerClick, setSelectedPropertyId, setActiveMenu]);
 
   return {
     setActiveMarker: (propertyId: string) => {

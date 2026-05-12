@@ -14,58 +14,96 @@ export class PropertyMarkerService {
   }
 
   /**
-   * Create a marker DOM element with lucide icon
+   * Create a marker DOM element with premium styling and icons
    */
   private createMarkerElement(property: Property, isActive: boolean = false) {
     const el = document.createElement("div");
     el.className = "property-marker-container";
 
-    // Get color based on property type
+    // Premium color palette
     const typeColorMap: Record<Property["type"], string> = {
-      house: "#00FF88",
-      apartment: "#00DDFF",
-      "agriculture land": "#88FF00",
-      "commercial space": "#FF6B00",
-      "commercial plots": "#FFD700",
-      site: "#FF00FF",
+      house: "#10B981",
+      apartment: "#3B82F6",
+      "agriculture land": "#6FCF97",
+      "commercial space": "#F59E0B",
+      "commercial plots": "#EC4899",
+      site: "#8B5CF6",
     };
 
-    // Get icon name and label based on type
+    // Better icon representations
     const typeIconMap: Record<Property["type"], string> = {
-      house: "🏠",
-      apartment: "🏢",
-      "agriculture land": "🌳",
-      "commercial space": "🛒",
-      "commercial plots": "📊",
+      house: "🏘️",
+      apartment: "🏗️",
+      "agriculture land": "🌾",
+      "commercial space": "🏭",
+      "commercial plots": "📐",
       site: "📍",
     };
 
     const color = typeColorMap[property.type] || "#FFFFFF";
     const icon = typeIconMap[property.type] || "📍";
+    const size = isActive ? "56px" : "48px";
+    const fontSize = isActive ? "24px" : "20px";
 
     el.innerHTML = `
       <div style="
         display: flex;
         align-items: center;
         justify-content: center;
-        width: ${isActive ? "48px" : "40px"};
-        height: ${isActive ? "48px" : "40px"};
+        width: ${size};
+        height: ${size};
         border-radius: 50%;
-        background: rgba(0, 0, 0, ${isActive ? "0.8" : "0.5"});
-        border: 2px solid ${isActive ? color : "rgba(255, 255, 255, 0.4)"};
-        backdrop-filter: blur(12px);
+        background: linear-gradient(135deg, rgba(51, 65, 85, 0.95) 0%, rgba(15, 23, 42, 0.98) 100%);
+        border: 2px solid ${isActive ? color : "rgba(255, 255, 255, 0.3)"};
+        backdrop-filter: blur(16px);
         cursor: pointer;
-        font-size: ${isActive ? "20px" : "16px"};
-        transition: all 0.2s ease;
+        font-size: ${fontSize};
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         box-shadow: ${
           isActive
-            ? `0 0 24px ${color}80, 0 0 12px ${color}40`
-            : "0 4px 12px rgba(0, 0, 0, 0.3)"
+            ? `0 0 40px ${color}80, 0 0 20px ${color}40, inset 0 0 20px ${color}20, 0 20px 40px rgba(0, 0, 0, 0.5)`
+            : `0 12px 32px rgba(0, 0, 0, 0.4), 0 0 20px ${color}40, 0 0 40px ${color}10`
         };
-        transform: ${isActive ? "scale(1.1)" : "scale(1)"};
+        transform: ${isActive ? "scale(1.3)" : "scale(1)"};
+        border-radius: 50%;
+        position: relative;
       ">
-        ${icon}
+        <div style="
+          filter: drop-shadow(0 0 6px ${color}80);
+          transform: ${isActive ? "scale(1.2)" : "scale(1)"};
+          transition: all 0.3s;
+        ">
+          ${icon}
+        </div>
+        ${
+          isActive
+            ? `<div style="
+          position: absolute;
+          width: 100%;
+          height: 100%;
+          border-radius: 50%;
+          border: 2px solid ${color};
+          animation: pulse-ring 2s infinite;
+          pointer-events: none;
+        "></div>`
+            : ""
+        }
       </div>
+      <style>
+        @keyframes pulse-ring {
+          0% {
+            box-shadow: 0 0 0 0 ${color}40;
+            transform: scale(1);
+          }
+          50% {
+            box-shadow: 0 0 0 12px transparent;
+          }
+          100% {
+            box-shadow: 0 0 0 24px transparent;
+            transform: scale(1);
+          }
+        }
+      </style>
     `;
 
     el.style.cursor = "pointer";
