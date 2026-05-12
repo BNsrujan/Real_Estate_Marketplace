@@ -59,7 +59,7 @@ const BottomBar = () => {
   };
 
   return (
-    <div className="relative w-full z-500 flex items-end gap-2 md:gap-4 flex-wrap md:flex-nowrap justify-center md:justify-start">
+    <div className="relative w-full z-500 flex items-end gap-2 md:gap-4 flex-wrap md:flex-nowrap justify-start">
       {/* Main Layer System */}
       <div className="relative">
         {/* Active Layer */}

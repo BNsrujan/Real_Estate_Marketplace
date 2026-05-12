@@ -18,6 +18,7 @@ import NavBar from "@/shared/components/navbar";
 import DetailPanel from "@/shared/components/sidebardetails";
 import BottomBar from "@/shared/components/bottombar";
 import MapControls from "@/shared/components/ui/MapControls";
+import Profile from "@/features/profile/components/Profile";
 
 interface Props {
   setIsLoaded: React.Dispatch<React.SetStateAction<boolean>>;
@@ -79,16 +80,22 @@ export function MapCanvas({ setIsLoaded }: Props) {
 
       {/* Stars */}
       <div
-        className="absolute z-0 pointer-events-none"
+        className="absolute inset-0 z-0 pointer-events-none"
         style={{ mixBlendMode: "screen" }}
       >
         <StarField />
       </div>
 
-      {/* Controls */}
-      <div className="absolute z-2">
-        {showButton && <StartExploreButton onClick={zoomToKarnataka} />}
-        <MapControls map={mapInstance.current} />
+      <div className="absolute inset-0 z-2 pointer-events-none">
+        {showButton && (
+          <div className="pointer-events-auto">
+            <StartExploreButton onClick={zoomToKarnataka} />
+          </div>
+        )}
+
+        <div className="pointer-events-auto">
+          <MapControls map={mapInstance.current} />
+        </div>
       </div>
 
       {/* Title */}
@@ -110,14 +117,24 @@ export function MapCanvas({ setIsLoaded }: Props) {
 
       {/* UI Panels */}
       {!showButton && (
-        <div className="absolute flex inset-0 z-4 pointer-events-none flex-col md:flex-row">
-          <div className="hidden md:block">
+        <div className="absolute inset-0 z-4 pointer-events-none flex ">
+          <div className="hidden md:block pointer-events-auto">
             <DetailPanel activeMenu="map" />
           </div>
+        
 
-          <div className="w-full flex flex-col justify-between h-screen p-3 md:p-4 lg:p-6">
+          <div className="relative">
+          <div className="absolute top-0 left-0 right-0 pointer-events-auto p-3 md:px-4 lg:px-6 ">
             <NavBar />
+          </div>
+
+          <div className="absolute bottom-0 left-0 right-0 pointer-events-auto p-3 md:p-4 lg:p-6">
             <BottomBar />
+          </div>
+
+          </div>
+          <div className="absolute top-3 right-3 pointer-events-auto ">
+            <Profile />
           </div>
         </div>
       )}
