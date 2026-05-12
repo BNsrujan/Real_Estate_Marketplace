@@ -7,7 +7,6 @@ import {
   SidebarContent,
   SidebarGroup,
 } from "@/shared/components/ui/sidebar";
-import { SidebarCard } from "@/shared/ui/sidebar_card";
 import { Separator } from "@/shared/components/ui/separator";
 import React from "react";
 import { useSidebarStore } from "@/store/sidebar_store";
@@ -40,29 +39,31 @@ const properties = [
 function SidebarMenuItem({
   item,
   active,
+  isPanelOpen,
   onActivate,
 }: {
   item: SidebarMenu;
   active: boolean;
+  isPanelOpen: boolean;
   onActivate: (id: MenuId) => void;
 }) {
-
-
-
   const Icon = item.Icon;
+  // visually "pressed" only when active AND panel is open
+  const pressed = active && isPanelOpen;
+
   return (
     <li>
       <button
         aria-label={item.title}
         title={item.title}
         onClick={() => onActivate(item.id)}
-        className={`group relative flex h-14 w-14 items-center justify-center overflow-hidden rounded-2xl transition-all duration-200 active:scale-[0.98] ${active
-          ? "border border-white/20 bg-white/[0.06]"
-          : "border border-white/10 hover:bg-white/[0.06]"
+        className={`group relative flex h-14 w-14 items-center justify-center overflow-hidden rounded-2xl transition-all duration-200 active:scale-[0.98] ${pressed
+            ? "border border-white/20 bg-white/[0.06]"
+            : "border border-white/10 hover:bg-white/[0.06]"
           }`}
       >
         <div
-          className={`flex h-10 w-10 items-center justify-center rounded-xl text-white ${active ? "bg-white/[0.06]" : "bg-transparent"
+          className={`flex h-10 w-10 items-center justify-center rounded-xl text-white ${pressed ? "bg-white/[0.06]" : "bg-transparent"
             }`}
         >
           <Icon size={18} />
@@ -75,21 +76,37 @@ function SidebarMenuItem({
 export function AppSidebar() {
   const activeMenu = useSidebarStore((s) => s.activeMenu);
   const setActiveMenu = useSidebarStore((s) => s.setActiveMenu);
+  const isPanelOpen = useSidebarStore((s) => s.isPanelOpen);
+  const openPanel = useSidebarStore((s) => s.openPanel);
+  const togglePanel = useSidebarStore((s) => s.togglePanel);
+
   const [selectedProperty, setSelectedProperty] = useState<number | null>(null);
+
+  const handleMenuActivate = useCallback(
+    (id: MenuId) => {
+      if (id === activeMenu) {
+        togglePanel();   // same item → toggle
+      } else {
+        setActiveMenu(id);
+        openPanel();     // new item → always open
+      }
+    },
+    [activeMenu, setActiveMenu, openPanel, togglePanel],
+  );
 
   const onKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
       const idx = SIDEBAR_MENUS.findIndex((m) => m.id === activeMenu);
       if (e.key === "ArrowDown") {
         e.preventDefault();
-        setActiveMenu(SIDEBAR_MENUS[(idx + 1) % SIDEBAR_MENUS.length].id);
+        handleMenuActivate(SIDEBAR_MENUS[(idx + 1) % SIDEBAR_MENUS.length].id);
       }
       if (e.key === "ArrowUp") {
         e.preventDefault();
-        setActiveMenu(SIDEBAR_MENUS[(idx - 1 + SIDEBAR_MENUS.length) % SIDEBAR_MENUS.length].id);
+        handleMenuActivate(SIDEBAR_MENUS[(idx - 1 + SIDEBAR_MENUS.length) % SIDEBAR_MENUS.length].id);
       }
     },
-    [activeMenu, setActiveMenu],
+    [activeMenu, handleMenuActivate],
   );
 
   return (
@@ -104,7 +121,8 @@ export function AppSidebar() {
                     key={menu.id}
                     item={menu}
                     active={activeMenu === menu.id}
-                    onActivate={setActiveMenu}
+                    isPanelOpen={isPanelOpen}
+                    onActivate={handleMenuActivate}
                   />
                 ))}
               </ul>
@@ -113,8 +131,7 @@ export function AppSidebar() {
 
           <Separator className="my-4" />
 
-          <div className="relative">
-            
+          <div className="relative overflow-visible">
             <div className="gap-4 flex flex-col h-full w-full overflow-y-auto py-3">
               {properties.map((property) => (
                 <WatchlistBadge
@@ -129,9 +146,9 @@ export function AppSidebar() {
                 />
               ))}
             </div>
-            {/* Floating bar */}
-            {selectedProperty !== null && (
-              <div className="absolute left-0 z-50 top-0 ml-3 w-64 rounded-2xl border border-white/10 bg-black/80 backdrop-blur-xl p-4 shadow-xl transition-all duration-200 z-50">
+
+            {/* {selectedProperty !== null && (
+              <div className="absolute left-0 top-0 ml-3 w-64 rounded-2xl border border-white/10 bg-black/80 backdrop-blur-xl p-4 shadow-xl transition-all duration-200 z-50">
                 {(() => {
                   const p = properties.find((p) => p.id === selectedProperty);
                   return p ? (
@@ -151,7 +168,7 @@ export function AppSidebar() {
                   ) : null;
                 })()}
               </div>
-            )}
+            )} */}
           </div>
         </SidebarContent>
       </Sidebar>

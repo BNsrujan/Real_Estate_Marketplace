@@ -114,7 +114,7 @@ const MapLayerSelector = () => {
             {/* Content */}
             <div className="hidden md:block absolute text-left bottom-2 center left-1/2 -translate-x-1/2">
               <div className="flex items-center gap-2 text-white/60">
-                <Check size={14} />
+                
                 <Layers3 size={14} />
                 <h3 className="text-sm font-semibold text-white/30">
                   {activeLayer.name}
@@ -129,10 +129,9 @@ const MapLayerSelector = () => {
             absolute bottom-0 left-full ml-2 md:ml-4
             flex items-end gap-2 md:gap-3
             transition-all duration-500
-            ${
-              isExpanded
-                ? "translate-x-0 opacity-100"
-                : "-translate-x-10 opacity-0 pointer-events-none"
+            ${isExpanded
+              ? "translate-x-0 opacity-100"
+              : "-translate-x-10 opacity-0 pointer-events-none"
             }
           `}
         >
@@ -178,7 +177,7 @@ const MapLayerSelector = () => {
                 {/* Layer Name */}
                 <div className="absolute text-left bottom-2 center left-1/2 -translate-x-1/2">
                   <div className="flex items-center gap-2 text-white/60">
-                    <Layers3 size={14} />
+                    
                     <h3 className="text-sm font-semibold text-white/30">
                       {layer.name}
                     </h3>

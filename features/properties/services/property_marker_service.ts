@@ -1,186 +1,179 @@
 import maplibregl from "maplibre-gl";
 import type { Property } from "@/shared/types";
 
-/**
- * Service to render property markers on the map using custom markers with lucide icons
- * Creates and manages DOM-based markers for each property with proper cleanup
- */
 export class PropertyMarkerService {
   private markers: Map<string, maplibregl.Marker> = new Map();
   private map: maplibregl.Map | null = null;
 
   constructor(map: maplibregl.Map) {
     this.map = map;
+    this.injectStyles();
   }
 
-  /**
-   * Create a marker DOM element with premium styling and icons
-   */
-  private createMarkerElement(property: Property, isActive: boolean = false) {
-    const el = document.createElement("div");
-    el.className = "property-marker-container";
+  /** Inject keyframes + utility classes that Tailwind can't generate dynamically */
+  private injectStyles() {
+    if (document.getElementById("property-marker-styles")) return;
+    const style = document.createElement("style");
+    style.id = "property-marker-styles";
+    style.textContent = `
+      @keyframes pulse-ring {
+        0%   { transform: scale(1);    opacity: 0.6; }
+        50%  { transform: scale(1.5);  opacity: 0.2; }
+        100% { transform: scale(2);    opacity: 0;   }
+      }
+      @keyframes marker-pop {
+        0%   { transform: scale(0.5); opacity: 0; }
+        70%  { transform: scale(1.1); }
+        100% { transform: scale(1);   opacity: 1; }
+      }
+      .marker-pop      { animation: marker-pop 0.3s cubic-bezier(0.34,1.56,0.64,1) forwards; }
+      .pulse-ring      { animation: pulse-ring 1.8s ease-out infinite; }
+      .marker-hover:hover { transform: scale(1.15) !important; z-index: 999 !important; }
+    `;
+    document.head.appendChild(style);
+  }
 
-    // Premium color palette
-    const typeColorMap: Record<Property["type"], string> = {
-      house: "#10B981",
-      apartment: "#3B82F6",
-      "agriculture land": "#6FCF97",
-      "commercial space": "#F59E0B",
-      "commercial plots": "#EC4899",
-      site: "#8B5CF6",
+  private getTypeConfig(type: Property["type"]): { color: string; icon: string; label: string } {
+    const config: Record<Property["type"], { color: string; icon: string; label: string }> = {
+      house:             { color: "#10B981", icon: "🏘️", label: "House"       },
+      apartment:         { color: "#3B82F6", icon: "🏗️", label: "Apt"         },
+      "agriculture land":{ color: "#6FCF97", icon: "🌾", label: "Agri"        },
+      "commercial space":{ color: "#F59E0B", icon: "🏭", label: "Commercial"  },
+      "commercial plots":{ color: "#EC4899", icon: "📐", label: "Plot"        },
+      site:              { color: "#8B5CF6", icon: "📍", label: "Site"        },
     };
+    return config[type] ?? { color: "#FFFFFF", icon: "📍", label: "Property" };
+  }
 
-    // Better icon representations
-    const typeIconMap: Record<Property["type"], string> = {
-      house: "🏘️",
-      apartment: "🏗️",
-      "agriculture land": "🌾",
-      "commercial space": "🏭",
-      "commercial plots": "📐",
-      site: "📍",
-    };
+  private createMarkerElement(property: Property, isActive = false): HTMLElement {
+    const { color, icon, label } = this.getTypeConfig(property.type);
 
-    const color = typeColorMap[property.type] || "#FFFFFF";
-    const icon = typeIconMap[property.type] || "📍";
-    const size = isActive ? "56px" : "48px";
-    const fontSize = isActive ? "24px" : "20px";
+    const wrapper = document.createElement("div");
+    wrapper.className = "relative flex flex-col items-center select-none marker-pop";
+    wrapper.style.cursor = "pointer";
 
-    el.innerHTML = `
-      <div style="
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        width: ${size};
-        height: ${size};
-        border-radius: 50%;
-        background: linear-gradient(135deg, rgba(51, 65, 85, 0.95) 0%, rgba(15, 23, 42, 0.98) 100%);
-        border: 2px solid ${isActive ? color : "rgba(255, 255, 255, 0.3)"};
-        backdrop-filter: blur(16px);
-        cursor: pointer;
-        font-size: ${fontSize};
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        box-shadow: ${
-          isActive
-            ? `0 0 40px ${color}80, 0 0 20px ${color}40, inset 0 0 20px ${color}20, 0 20px 40px rgba(0, 0, 0, 0.5)`
-            : `0 12px 32px rgba(0, 0, 0, 0.4), 0 0 20px ${color}40, 0 0 40px ${color}10`
-        };
-        transform: ${isActive ? "scale(1.3)" : "scale(1)"};
-        border-radius: 50%;
-        position: relative;
-      ">
-        <div style="
-          filter: drop-shadow(0 0 6px ${color}80);
-          transform: ${isActive ? "scale(1.2)" : "scale(1)"};
-          transition: all 0.3s;
-        ">
-          ${icon}
-        </div>
-        ${
-          isActive
-            ? `<div style="
-          position: absolute;
-          width: 100%;
-          height: 100%;
-          border-radius: 50%;
-          border: 2px solid ${color};
-          animation: pulse-ring 2s infinite;
-          pointer-events: none;
-        "></div>`
-            : ""
-        }
-      </div>
-      <style>
-        @keyframes pulse-ring {
-          0% {
-            box-shadow: 0 0 0 0 ${color}40;
-            transform: scale(1);
-          }
-          50% {
-            box-shadow: 0 0 0 12px transparent;
-          }
-          100% {
-            box-shadow: 0 0 0 24px transparent;
-            transform: scale(1);
-          }
-        }
-      </style>
+    // ── Pulse ring (active only) ──────────────────────────────────────────
+    if (isActive) {
+      const ring = document.createElement("div");
+      ring.className = "pulse-ring absolute rounded-full pointer-events-none";
+      ring.style.cssText = `
+        width: 56px; height: 56px;
+        border: 2px solid ${color};
+        top: 50%; left: 50%;
+        transform-origin: center;
+        margin-top: -28px; margin-left: -28px;
+      `;
+      wrapper.appendChild(ring);
+
+      // second, slower ring
+      const ring2 = ring.cloneNode() as HTMLElement;
+      ring2.style.animationDelay = "0.6s";
+      wrapper.appendChild(ring2);
+    }
+
+    // ── Main bubble ───────────────────────────────────────────────────────
+    const bubble = document.createElement("div");
+    bubble.className = [
+      "relative flex items-center justify-center",
+      "rounded-full backdrop-blur-xl",
+      "transition-all duration-300 ease-out",
+      "marker-hover",
+    ].join(" ");
+
+    const size = isActive ? 56 : 44;
+    bubble.style.cssText = `
+      width: ${size}px; height: ${size}px;
+      background: linear-gradient(135deg, rgba(30,41,59,0.97) 0%, rgba(15,23,42,0.99) 100%);
+      border: 2px solid ${isActive ? color : "rgba(255,255,255,0.18)"};
+      box-shadow: ${
+        isActive
+          ? `0 0 0 4px ${color}30, 0 0 24px ${color}60, 0 16px 40px rgba(0,0,0,0.6)`
+          : `0 8px 24px rgba(0,0,0,0.45), 0 0 16px ${color}25`
+      };
+      transform: ${isActive ? "scale(1.15)" : "scale(1)"};
+      z-index: ${isActive ? 999 : 1};
     `;
 
-    el.style.cursor = "pointer";
+    // icon
+    const iconEl = document.createElement("div");
+    iconEl.className = "transition-transform duration-300";
+    iconEl.style.cssText = `
+      font-size: ${isActive ? "22px" : "18px"};
+      filter: drop-shadow(0 0 5px ${color}90);
+      transform: ${isActive ? "scale(1.1)" : "scale(1)"};
+    `;
+    iconEl.textContent = icon;
+    bubble.appendChild(iconEl);
 
-    return el;
+    // active center dot
+    if (isActive) {
+      const dot = document.createElement("div");
+      dot.className = "absolute bottom-0.5 right-0.5 w-2.5 h-2.5 rounded-full border-2 border-slate-900";
+      dot.style.background = color;
+      bubble.appendChild(dot);
+    }
+
+    wrapper.appendChild(bubble);
+
+    // ── Price tag ─────────────────────────────────────────────────────────
+    const tag = document.createElement("div");
+    tag.className = [
+      "mt-1.5 px-2 py-0.5 rounded-full",
+      "text-[10px] font-semibold tracking-wide",
+      "backdrop-blur-md border whitespace-nowrap",
+      "transition-all duration-300",
+    ].join(" ");
+    tag.style.cssText = `
+      background: rgba(15,23,42,0.88);
+      border-color: ${isActive ? color : "rgba(255,255,255,0.12)"};
+      color: ${isActive ? color : "rgba(255,255,255,0.75)"};
+      box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+    `;
+    tag.textContent = property.price ?? label;
+    wrapper.appendChild(tag);
+
+    return wrapper;
   }
 
-  /**
-   * Add markers for all properties
-   */
   addMarkers(properties: Property[], onMarkerClick?: (prop: Property) => void) {
     if (!this.map) return;
-
-    // Clear existing markers
     this.clearMarkers();
 
     properties.forEach((property) => {
       const el = this.createMarkerElement(property);
 
-      const marker = new maplibregl.Marker({ element: el, anchor: "center" })
+      const marker = new maplibregl.Marker({ element: el, anchor: "bottom" })
         .setLngLat([property.lng, property.lat])
         .addTo(this.map!);
 
-      // Click handler
       el.addEventListener("click", (e) => {
         e.stopPropagation();
         onMarkerClick?.(property);
-      });
-
-      // Hover effect
-      el.addEventListener("mouseenter", () => {
-        el.style.transform = "scale(1.15)";
-        el.style.zIndex = "999";
-      });
-
-      el.addEventListener("mouseleave", () => {
-        el.style.transform = "scale(1)";
-        el.style.zIndex = "1";
       });
 
       this.markers.set(property.id, marker);
     });
   }
 
-  /**
-   * Update a specific marker as active/inactive
-   */
   updateMarkerActive(propertyId: string, isActive: boolean) {
     const marker = this.markers.get(propertyId);
     if (!marker) return;
-
-    // Get the property data from the marker's LngLat
-    const lngLat = marker.getLngLat();
-    
-    // We need to update the element
-    // Since we can't easily get the property data here, we'll just update the visual state
     const el = marker.getElement();
-    if (isActive) {
-      el.style.transform = "scale(1.2)";
-      el.style.zIndex = "9999";
-    } else {
-      el.style.transform = "scale(1)";
-      el.style.zIndex = "1";
+
+    // find the bubble (first div inside wrapper)
+    const bubble = el.querySelector<HTMLElement>("div > div:not(.pulse-ring)");
+    if (bubble) {
+      bubble.style.transform = isActive ? "scale(1.15)" : "scale(1)";
+      bubble.style.zIndex    = isActive ? "999" : "1";
     }
+    el.style.zIndex = isActive ? "9999" : "1";
   }
 
-  /**
-   * Remove all markers
-   */
   clearMarkers() {
-    this.markers.forEach((marker) => marker.remove());
+    this.markers.forEach((m) => m.remove());
     this.markers.clear();
   }
 
-  /**
-   * Remove a specific marker
-   */
   removeMarker(propertyId: string) {
     const marker = this.markers.get(propertyId);
     if (marker) {
@@ -189,16 +182,10 @@ export class PropertyMarkerService {
     }
   }
 
-  /**
-   * Get all active markers
-   */
   getMarkers() {
     return Array.from(this.markers.values());
   }
 
-  /**
-   * Clean up the service
-   */
   dispose() {
     this.clearMarkers();
     this.map = null;

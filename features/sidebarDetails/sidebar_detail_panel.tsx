@@ -83,7 +83,7 @@ export default function SidebarDetailPanel() {
             {menuData && <menuData.Icon size={34} className="text-white" />}
           </div>
 
-          <h1 className="mb-3 text-3xl font-bold">{menuData?.title}</h1>
+          <h1 className="mb-3 text-3xl font-bold text-white">{menuData?.title}</h1>
           <p className="leading-relaxed text-white/55">
             {menuData?.description}
           </p>

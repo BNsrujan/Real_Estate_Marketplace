@@ -1,1 +1,1 @@
-export * from "./zoom-ranges";
+export * from "./zoom_ranges";
