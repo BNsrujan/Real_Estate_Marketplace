@@ -95,6 +95,22 @@ export function useMapInstance({
     mapRef.current = map;
 
     map.on("style.load", () => {
+<<<<<<< HEAD
+=======
+      try { map.setProjection({ type: "globe" }); } catch {
+
+        }
+
+      try {
+        (map as any).setFog({
+          range: [-1, 2],
+          color: "rgba(6, 12, 34, 0.85)",
+          "horizon-blend": 0.06,
+        });
+      } catch {
+      }
+
+>>>>>>> f26a9cf (property correction)
       addMapLayers(map);
 
       map.on("click", (e) => {

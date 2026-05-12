@@ -23,11 +23,11 @@ export interface Property {
 export function PropertyCard({ property }: { property: Property }) {
   const TYPE_ICON: Record<Property["type"], string> = {
     house: "🏠",
-    agriculture_land: "🌾",
+    "agriculture land": "🌾",
     site: "📍",
-    commercial_space: "🏢",
+    "commercial space": "🏢",
     apartment: "🏢",
-    commercial_plots: "🏗️",
+    "commercial plots": "🏗️",
   };
 
   return (
