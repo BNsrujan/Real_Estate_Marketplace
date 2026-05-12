@@ -53,14 +53,13 @@ const BottomBar = () => {
 
   const handleLayerChange = (layer: LayerType) => {
     setActiveLayer(layer);
-
     setTimeout(() => {
       setIsExpanded(false);
     }, 250);
   };
 
   return (
-    <div className="relative  w-full z-500 flex items-end gap-4">
+    <div className="relative w-full z-500 flex items-end gap-2 md:gap-4 flex-wrap md:flex-nowrap justify-center md:justify-start">
       {/* Main Layer System */}
       <div className="relative">
         {/* Active Layer */}
@@ -70,7 +69,7 @@ const BottomBar = () => {
             group
             relative
             overflow-hidden
-            rounded-3xl
+            rounded-2xl md:rounded-3xl
             border border-white/10
             bg-black/40
             backdrop-blur-2xl
@@ -78,24 +77,23 @@ const BottomBar = () => {
             transition-all duration-300
             hover:scale-[1.02]
             active:scale-[0.98]
+            w-full md:w-auto
           "
         >
           {/* Background Glow */}
           <div
-            className={`
-              absolute inset-0 bg-gradient-to-br ${activeLayer.color}
-            `}
+            className={`absolute inset-0 bg-gradient-to-br ${activeLayer.color}`}
           />
 
-          <div className="relative flex items-center gap-4 ">
+          <div className="relative flex items-center gap-2 md:gap-4 p-2 md:p-0">
             {/* Layer Preview Image */}
             <div
               className="
                 relative
-                h-24
-                w-24
+                h-16 md:h-24
+                w-16 md:w-24
                 overflow-hidden
-                rounded-2xl
+                rounded-lg md:rounded-2xl
                 border border-white/10
               "
             >
@@ -109,28 +107,28 @@ const BottomBar = () => {
                   group-hover:scale-110
                 "
               />
-
               {/* Dark Overlay */}
               <div className="absolute inset-0 bg-black/20" />
             </div>
 
             {/* Content */}
-            <div className="absolute text-left bottom-2 center left-1/2 -translate-x-1/2">
+            <div className="hidden md:block absolute text-left bottom-2 center left-1/2 -translate-x-1/2">
               <div className="flex items-center gap-2 text-white/60">
+                <Check size={14} />
                 <Layers3 size={14} />
-               <h3 className=" text-sm font-semibold text-white/30">
-                {activeLayer.name}
-              </h3>
+                <h3 className="text-sm font-semibold text-white/30">
+                  {activeLayer.name}
+                </h3>
               </div>
             </div>
           </div>
         </button>
 
-        
+        {/* Other Layers */}
         <div
           className={`
-            absolute bottom-0 left-full ml-4
-            flex items-end gap-3
+            absolute bottom-0 left-full ml-2 md:ml-4
+            flex items-end gap-2 md:gap-3
             transition-all duration-500
             ${
               isExpanded
@@ -147,7 +145,7 @@ const BottomBar = () => {
                 group
                 relative
                 overflow-hidden
-                rounded-3xl
+                rounded-2xl md:rounded-3xl
                 border border-white/10
                 bg-black/35
                 backdrop-blur-xl
@@ -162,7 +160,7 @@ const BottomBar = () => {
               }}
             >
               {/* Image */}
-              <div className="relative h-24 w-24 overflow-hidden">
+              <div className="relative h-16 md:h-24 w-16 md:w-24 overflow-hidden">
                 <Image
                   src={layer.image}
                   alt={layer.name}
@@ -174,25 +172,20 @@ const BottomBar = () => {
                   "
                 />
 
-               
                 <div
-                  className={`
-                    absolute inset-0 bg-gradient-to-t
-                    from-black/90 via-black/30 to-transparent
-                  `}
+                  className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent"
                 />
 
                 {/* Layer Name */}
-              <div className="absolute text-left bottom-2 center left-1/2 -translate-x-1/2">
-              <div className="flex items-center gap-2 text-white/60">
-                <Layers3 size={14} />
-               <h3 className=" text-sm font-semibold text-white/30">
-                {layer.name}
-              </h3>
+                <div className="absolute text-left bottom-2 center left-1/2 -translate-x-1/2">
+                  <div className="flex items-center gap-2 text-white/60">
+                    <Layers3 size={14} />
+                    <h3 className="text-sm font-semibold text-white/30">
+                      {layer.name}
+                    </h3>
+                  </div>
+                </div>
               </div>
-            </div>
-              </div>
-
             </button>
           ))}
         </div>

@@ -85,7 +85,7 @@ export function MapCanvas({ setIsLoaded }: Props) {
       </div>
 
       {/* Controls */}
-      <div className="absolute inset-0 z-2">
+      <div className="absolute inset-0 z-1">
         {showButton && <StartExploreButton onClick={zoomToKarnataka} />}
         <MapControls map={mapInstance.current} />
       </div>
