@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
+
 import { MAP_CONFIG, TILE_SOURCES } from "@/lib/globe/mapConfig";
 import { addMapLayers } from "../services/mapLayerService";
 
@@ -56,9 +57,9 @@ export function useMapInstance({
           {
             id: "background",
             type: "background",
-            paint: { "background-color": "#000000" },
+            paint: { "background-color": "rgba(0,0,0,0)" },
           },
-          { id: "satellite", type: "raster", source: "satellite", paint: { "raster-opacity": 1 } },
+          { id: "satellite", type: "raster", source: "satellite" },
           {
             id: "roads",
             type: "raster",
@@ -95,10 +96,7 @@ export function useMapInstance({
     mapRef.current = map;
 
     map.on("style.load", () => {
-<<<<<<< HEAD
-=======
       try { map.setProjection({ type: "globe" }); } catch {
-
         }
 
       try {
@@ -110,7 +108,6 @@ export function useMapInstance({
       } catch {
       }
 
->>>>>>> f26a9cf (property correction)
       addMapLayers(map);
 
       map.on("click", (e) => {
