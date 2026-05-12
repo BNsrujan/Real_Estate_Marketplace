@@ -66,6 +66,7 @@ export default function StarField() {
   }
 
   return (
+<<<<<<< HEAD
     <div style={{ position: "absolute", inset: 0, pointerEvents: "none" }}>
       <Canvas
         camera={{ position: [0, 0, 100], fov: 75, far: 10000 }}
@@ -73,6 +74,10 @@ export default function StarField() {
         dpr={typeof window !== "undefined" ? window.devicePixelRatio : 1}
         gl={{ antialias: true, alpha: false, stencil: false }}
       >
+=======
+    <div style={{ position: "absolute", inset: 0, zIndex: -10 }}>
+      <Canvas>
+>>>>>>> 3c693de (Update z-index values for map and star field components)
         <Stars3D />
       </Canvas>
     </div>
