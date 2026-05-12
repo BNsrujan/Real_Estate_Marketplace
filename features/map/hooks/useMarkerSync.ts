@@ -40,8 +40,8 @@ export function useMarkerSync({
 
       type:
         p.type === "site"
-          ? "land"
-          : (p.type as "house" | "land" | "apartment" | "commercial"),
+          ? "house"
+          : (p.type as "house" | "site"  | "agriculture land" | "commercial space" | "apartment" | "commercial plots"),
     }));
   }, []);
 
