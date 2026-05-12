@@ -88,32 +88,14 @@ export function MapCanvas({ setIsLoaded }: Props) {
       <div className="absolute inset-0 z-2">
         {showButton && <StartExploreButton onClick={zoomToKarnataka} />}
 
-<<<<<<< HEAD
         <MapControls map={mapInstance.current} />
       </div>
-=======
-      {/* Map container */}
-      <div ref={mapContainerRef} className="absolute inset-0 z-[1]" />
-      <MapControls map={mapInstance.current} />
-  
-      {!showButton && (
-        <div className="absolute inset-0 z-10 pointer-events-none">
-          <NavBar />
-          <DetailPanel activeMenu="map" />
-          <BottomBar  />
-        </div>
-      )}
->>>>>>> 3c693de (Update z-index values for map and star field components)
 
       {/* Title */}
       <div
         ref={titleRef}
         className="
-<<<<<<< HEAD
           absolute top-5 left-0 w-full z-[3]
-=======
-          absolute top-5 left-0 w-full z-[5]
->>>>>>> 3c693de (Update z-index values for map and star field components)
           text-center pointer-events-none
           text-[clamp(28px,7vw,110px)]
           tracking-[clamp(4px,2vw,14px)]
