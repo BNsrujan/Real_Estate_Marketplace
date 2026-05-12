@@ -1,10 +1,26 @@
 export const MAP_CENTER: [number, number] = [78.9629, 24.5937];
 export const MAP_CONFIG = {
   center: MAP_CENTER,
-  zoom: 2.1,
-  minZoom: 0.1,
+  zoom: 2.5,
+  minZoom: 3,
   maxZoom: 18,
 };
+
+export function getResponsiveMapConfig() {
+  if (typeof window === "undefined") return MAP_CONFIG;
+
+  const w = window.innerWidth;
+
+  if (w < 640) {
+    return { center: MAP_CENTER, zoom: 1.3, minZoom: 1.2, maxZoom: 18 };
+  }
+
+  if (w < 1024) {
+    return { center: MAP_CENTER, zoom: 2.3, minZoom: 1.4, maxZoom: 18 };
+  }
+
+  return MAP_CONFIG;
+}
 
 export const ROTATION_CONFIG = {
   speed: 0.02,

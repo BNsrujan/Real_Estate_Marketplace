@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 
-import { MAP_CONFIG, TILE_SOURCES } from "@/lib/globe/mapConfig";
+import { MAP_CONFIG, TILE_SOURCES, getResponsiveMapConfig } from "@/lib/globe/mapConfig";
 import { addMapLayers } from "../services/mapLayerService";
 
 interface UseMapInstanceOptions {
@@ -37,14 +37,15 @@ export function useMapInstance({
 
     const loadStart = Date.now();
 console.log("Container size:", containerRef.current?.offsetWidth, containerRef.current?.offsetHeight);
+    const cfg = getResponsiveMapConfig();
     const map = new maplibregl.Map({
       container: containerRef.current,
-      center: MAP_CONFIG.center,
-      zoom: MAP_CONFIG.zoom,
+      center: cfg.center,
+      zoom: cfg.zoom,
       pitch: 0,
       bearing: 0,
-      minZoom: MAP_CONFIG.minZoom,
-      maxZoom: MAP_CONFIG.maxZoom,
+      minZoom: cfg.minZoom,
+      maxZoom: cfg.maxZoom,
       style: {
         version: 8,
         projection: { type: "globe" },
