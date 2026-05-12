@@ -84,24 +84,6 @@ export default function LoadingScreen({
           aria-label={`Loading ${appName}`}
           className="relative z-10 flex flex-col items-center text-center animate-rise"
         >
-
-          {/* <div
-            aria-hidden="true"
-            className="relative w-16 h-16 rounded-full border border-white/25 bg-white/[0.04] backdrop-blur-sm flex items-center justify-center mb-7"
-          >
-        
-            <span
-              className="absolute -inset-[3px] rounded-full border-[1.5px] border-transparent animate-arc-spin"
-              style={{
-                borderTopColor: "rgba(255,255,255,0.70)",
-                borderRightColor: "rgba(255,255,255,0.18)",
-              }}
-            />
-            <span className="font-cormorant font-light text-[22px] text-white/85 tracking-[0.05em] leading-none select-none">
-              {appName.charAt(0).toUpperCase()}
-            </span>
-          </div> */}
-
           {/* App name */}
           <h1 className="font-cormorant font-light  tracking-[0.12em] leading-none text-white/90 mb-2.5 animate-rise-d1 text-5xl sm:text-6xl lg:text-7xl">
             {appName}

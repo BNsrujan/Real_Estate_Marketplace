@@ -3,7 +3,7 @@
 import { useRef, useState, useCallback } from "react";
 
 import StarField from "@/features/space/star_field";
-import StartExploreButton from "@/shared/components/ui/startbtn";
+import StartExploreButton from "@/shared/components/comman/startbtn";
 import PropertyPopup from "@/shared/components/map/property_popup";
 import { useMapInstance } from "../hooks/use_map_instance";
 import { useMarkerSync } from "../hooks/use_marker_sync";
@@ -12,7 +12,7 @@ import { usePropertyMarkers } from "@/features/properties/hooks/use_property_mar
 import { TITLE_FADE_ZOOM } from "@/lib/globe/map_config";
 import type { Property } from "@/shared/types";
 import NavBar from "@/shared/components/navbar";
-import BottomBar from "@/shared/components/bottombar";
+import MapLayerSelector from "@/features/mapLayerSelector/map_layer_selector";
 import MapControls from "@/features/map/components/map_contoler";
 import Profile from "@/features/profile/components/Profile";
 
@@ -126,7 +126,7 @@ export function MapCanvas({ setIsLoaded }: Props) {
           </div>
 
           <div className="absolute bottom-0 left-0 right-0 pointer-events-auto p-3 md:p-4 lg:p-6">
-            <BottomBar />
+            <MapLayerSelector />
           </div>
 
           </div>

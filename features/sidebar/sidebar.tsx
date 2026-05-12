@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 import { Map, Bookmark, MessageSquare, User, Search } from "lucide-react";
 import {
   Sidebar,
@@ -11,6 +11,7 @@ import { SidebarCard } from "@/shared/ui/sidebar_card";
 import { Separator } from "@/shared/components/ui/separator";
 import React from "react";
 import { useSidebarStore } from "@/store/sidebar_store";
+import WatchlistBadge from "./watchlist_badge";
 
 type MenuId = "map" | "search" | "saved" | "messages" | "profile";
 
@@ -30,10 +31,10 @@ const SIDEBAR_MENUS: SidebarMenu[] = [
 ];
 
 const properties = [
-  { id: 1, image: "/property/image.png", alt: "Property 1" },
-  { id: 2, image: "/property/image.png", alt: "Property 2" },
-  { id: 3, image: "/property/image.png", alt: "Property 3" },
-  { id: 4, image: "/property/image.png", alt: "Property 4" },
+  { id: 1, area: "Bengaluru", images: [{ image: "/property/image.png", alt: "Property 1" }, { image: "/property/image.png", alt: "Property 1" }] },
+  { id: 2, area: "Mysore", images: [{ image: "/property/image.png", alt: "Property 2" }, { image: "/property/image.png", alt: "Property 2" }] },
+  { id: 3, area: "Hubli", images: [{ image: "/property/image.png", alt: "Property 3" }, { image: "/property/image.png", alt: "Property 3" }] },
+  { id: 4, area: "Mangalore", images: [{ image: "/property/image.png", alt: "Property 4" }, { image: "/property/image.png", alt: "Property 4" }] },
 ];
 
 function SidebarMenuItem({
@@ -45,6 +46,9 @@ function SidebarMenuItem({
   active: boolean;
   onActivate: (id: MenuId) => void;
 }) {
+
+
+
   const Icon = item.Icon;
   return (
     <li>
@@ -52,16 +56,14 @@ function SidebarMenuItem({
         aria-label={item.title}
         title={item.title}
         onClick={() => onActivate(item.id)}
-        className={`group relative flex h-14 w-14 items-center justify-center overflow-hidden rounded-2xl transition-all duration-200 active:scale-[0.98] ${
-          active
-            ? "border border-white/20 bg-white/[0.06]"
-            : "border border-white/10 hover:bg-white/[0.06]"
-        }`}
+        className={`group relative flex h-14 w-14 items-center justify-center overflow-hidden rounded-2xl transition-all duration-200 active:scale-[0.98] ${active
+          ? "border border-white/20 bg-white/[0.06]"
+          : "border border-white/10 hover:bg-white/[0.06]"
+          }`}
       >
         <div
-          className={`flex h-10 w-10 items-center justify-center rounded-xl text-white ${
-            active ? "bg-white/[0.06]" : "bg-transparent"
-          }`}
+          className={`flex h-10 w-10 items-center justify-center rounded-xl text-white ${active ? "bg-white/[0.06]" : "bg-transparent"
+            }`}
         >
           <Icon size={18} />
         </div>
@@ -73,6 +75,7 @@ function SidebarMenuItem({
 export function AppSidebar() {
   const activeMenu = useSidebarStore((s) => s.activeMenu);
   const setActiveMenu = useSidebarStore((s) => s.setActiveMenu);
+  const [selectedProperty, setSelectedProperty] = useState<number | null>(null);
 
   const onKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
@@ -110,16 +113,45 @@ export function AppSidebar() {
 
           <Separator className="my-4" />
 
-          <div className="gap-4 flex flex-col h-full w-full overflow-y-auto">
-            {properties.map((property) => (
-              <SidebarCard key={property.id} className="p-0 cursor-pointer">
-                <img
-                  src={property.image}
-                  alt={property.alt}
-                  className="h-10 w-full rounded-md object-cover"
+          <div className="relative">
+            
+            <div className="gap-4 flex flex-col h-full w-full overflow-y-auto py-3">
+              {properties.map((property) => (
+                <WatchlistBadge
+                  key={property.id}
+                  property={property}
+                  isSelected={selectedProperty === property.id}
+                  onClick={() =>
+                    setSelectedProperty(
+                      selectedProperty === property.id ? null : property.id
+                    )
+                  }
                 />
-              </SidebarCard>
-            ))}
+              ))}
+            </div>
+            {/* Floating bar */}
+            {selectedProperty !== null && (
+              <div className="absolute left-0 z-50 top-0 ml-3 w-64 rounded-2xl border border-white/10 bg-black/80 backdrop-blur-xl p-4 shadow-xl transition-all duration-200 z-50">
+                {(() => {
+                  const p = properties.find((p) => p.id === selectedProperty);
+                  return p ? (
+                    <div className="flex flex-col gap-3">
+                      <p className="text-sm font-semibold text-white">{p.area}</p>
+                      <div className="flex gap-2 flex-wrap">
+                        {p.images.map((img: any, i: number) => (
+                          <img
+                            key={i}
+                            src={img.image}
+                            alt={img.alt}
+                            className="h-12 w-12 rounded-lg object-cover"
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  ) : null;
+                })()}
+              </div>
+            )}
           </div>
         </SidebarContent>
       </Sidebar>

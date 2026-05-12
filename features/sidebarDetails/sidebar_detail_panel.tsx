@@ -7,7 +7,7 @@ import {
   Bookmark,
   MessageSquare,
   User,
-  ChevronRight,
+
   Bell,
   Activity,
   TrendingUp,
@@ -60,7 +60,7 @@ const MENU_CONTENT: Record<string, MenuContent> = {
  * SidebarDetailPanel — Slides in from the left when menu is active.
  * Shows menu-specific content (map features, search filters, profile, etc.).
  */
-export function SidebarDetailPanel() {
+export default function SidebarDetailPanel() {
   const { activeMenu, isPanelOpen } = useSidebarStore();
 
   const menuData = useMemo(() => MENU_CONTENT[activeMenu], [activeMenu]);

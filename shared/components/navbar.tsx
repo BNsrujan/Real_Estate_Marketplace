@@ -36,8 +36,6 @@ const NavBar = () => {
           Commercial
         </button>
       </div>
-
-   
     </div>
   );
 };

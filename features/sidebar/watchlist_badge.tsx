@@ -1,30 +1,42 @@
-import {
-  Avatar,
-  AvatarFallback,
-  AvatarGroup,
-  AvatarGroupCount,
-  AvatarImage,
-} from "@/shared/components/ui/avatar"
+"use client";
 
-export function AvatarGroupCount() {
+import {
+  Avatar, AvatarImage, AvatarFallback,
+  AvatarGroup, AvatarGroupCount,
+} from "@/shared/components/ui/avatar";
+
+export default function WatchlistBadge({
+  property,
+  isSelected,
+  onClick,
+}: {
+  property: any;
+  isSelected: boolean;
+  onClick: () => void;
+}) {
   return (
-    <AvatarGroup className="grayscale">
-      <Avatar>
-        <AvatarImage src="https://github.com/shadcn.png" alt="@shadcn" />
-        <AvatarFallback>CN</AvatarFallback>
-      </Avatar>
-      <Avatar>
-        <AvatarImage src="https://github.com/maxleiter.png" alt="@maxleiter" />
-        <AvatarFallback>LR</AvatarFallback>
-      </Avatar>
-      <Avatar>
-        <AvatarImage
-          src="https://github.com/evilrabbit.png"
-          alt="@evilrabbit"
-        />
-        <AvatarFallback>ER</AvatarFallback>
-      </Avatar>
-      <AvatarGroupCount>+3</AvatarGroupCount>
-    </AvatarGroup>
-  )
+    <div
+      className="flex flex-col items-center w-full cursor-pointer"
+      onClick={onClick}
+    >
+      <AvatarGroup
+        className={`ring-2 rounded-xl transition-all duration-200 ${
+          isSelected ? "ring-blue-500" : "ring-transparent"
+        }`}
+      >
+        <Avatar>
+          <AvatarImage src={property.images[0].image} alt={property.images[0].alt} />
+          <AvatarFallback>CN</AvatarFallback>
+        </Avatar>
+        <Avatar>
+          <AvatarImage src={property.images[1].image} alt={property.images[1].alt} />
+          <AvatarFallback>CN</AvatarFallback>
+        </Avatar>
+        <AvatarGroupCount>+{property.images.length}</AvatarGroupCount>
+      </AvatarGroup>
+      <div className="text-xs font-medium text-muted-foreground truncate text-ellipsis pt-2 text-start w-full">
+        {property.area}
+      </div>
+    </div>
+  );
 }
