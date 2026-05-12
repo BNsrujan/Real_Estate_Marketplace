@@ -42,6 +42,7 @@ export function MapCanvas({ setIsLoaded }: Props) {
 
   const handleZoomChange = useCallback((zoom: number) => {
     if (titleRef.current) {
+      titleRef.current.style.zIndex = zoom >= TITLE_FADE_ZOOM ? "-3" : "3";
       titleRef.current.style.opacity = zoom >= TITLE_FADE_ZOOM ? "0" : "1";
     }
 
@@ -78,14 +79,14 @@ export function MapCanvas({ setIsLoaded }: Props) {
 
       {/* Stars */}
       <div
-        className="absolute inset-0 z-0ddd pointer-events-none"
+        className="absolute z-0 pointer-events-none"
         style={{ mixBlendMode: "screen" }}
       >
         <StarField />
       </div>
 
       {/* Controls */}
-      <div className="absolute inset-0 z-1">
+      <div className="absolute z-2">
         {showButton && <StartExploreButton onClick={zoomToKarnataka} />}
         <MapControls map={mapInstance.current} />
       </div>
@@ -94,12 +95,12 @@ export function MapCanvas({ setIsLoaded }: Props) {
       <div
         ref={titleRef}
         className="
-          absolute top-5 left-0 w-full z-3
+          absolute top-5 left-0 w-full 
           text-center pointer-events-none
           text-[clamp(28px,7vw,110px)]
           tracking-[clamp(4px,2vw,14px)]
           text-[#e6f7ff]
-          transition-opacity duration-400 ease-in-out
+          transition-all duration-400 ease-in-out
           [text-shadow:0_0_40px_rgba(108,207,255,0.6)]
           font-['Orbitron',sans-serif]
         "
