@@ -74,7 +74,7 @@ export function MapCanvas({ setIsLoaded }: Props) {
   return (
     <div className="relative w-full h-full overflow-hidden">
       {/* Map */}
-      <div ref={mapContainerRef} className="absolute inset-0  " />
+      <div ref={mapContainerRef} style={{ position: "absolute", inset: 0, width: "100%", height: "100%" }} />
 
       {/* Stars */}
       <div

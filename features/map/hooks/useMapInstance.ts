@@ -36,7 +36,7 @@ export function useMapInstance({
     if (!containerRef.current || mapRef.current) return;
 
     const loadStart = Date.now();
-
+console.log("Container size:", containerRef.current?.offsetWidth, containerRef.current?.offsetHeight);
     const map = new maplibregl.Map({
       container: containerRef.current,
       center: MAP_CONFIG.center,
@@ -57,9 +57,14 @@ export function useMapInstance({
           {
             id: "background",
             type: "background",
-            paint: { "background-color": "rgba(0,0,0,0)" },
+ 
+            paint: { "background-color": "#000000" },
           },
-          { id: "satellite", type: "raster", source: "satellite" },
+          { id: "satellite", type: "raster", source: "satellite",paint: { 
+          "raster-opacity": 1,
+          "raster-brightness-min": 0.1,  
+          "raster-saturation": 0.2,       
+          }},
           {
             id: "roads",
             type: "raster",
@@ -95,19 +100,12 @@ export function useMapInstance({
 
     mapRef.current = map;
 
+
+    const ro = new ResizeObserver(() => map.resize());
+    ro.observe(containerRef.current);
+
     map.on("style.load", () => {
-      try { map.setProjection({ type: "globe" }); } catch {
-        }
-
-      try {
-        (map as any).setFog({
-          range: [-1, 2],
-          color: "rgba(6, 12, 34, 0.85)",
-          "horizon-blend": 0.06,
-        });
-      } catch {
-      }
-
+      map.resize();
       addMapLayers(map);
 
       map.on("click", (e) => {
@@ -124,9 +122,12 @@ export function useMapInstance({
     });
 
     map.on("load", () => {
-      const elapsed = Date.now() - loadStart;
-      const delay = Math.max(0, 200 - elapsed);
-      setTimeout(() => onLoadRef.current(), delay);
+    requestAnimationFrame(() => {
+        map.resize();
+        const elapsed = Date.now() - loadStart;
+        const delay = Math.max(0, 200 - elapsed);
+        setTimeout(() => onLoadRef.current(), delay);
+      });
     });
 
     map.on("zoom", () => {
@@ -134,6 +135,7 @@ export function useMapInstance({
     });
 
     return () => {
+      ro.disconnect();
       map.remove();
       mapRef.current = null;
     };
