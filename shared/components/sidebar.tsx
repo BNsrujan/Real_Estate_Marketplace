@@ -88,14 +88,12 @@ function SidebarMenuItem({
   onActivate: (id: MenuId) => void;
 }) {
   const Icon = item.Icon;
-
-  if (collapsed) {
     return (
       <li>
         <button
           aria-label={item.title}
           title={item.title}
-          // onClick={() => onActivate(item.id)}
+          onClick={() => onActivate(item.id)}
           className={`group relative flex h-14 w-14 items-center justify-center overflow-hidden rounded-2xl transition-all duration-200 active:scale-[0.98] ${
             active
               ? "border border-white/20 bg-white/[0.06]"
@@ -109,68 +107,9 @@ function SidebarMenuItem({
           >
             <Icon size={18} />
           </div>
-          
         </button>
       </li>
     );
-  }
-
-  return (
-    <li>
-      <SidebarCard
-        role="button"
-        tabIndex={0}
-        onClick={() => onActivate(item.id)}
-        className={`w-full cursor-pointer rounded-3xl transition-all duration-200 px-4 py-3 ${
-          active
-            ? "border border-white/20 bg-[rgba(255,255,255,0.03)] shadow-[0_0_8px_rgba(255,255,255,0.04)]"
-            : "border border-white/10 bg-[rgba(255,255,255,0.02)] hover:bg-[rgba(255,255,255,0.04)]"
-        }`}
-      >
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div
-              className={`flex h-12 w-12 items-center justify-center rounded-2xl border border-white/10 text-white ${
-                active ? "bg-white/[0.06]" : "bg-transparent"
-              }`}
-            >
-              <Icon size={20} />
-            </div>
-
-            <div className="text-left">
-              <p className="text-sm font-semibold text-white">{item.title}</p>
-              <p className="text-xs text-white/45">{item.description}</p>
-            </div>
-          </div>
-
-          <div
-            className={`text-white/40 transition-transform duration-200 ${active ? "text-white translate-x-1" : ""}`}
-          >
-            <ChevronRight size={18} />
-          </div>
-        </div>
-      </SidebarCard>
-    </li>
-  );
-}
-
-function QuickAction({
-  title,
-  Icon,
-}: {
-  title: string;
-  Icon: React.ComponentType<{ size?: number; className?: string }>;
-}) {
-  return (
-    <SidebarCard className="p-3 cursor-pointer">
-      <div className="flex items-center gap-3">
-        <div className="flex h-10 w-10 items-center justify-center rounded-xl text-white/80">
-          <Icon size={18} />
-        </div>
-        <span className="text-sm text-white/80">{title}</span>
-      </div>
-    </SidebarCard>
-  );
 }
 
 export function AppSidebar() {
@@ -230,21 +169,7 @@ export function AppSidebar() {
           </SidebarGroup>
 
           
-          {!collapsed && (
-            <SidebarGroup className="mt-6 py-6">
-              <div className="mb-2 px-2">
-                <p className="text-[11px] uppercase tracking-[0.25em] text-white/40">
-                  Quick Access
-                </p>
-              </div>
-
-              <div className="space-y-3">
-                <QuickAction title="Notifications" Icon={Bell} />
-                <QuickAction title="Recent Activity" Icon={Activity} />
-                <QuickAction title="Trending Locations" Icon={TrendingUp} />
-              </div>
-            </SidebarGroup>
-          )}
+          
         <Separator className="my-4"/>
 
     <div className="gap-4 flex flex-col h-full w-full overflow-y-auto">

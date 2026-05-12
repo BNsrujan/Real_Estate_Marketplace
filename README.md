@@ -16,4 +16,11 @@ z-[-10] — StarField (Three.js earth/stars canvas) — Background
 z-[1] — MapLibre map container
 z-[5] — Title and UI elements
 z-[10] — UI overlays (navbar, sidebar)
+<<<<<<< HEAD
 z-[9999] — Loading screen
+
+
+features/map/components/MapCanvas.tsx
+=======
+z-[9999] — Loading screen
+>>>>>>> 3c693de (Update z-index values for map and star field components)
