@@ -2,9 +2,13 @@
 
 import { useEffect, useRef, useState } from "react";
 import ProfileModel from "./profile_model";
+import LoginModal from "./LoginModal";
+import { useAuthStore } from "@/store/auth_store";
 
 const Profile = () => {
-const [profileMenuOpen, setProfileMenuOpen] = useState(false);
+  const { isLoggedIn, user } = useAuthStore();
+  const [profileMenuOpen, setProfileMenuOpen] = useState(false);
+  const [loginModalOpen, setLoginModalOpen] = useState(false);
 
   const profileRef = useRef<HTMLDivElement | null>(null);
 
@@ -12,7 +16,10 @@ const [profileMenuOpen, setProfileMenuOpen] = useState(false);
     setProfileMenuOpen((prev) => !prev);
   };
 
-    
+  const handleLoginClick = () => {
+    setLoginModalOpen(true);
+  };
+
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
@@ -30,24 +37,36 @@ const [profileMenuOpen, setProfileMenuOpen] = useState(false);
     };
   }, []);
 
-    return (
-        <div className="relative z-50 " ref={profileRef}>
-            <button
-                onClick={handleProfileClick}
-                className="flex items-center gap-2 rounded-full bg-white/20 px-1 py-1 backdrop-blur-md hover:bg-white/30 transition"
-            >
-                <div className="w-8 md:w-10 h-8 md:h-10 rounded-full bg-gray-300 flex items-center justify-center">
-                    <span className="text-black font-bold text-xs md:text-sm">N</span>
-                </div>
+  return (
+    <div className="relative z-50 " ref={profileRef}>
+      {isLoggedIn ? (
+        <>
+          <button
+            onClick={handleProfileClick}
+            className="flex items-center gap-2 rounded-full bg-white/20 px-1 py-1 backdrop-blur-md hover:bg-white/30 transition"
+          >
+            <div className="w-8 md:w-10 h-8 md:h-10 rounded-full bg-gray-300 flex items-center justify-center">
+              <span className="text-black font-bold text-xs md:text-sm">
+                {user?.name?.charAt(0)?.toUpperCase() || "U"}
+              </span>
+            </div>
+          </button>
 
-            </button>
-
-            {profileMenuOpen && (
-            <ProfileModel />
-            )}
-        </div>
-    )
-}
-
+          {profileMenuOpen && <ProfileModel user={user || undefined} />}
+        </>
+      ) : (
+        <>
+          <button
+            onClick={handleLoginClick}
+            className="flex items-center gap-2 rounded-full bg-white/20 px-4 py-2 backdrop-blur-md hover:bg-white/30 transition text-white font-medium text-sm"
+          >
+            Login
+          </button>
+          <LoginModal open={loginModalOpen} onOpenChange={setLoginModalOpen} />
+        </>
+      )}
+    </div>
+  );
+};
 
 export default Profile;
