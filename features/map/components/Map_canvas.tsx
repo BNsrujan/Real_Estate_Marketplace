@@ -3,7 +3,7 @@
 import { useRef, useState, useCallback } from "react";
 
 import StarField from "@/features/space/star_field";
-import StartExploreButton from "@/shared/components/comman/startbtn";
+import StartExploreButton from "@/shared/components/common/startbtn";
 import PropertyPopup from "@/shared/components/map/property_popup";
 import { useMapInstance } from "../hooks/use_map_instance";
 import { useMarkerSync } from "../hooks/use_marker_sync";

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import ProfileModel from "./profile_model";
+import ProfileModal from "./profile_modal";
 import LoginModal from "./LoginModal";
 import { useAuthStore } from "@/store/auth_store";
 
@@ -52,7 +52,7 @@ const Profile = () => {
             </div>
           </button>
 
-          {profileMenuOpen && <ProfileModel user={user || undefined} />}
+          {profileMenuOpen && <ProfileModal user={user || undefined} />}
         </>
       ) : (
         <>
