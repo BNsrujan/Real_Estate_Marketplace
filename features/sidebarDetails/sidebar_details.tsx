@@ -182,8 +182,7 @@ export function DetailPanel({ activeMenu: propActiveMenu, activeData }: DetailPa
                         key={property.id}
                         property={property as any}
                         onOpen={(p) => setSelectedPropertyId(p.id)}
-                      />
-                    ))
+                      />       ))
                   )}
                 </div>
               )}
