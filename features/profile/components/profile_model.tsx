@@ -9,6 +9,7 @@ import {
   ShieldCheck,
   User,
 } from "lucide-react";
+import { useAuthStore } from "@/store/auth_store";
 
 type ProfileModalProps = {
   user?: {
@@ -32,6 +33,7 @@ const ProfileModal = ({
 }: ProfileModalProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const modalRef = useRef<HTMLDivElement | null>(null);
+  const logout = useAuthStore((state) => state.logout);
 
   // Close on outside click
   useEffect(() => {
@@ -60,8 +62,7 @@ const ProfileModal = ({
         await onLogout();
       }
 
-      // Example:
-      // router.push("/login");
+      logout();
     } catch (error) {
       console.error("Logout failed:", error);
     } finally {
