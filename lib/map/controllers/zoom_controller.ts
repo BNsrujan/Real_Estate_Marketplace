@@ -11,7 +11,7 @@ export enum ZoomState {
 export type ZoomLevelCallback = (zoom: number) => void;
 export type ZoomStateCallback = (state: ZoomState, from?: ZoomState, zoom?: number) => void;
 
-import { ZOOM_RANGES } from "../config/zoom-ranges";
+import { ZOOM_RANGES } from "../config/zoom_ranges";
 
 export class ZoomController {
   private map: any | null = null;

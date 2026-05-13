@@ -1,3 +1,3 @@
-export * from "./zoom-controller";
-export * from "./layer-controller";
-export * from "./interaction-controller";
+export * from "./zoom_controller";
+export * from "./layer_controller";
+export * from "./interaction_controller";

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import renderSvg from "@/svgImport";
-import CommonButton from "./CommonButton";
+import CommonButton from "./common_button";
 
 export default function Notify() {
   const [isVisible, setIsVisible] = useState(true);
