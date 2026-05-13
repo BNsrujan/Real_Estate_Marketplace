@@ -6,6 +6,7 @@ import "maplibre-gl/dist/maplibre-gl.css";
 
 import { MAP_CONFIG, TILE_SOURCES, getResponsiveMapConfig } from "@/lib/globe/map_config";
 import { addMapLayers } from "../services/map_layer_service";
+import { useMapStore } from "@/store/map_store";
 
 interface UseMapInstanceOptions {
   containerRef: React.RefObject<HTMLDivElement | null>;
@@ -31,6 +32,37 @@ export function useMapInstance({
   onLoadRef.current = onLoad;
   onZoomRef.current = onZoom;
   onDistrictClickRef.current = onDistrictClick;
+
+  const { activeLayer } = useMapStore();
+
+  useEffect(() => {
+    if (!mapRef.current || !isStyleLoaded) return;
+
+    // Toggle layer visibility based on activeLayer
+    const map = mapRef.current;
+
+    // Keep satellite as background
+    // Toggle roads, traffic, transit, biking based on activeLayer
+
+    const layerVisibilityMap: Record<string, string[]> = {
+      "terrain": [],
+      "traffic": ["roads"],
+      "transit": ["roads"],
+      "biking": ["roads"],
+    };
+
+    const targetLayers = layerVisibilityMap[activeLayer] || [];
+
+    // In a real application, you'd toggle visibility or add/remove layers
+    // Here we will just use the 'roads' layer as an example of toggling
+    if (map.getLayer("roads")) {
+      if (activeLayer !== "terrain") {
+        map.setLayoutProperty("roads", "visibility", "visible");
+      } else {
+        map.setLayoutProperty("roads", "visibility", "none");
+      }
+    }
+  }, [activeLayer, isStyleLoaded]);
 
   useEffect(() => {
     if (!containerRef.current || mapRef.current) return;

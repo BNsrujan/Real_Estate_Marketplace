@@ -2,7 +2,8 @@
 
 import Image from "next/image";
 import { useMemo, useState } from "react";
-import { Check, Layers3 } from "lucide-react";
+import { Layers3 } from "lucide-react";
+import { useMapStore } from "@/store/map_store";
 
 type LayerType = {
   id: string;
@@ -23,36 +24,41 @@ const mapLayers: LayerType[] = [
   {
     id: "traffic",
     name: "Traffic",
-    image: "/layers/traffic.jpg",
+    image: "/pics/layers/satellite.png", // Fallback to satellite with overlay
     color: "from-orange-400/20 to-red-500/10",
     items: ["Live Traffic", "Road Blocks", "Accidents", "Signals"],
   },
   {
     id: "transit",
     name: "Transit",
-    image: "/layers/transit.jpg",
+    image: "/pics/layers/satellite.png", // Fallback to satellite with overlay
     color: "from-cyan-400/20 to-blue-500/10",
     items: ["Metro", "Railway", "Bus Stops", "Stations"],
   },
   {
     id: "biking",
     name: "Biking",
-    image: "/layers/biking.jpg",
+    image: "/pics/layers/satellite.png", // Fallback to satellite with overlay
     color: "from-purple-400/20 to-pink-500/10",
     items: ["Bike Routes", "Trails", "Parking", "Repair Shops"],
   },
 ];
 
 const MapLayerSelector = () => {
-  const [activeLayer, setActiveLayer] = useState<LayerType>(mapLayers[0]);
+  const { activeLayer: storeActiveLayer, setActiveLayer: storeSetActiveLayer } = useMapStore();
   const [isExpanded, setIsExpanded] = useState(false);
+
+  const activeLayer = useMemo(
+    () => mapLayers.find((layer) => layer.id === storeActiveLayer) || mapLayers[0],
+    [storeActiveLayer]
+  );
 
   const otherLayers = useMemo(() => {
     return mapLayers.filter((layer) => layer.id !== activeLayer.id);
   }, [activeLayer]);
 
   const handleLayerChange = (layer: LayerType) => {
-    setActiveLayer(layer);
+    storeSetActiveLayer(layer.id);
     setTimeout(() => {
       setIsExpanded(false);
     }, 250);
@@ -101,22 +107,22 @@ const MapLayerSelector = () => {
                 src={activeLayer.image}
                 alt={activeLayer.name}
                 fill
-                className="
+                className={`
                   object-cover
                   transition-transform duration-500
                   group-hover:scale-110
-                "
+                  ${activeLayer.id !== 'terrain' ? 'opacity-70 saturate-50' : ''}
+                `}
               />
               {/* Dark Overlay */}
-              <div className="absolute inset-0 bg-black/20" />
+              <div className={`absolute inset-0 ${activeLayer.id !== 'terrain' ? 'bg-gradient-to-t ' + activeLayer.color : 'bg-black/20'}`} />
             </div>
 
             {/* Content */}
-            <div className="hidden md:block absolute text-left bottom-2 center left-1/2 -translate-x-1/2">
-              <div className="flex items-center gap-2 text-white/60">
-                
+            <div className="absolute text-left bottom-2 center left-1/2 -translate-x-1/2">
+              <div className="flex items-center gap-2 text-white">
                 <Layers3 size={14} />
-                <h3 className="text-sm font-semibold text-white/30">
+                <h3 className="text-sm font-semibold text-white/90">
                   {activeLayer.name}
                 </h3>
               </div>
@@ -128,7 +134,7 @@ const MapLayerSelector = () => {
           className={`
             absolute bottom-0 left-full ml-2 md:ml-4
             flex items-end gap-2 md:gap-3
-            transition-all duration-500
+            transition-all duration-500 z-[100]
             ${isExpanded
               ? "translate-x-0 opacity-100"
               : "-translate-x-10 opacity-0 pointer-events-none"
@@ -152,6 +158,7 @@ const MapLayerSelector = () => {
                 hover:-translate-y-2
                 hover:scale-[1.02]
                 active:scale-[0.97]
+                cursor-pointer
               "
               style={{
                 transitionDelay: `${index * 90}ms`,
@@ -163,22 +170,22 @@ const MapLayerSelector = () => {
                   src={layer.image}
                   alt={layer.name}
                   fill
-                  className="
+                  className={`
                     object-cover
                     transition-transform duration-700
                     group-hover:scale-110
-                  "
+                    ${layer.id !== 'terrain' ? 'opacity-70 saturate-50' : ''}
+                  `}
                 />
 
                 <div
-                  className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent"
+                  className={`absolute inset-0 bg-gradient-to-t ${layer.id !== 'terrain' ? layer.color : 'from-black/90 via-black/30 to-transparent'}`}
                 />
 
                 {/* Layer Name */}
                 <div className="absolute text-left bottom-2 center left-1/2 -translate-x-1/2">
-                  <div className="flex items-center gap-2 text-white/60">
-                    
-                    <h3 className="text-sm font-semibold text-white/30">
+                  <div className="flex items-center gap-2 text-white">
+                    <h3 className="text-sm font-semibold text-white/90">
                       {layer.name}
                     </h3>
                   </div>

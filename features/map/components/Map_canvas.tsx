@@ -119,18 +119,16 @@ export function MapCanvas({ setIsLoaded }: Props) {
 
       {/* UI Panels */}
       {!showButton && (
-        <div className="absolute inset-0 z-4 pointer-events-none flex ">
-          <div className="relative">
-          <div className="absolute top-0 left-0 right-0 pointer-events-auto p-3 md:px-4 lg:px-6 ">
+        <div className="absolute inset-0 z-[4] pointer-events-none flex ">
+          <div className="absolute top-0 left-0 right-0 pointer-events-auto p-3 md:px-4 lg:px-6 z-[50]">
             <NavBar />
           </div>
 
-          <div className="absolute bottom-0 left-0 right-0 pointer-events-auto p-3 md:p-4 lg:p-6">
+          <div className="absolute bottom-6 left-6 pointer-events-auto z-[50]">
             <MapLayerSelector />
           </div>
 
-          </div>
-          <div className="absolute top-3 right-3 pointer-events-auto ">
+          <div className="absolute top-3 right-3 pointer-events-auto z-[50]">
             <Profile />
           </div>
         </div>
