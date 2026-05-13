@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState, useCallback } from "react";
+import { useRef, useState, useCallback, useEffect } from "react";
 
 import StarField from "@/features/space/star_field";
 import StartExploreButton from "@/shared/components/common/startbtn";
@@ -85,7 +85,9 @@ export function MapCanvas({ setIsLoaded }: Props) {
     onMarkerLeave: handleMarkerLeave,
   });
 
-  filterByDistrictRef.current = filterByDistrict;
+  useEffect(() => {
+    filterByDistrictRef.current = filterByDistrict;
+  }, [filterByDistrict]);
 
   const { zoomToKarnataka } = useDistrictZoom({
     mapRef: mapInstance,

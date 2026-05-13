@@ -28,9 +28,12 @@ export function useMapInstance({
   const onLoadRef = useRef(onLoad);
   const onZoomRef = useRef(onZoom);
   const onDistrictClickRef = useRef(onDistrictClick);
-  onLoadRef.current = onLoad;
-  onZoomRef.current = onZoom;
-  onDistrictClickRef.current = onDistrictClick;
+
+  useEffect(() => {
+    onLoadRef.current = onLoad;
+    onZoomRef.current = onZoom;
+    onDistrictClickRef.current = onDistrictClick;
+  }, [onLoad, onZoom, onDistrictClick]);
 
   useEffect(() => {
     if (!containerRef.current || mapRef.current) return;

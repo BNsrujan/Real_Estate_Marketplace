@@ -2,16 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import {
-  X,
-  MapPin,
-  Ruler,
-  Home,
-  Sprout,
-  Building2,
-  Construction,
-  IndianRupee,
-} from "lucide-react";
+
 import type { Property } from "@/shared/types";
 import PropertyHoverCard from "@/features/properties/components/property_card";
 
@@ -57,8 +48,13 @@ export default function PropertyPopup({ property, onClose, isHoverMode = false, 
 
   useEffect(() => { setMounted(true); }, []);
 
-  if (property) prevProp.current = property;
-  const display = property ?? prevProp.current;
+  const [displayProperty, setDisplayProperty] = useState<Property | null>(property);
+
+  useEffect(() => {
+    if (property) setDisplayProperty(property);
+  }, [property]);
+
+  const display = property ?? displayProperty;
 
   useEffect(() => {
     if (!visible) return;

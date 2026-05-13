@@ -29,21 +29,23 @@ export function useMarkerSync({
   const blockMarkerRenderRef = useRef(false);
 
   const onMarkerClickRef = useRef(onMarkerClick);
-  onMarkerClickRef.current = onMarkerClick;
+
+  useEffect(() => {
+    onMarkerClickRef.current = onMarkerClick;
+  }, [onMarkerClick]);
 
   const filterByDistrictRef = useRef<(name: string) => void>(() => {});
+
   useEffect(() => {
     propertiesRef.current = rawData.map((p, i) => ({
-      id: String(i),
       ...p,
-
+      id: p.id || String(i),
       type:
         p.type === "site"
           ? "house"
-          : (p.type as "house" | "site"  | "agriculture land" | "commercial space" | "apartment" | "commercial plots"),
+          : (p.type as "house" | "site" | "agriculture land" | "commercial space" | "apartment" | "commercial plots"),
     }));
   }, []);
-
 
   const clearMarkers = useCallback(() => {
     markersRef.current.forEach((m) => m.remove());
@@ -75,7 +77,6 @@ export function useMarkerSync({
         (p) => p.district?.toLowerCase() === districtName.toLowerCase(),
       );
 
-      
       const features = map.querySourceFeatures("district-centers");
       const match = features.find(
         (f) =>
@@ -93,7 +94,6 @@ export function useMarkerSync({
           speed: 0.75,
         });
 
-
         map.once("moveend", () => {
           placeMarkers(map, filtered, "filtered");
         });
@@ -105,7 +105,9 @@ export function useMarkerSync({
     [mapRef, clearMarkers, placeMarkers],
   );
 
-  filterByDistrictRef.current = filterByDistrict;
+  useEffect(() => {
+    filterByDistrictRef.current = filterByDistrict;
+  }, [filterByDistrict]);
 
   useEffect(() => {
     const map = mapRef.current;
@@ -139,7 +141,7 @@ export function useMarkerSync({
     return () => {
       map.off("zoom", onZoom);
     };
-  }, [isStyleLoaded, clearMarkers, placeMarkers]);
+  }, [isStyleLoaded, clearMarkers, placeMarkers, mapRef]);
 
   return { filterByDistrict };
 }

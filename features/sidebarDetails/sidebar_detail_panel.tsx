@@ -48,6 +48,7 @@ const MENU_CONTENT: Record<string, MenuContent> = {
     description: "Chat with agents and property owners.",
     Icon: MessageSquare,
   },
+
 };
 
 /**
@@ -57,7 +58,10 @@ const MENU_CONTENT: Record<string, MenuContent> = {
 export default function SidebarDetailPanel() {
   const { activeMenu, isPanelOpen } = useSidebarStore();
 
-  const menuData = useMemo(() => MENU_CONTENT[activeMenu], [activeMenu]);
+  const menuData = useMemo(() => {
+    if (!activeMenu) return null;
+    return MENU_CONTENT[activeMenu as string];
+  }, [activeMenu]);
 
   return (
     <aside
@@ -149,7 +153,6 @@ export default function SidebarDetailPanel() {
             </SidebarCard>
           )}
 
-          {/* PROFILE */}
 
         </div>
 
