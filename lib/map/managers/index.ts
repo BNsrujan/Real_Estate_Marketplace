@@ -1,2 +1,2 @@
-export * from "./property-manager";
-export * from "./cluster-manager";
+export * from "./property_manager";
+export * from "./cluster_manager";

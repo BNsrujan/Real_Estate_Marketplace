@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { fetchProperties } from "../services/propertyService";
+import { fetchProperties } from "../services/property_service";
 import type { Property } from "@/shared/types";
 
 interface UsePropertiesOptions {
