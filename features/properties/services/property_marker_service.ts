@@ -54,12 +54,11 @@ export class PropertyMarkerService {
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: flex-end;
+      justify-content: center;
       cursor: pointer;
-      transform-origin: center bottom;
       position: relative;
-      width: auto;
-      height: auto;
+      width: ${isActive ? "56px" : "44px"};
+      height: ${isActive ? "56px" : "44px"};
     `;
 
     // ── Pulse ring (active only) ──────────────────────────────────────────
@@ -67,23 +66,19 @@ export class PropertyMarkerService {
       const ring = document.createElement("div");
       ring.className = "pulse-ring absolute rounded-full pointer-events-none";
       ring.style.cssText = `
-        width: 56px; height: 56px;
+        width: 100px; height: 100px;
         border: 2px solid ${color};
         top: 50%; left: 50%;
         transform-origin: center;
-        margin-top: -28px; margin-left: -28px;
+        margin-top: -50px; margin-left: -50px;
       `;
       wrapper.appendChild(ring);
-
-      // second, slower ring
-      const ring2 = ring.cloneNode() as HTMLElement;
-      ring2.style.animationDelay = "0.6s";
-      wrapper.appendChild(ring2);
     }
 
     // ── Main bubble ───────────────────────────────────────────────────────
     const bubble = document.createElement("div");
     bubble.className = [
+      "marker-bubble",
       "relative flex items-center justify-center",
       "rounded-full backdrop-blur-xl",
       "transition-all duration-300 ease-out",
@@ -100,8 +95,7 @@ export class PropertyMarkerService {
           ? `0 0 0 4px ${color}30, 0 0 24px ${color}60, 0 16px 40px rgba(0,0,0,0.6)`
           : `0 8px 24px rgba(0,0,0,0.45), 0 0 16px ${color}25`
       };
-      transform: ${isActive ? "scale(1.15)" : "scale(1)"};
-      z-index: ${isActive ? 999 : 1};
+      z-index: 2;
     `;
 
     // icon
@@ -128,16 +122,20 @@ export class PropertyMarkerService {
     // ── Price tag ─────────────────────────────────────────────────────────
     const tag = document.createElement("div");
     tag.className = [
-      "mt-1.5 px-2 py-0.5 rounded-full",
+      "absolute px-2 py-0.5 rounded-full",
       "text-[10px] font-semibold tracking-wide",
       "backdrop-blur-md border whitespace-nowrap",
       "transition-all duration-300",
     ].join(" ");
     tag.style.cssText = `
+      top: 100%;
+      left: 50%;
+      transform: translateX(-50%) translateY(4px);
       background: rgba(15,23,42,0.88);
       border-color: ${isActive ? color : "rgba(255,255,255,0.12)"};
       color: ${isActive ? color : "rgba(255,255,255,0.75)"};
       box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+      z-index: 1;
     `;
     tag.textContent = property.price ?? label;
     wrapper.appendChild(tag);
@@ -157,7 +155,7 @@ export class PropertyMarkerService {
     properties.forEach((property) => {
       const el = this.createMarkerElement(property);
 
-      const marker = new maplibregl.Marker({ element: el, anchor: "bottom" })
+      const marker = new maplibregl.Marker({ element: el, anchor: "center" })
         .setLngLat([property.lng, property.lat])
         .addTo(this.map!);
 
@@ -185,8 +183,8 @@ export class PropertyMarkerService {
     if (!marker) return;
     const el = marker.getElement();
 
-    // find the bubble (first div inside wrapper)
-    const bubble = el.querySelector<HTMLElement>("div > div:not(.pulse-ring)");
+    // find the bubble
+    const bubble = el.querySelector<HTMLElement>(".marker-bubble");
     if (bubble) {
       bubble.style.transform = isActive ? "scale(1.15)" : "scale(1)";
       bubble.style.zIndex    = isActive ? "999" : "1";

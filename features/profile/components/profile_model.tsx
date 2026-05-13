@@ -76,11 +76,6 @@ const ProfileModal = ({
       onClick: onProfile,
     },
     {
-      label: "Saved Properties",
-      icon: Bookmark,
-      onClick: onSavedProperties,
-    },
-    {
       label: "Settings",
       icon: Settings,
       onClick: onSettings,

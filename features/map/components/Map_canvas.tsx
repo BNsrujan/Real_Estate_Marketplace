@@ -154,24 +154,24 @@ export function MapCanvas({ setIsLoaded }: Props) {
 
       {/* Property Popup - Show on hover with smooth animation */}
       {hoveredProperty && (
-        <div className="fixed bottom-0 w-full z-2147483647 pointer-events-auto">
-          <PropertyPopup
-            property={hoveredProperty}
-            onClose={() => setHoveredProperty(null)}
-            isHoverMode={true}
-          />
-        </div>
+        <PropertyPopup
+          property={hoveredProperty}
+          onClose={() => setHoveredProperty(null)}
+          isHoverMode={true}
+          markerLngLat={{ lng: hoveredProperty.lng, lat: hoveredProperty.lat }}
+          mapInstance={mapInstance}
+        />
       )}
 
       {/* Property Popup - Show on click */}
       {activeProperty && (
-        <div className="fixed bottom-0 w-full z-2147483647 pointer-events-auto">
-          <PropertyPopup
-            property={activeProperty}
-            onClose={() => setActiveProperty(null)}
-            isHoverMode={false}
-          />
-        </div>
+        <PropertyPopup
+          property={activeProperty}
+          onClose={() => setActiveProperty(null)}
+          isHoverMode={false}
+          markerLngLat={{ lng: activeProperty.lng, lat: activeProperty.lat }}
+          mapInstance={mapInstance}
+        />
       )}
     </div>
   );

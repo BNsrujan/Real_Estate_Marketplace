@@ -63,7 +63,7 @@ export default function PropertyHoverCard({
       {/* Image */}
       <div className="relative h-40 w-full">
         <Image
-          src={property.images[0]}
+          src={property.images?.[0] || "/property/image.png"}
           alt={property.title}
           fill
           className="object-cover"

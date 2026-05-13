@@ -1,6 +1,7 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useState, useRef, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { Map, Bookmark, MessageSquare, User, Search } from "lucide-react";
 import {
   Sidebar,
@@ -9,13 +10,14 @@ import {
 } from "@/shared/components/ui/sidebar";
 import { Separator } from "@/shared/components/ui/separator";
 import React from "react";
-import { useSidebarStore } from "@/store/sidebar_store";
+import { useSidebarStore, type SidebarMenuId } from "@/store/sidebar_store";
 import WatchlistBadge from "./watchlist_badge";
+import Image from "next/image";
 
-type MenuId = "map" | "search" | "saved" | "messages" | "profile";
+type MenuId = SidebarMenuId;
 
 type SidebarMenu = {
-  id: MenuId;
+  id: Exclude<MenuId, null>;
   title: string;
   description: string;
   Icon: React.ComponentType<{ size?: number; className?: string }>;
@@ -26,7 +28,6 @@ const SIDEBAR_MENUS: SidebarMenu[] = [
   { id: "search", title: "Smart Search", Icon: Search, description: "Search by filters and landmarks." },
   { id: "saved", title: "Saved Properties", Icon: Bookmark, description: "Your bookmarks and recent views." },
   { id: "messages", title: "Messages", Icon: MessageSquare, description: "Agent chats and updates." },
-  { id: "profile", title: "Profile", Icon: User, description: "Account settings and preferences." },
 ];
 
 const properties = [
@@ -35,6 +36,52 @@ const properties = [
   { id: 3, area: "Hubli", images: [{ image: "/property/image.png", alt: "Property 3" }, { image: "/property/image.png", alt: "Property 3" }] },
   { id: 4, area: "Mangalore", images: [{ image: "/property/image.png", alt: "Property 4" }, { image: "/property/image.png", alt: "Property 4" }] },
 ];
+
+function WatchlistPreview({ 
+  property, 
+  pos,
+  onClose
+}: { 
+  property: any; 
+  pos: { top: number; left: number };
+  onClose: () => void;
+}) {
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => { setMounted(true); }, []);
+
+  if (!mounted || typeof document === "undefined") return null;
+
+  return createPortal(
+    <>
+      <div className="fixed inset-0 z-[90]" onClick={onClose} />
+      <div 
+        className="fixed z-[100] w-64 rounded-2xl border border-white/10 bg-black/80 backdrop-blur-xl p-4 shadow-xl transition-all duration-300 animate-in fade-in slide-in-from-left-2"
+        style={{ 
+          top: pos.top, 
+          left: pos.left,
+          transform: "translateY(-20%)"
+        }}
+      >
+        <div className="flex flex-col gap-3">
+          <p className="text-sm font-semibold text-white">{property.area}</p>
+          <div className="flex gap-2 flex-wrap">
+            {property.images.map((img: any, i: number) => (
+              <img
+                key={i}
+                src={img.image}
+                alt={img.alt}
+                className="h-12 w-12 rounded-lg object-cover border border-white/5"
+              />
+            ))}
+          </div>
+        </div>
+      
+        <div className="absolute left-[-6px] top-8 w-3 h-3 bg-black/80 border-l border-b border-white/10 transform rotate-45" />
+      </div>
+    </>,
+    document.body
+  );
+}
 
 function SidebarMenuItem({
   item,
@@ -48,7 +95,6 @@ function SidebarMenuItem({
   onActivate: (id: MenuId) => void;
 }) {
   const Icon = item.Icon;
-  // visually "pressed" only when active AND panel is open
   const pressed = active && isPanelOpen;
 
   return (
@@ -81,40 +127,57 @@ export function AppSidebar() {
   const togglePanel = useSidebarStore((s) => s.togglePanel);
 
   const [selectedProperty, setSelectedProperty] = useState<number | null>(null);
+  const [popupPos, setPopupPos] = useState<{ top: number; left: number } | null>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   const handleMenuActivate = useCallback(
     (id: MenuId) => {
       if (id === activeMenu) {
-        togglePanel();   // same item → toggle
+        togglePanel();   
       } else {
         setActiveMenu(id);
-        openPanel();     // new item → always open
+        openPanel();    
       }
     },
     [activeMenu, setActiveMenu, openPanel, togglePanel],
   );
 
-  const onKeyDown = useCallback(
-    (e: React.KeyboardEvent) => {
-      const idx = SIDEBAR_MENUS.findIndex((m) => m.id === activeMenu);
-      if (e.key === "ArrowDown") {
-        e.preventDefault();
-        handleMenuActivate(SIDEBAR_MENUS[(idx + 1) % SIDEBAR_MENUS.length].id);
-      }
-      if (e.key === "ArrowUp") {
-        e.preventDefault();
-        handleMenuActivate(SIDEBAR_MENUS[(idx - 1 + SIDEBAR_MENUS.length) % SIDEBAR_MENUS.length].id);
-      }
-    },
-    [activeMenu, handleMenuActivate],
-  );
+  const handleBadgeClick = (e: React.MouseEvent, id: number) => {
+    if (selectedProperty === id) {
+      setSelectedProperty(null);
+      setPopupPos(null);
+    } else {
+      const rect = e.currentTarget.getBoundingClientRect();
+      setSelectedProperty(id);
+      setPopupPos({
+        top: rect.top,
+        left: rect.right + 20, 
+      });
+    }
+  };
+
+  // Close popup on scroll
+  useEffect(() => {
+    const container = scrollContainerRef.current;
+    if (!container || selectedProperty === null) return;
+
+    const handleScroll = () => {
+      setSelectedProperty(null);
+      setPopupPos(null);
+    };
+
+    container.addEventListener("scroll", handleScroll);
+    return () => container.removeEventListener("scroll", handleScroll);
+  }, [selectedProperty]);
+
+
 
   return (
     <div className="hidden md:flex h-screen overflow-hidden bg-black text-white w-22">
       <Sidebar className="w-22 border-r border-white/10 bg-black/50 backdrop-blur-3xl flex flex-col items-center py-4">
         <SidebarContent className="px-4 py-4">
           <SidebarGroup>
-            <nav onKeyDown={onKeyDown} aria-label="Primary navigation">
+            <nav  aria-label="Primary navigation">
               <ul className="space-y-3">
                 {SIDEBAR_MENUS.map((menu) => (
                   <SidebarMenuItem
@@ -131,44 +194,35 @@ export function AppSidebar() {
 
           <Separator className="my-4" />
 
-          <div className="relative overflow-visible">
-            <div className="gap-4 flex flex-col h-full w-full overflow-y-auto py-3">
+          <div className="relative overflow-visible flex-1">
+            <div 
+              ref={scrollContainerRef}
+              className="gap-4 flex flex-col h-full w-full overflow-y-auto no-scrollbar py-3"
+            >
               {properties.map((property) => (
                 <WatchlistBadge
                   key={property.id}
                   property={property}
                   isSelected={selectedProperty === property.id}
-                  onClick={() =>
-                    setSelectedProperty(
-                      selectedProperty === property.id ? null : property.id
-                    )
-                  }
+                  onClick={(e) => handleBadgeClick(e, property.id)}
                 />
               ))}
             </div>
 
-            {/* {selectedProperty !== null && (
-              <div className="absolute left-0 top-0 ml-3 w-64 rounded-2xl border border-white/10 bg-black/80 backdrop-blur-xl p-4 shadow-xl transition-all duration-200 z-50">
-                {(() => {
-                  const p = properties.find((p) => p.id === selectedProperty);
-                  return p ? (
-                    <div className="flex flex-col gap-3">
-                      <p className="text-sm font-semibold text-white">{p.area}</p>
-                      <div className="flex gap-2 flex-wrap">
-                        {p.images.map((img: any, i: number) => (
-                          <img
-                            key={i}
-                            src={img.image}
-                            alt={img.alt}
-                            className="h-12 w-12 rounded-lg object-cover"
-                          />
-                        ))}
-                      </div>
-                    </div>
-                  ) : null;
-                })()}
-              </div>
-            )} */}
+            {selectedProperty !== null && popupPos && (
+              <WatchlistPreview 
+                property={properties.find(p => p.id === selectedProperty)}
+                pos={popupPos}
+                onClose={() => {
+                  setSelectedProperty(null);
+                  setPopupPos(null);
+                }}
+              />
+            )}
+          </div>
+
+          <div className=" bg-white flex items-end-safe rounded-lg justify-center mt-auto ">
+            <Image src="/pics/image.png" alt="Logo" width={80} height={80} className="object-contain" />
           </div>
         </SidebarContent>
       </Sidebar>

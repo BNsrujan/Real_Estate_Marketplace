@@ -7,6 +7,7 @@ export interface Property {
   lat: number;
   lng: number;
   district: string;
+  images?: string[];
 }
 
 export interface District {

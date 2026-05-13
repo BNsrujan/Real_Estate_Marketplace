@@ -15,6 +15,7 @@ export const DUMMY_PROPERTIES: Property[] = [
     lat: 12.9716,
     lng: 77.5946,
     district: "Bangalore",
+    images: ["/property/image.png"],
   },
   {
     id: "2",
@@ -25,6 +26,7 @@ export const DUMMY_PROPERTIES: Property[] = [
     lat: 12.2958,
     lng: 76.6394,
     district: "Mysore",
+    images: ["/property/image.png"],
   },
   {
     id: "3",
@@ -35,6 +37,7 @@ export const DUMMY_PROPERTIES: Property[] = [
     lat: 12.8652,
     lng: 74.8664,
     district: "Mangalore",
+    images: ["/property/image.png"],
   },
   {
     id: "4",
@@ -45,6 +48,7 @@ export const DUMMY_PROPERTIES: Property[] = [
     lat: 15.8497,
     lng: 75.6499,
     district: "Belgaum",
+    images: ["/property/image.png"],
   },
   {
     id: "5",
@@ -55,6 +59,7 @@ export const DUMMY_PROPERTIES: Property[] = [
     lat: 13.7307,
     lng: 75.5678,
     district: "Shimoga",
+    images: ["/property/image.png"],
   },
 
   // Tamil Nadu
@@ -67,6 +72,7 @@ export const DUMMY_PROPERTIES: Property[] = [
     lat: 13.0827,
     lng: 80.2707,
     district: "Chennai",
+    images: ["/property/image.png"],
   },
   {
     id: "7",
@@ -77,6 +83,7 @@ export const DUMMY_PROPERTIES: Property[] = [
     lat: 11.0081,
     lng: 76.9877,
     district: "Coimbatore",
+    images: ["/property/image.png"],
   },
   {
     id: "8",
@@ -87,6 +94,7 @@ export const DUMMY_PROPERTIES: Property[] = [
     lat: 11.6643,
     lng: 78.1460,
     district: "Salem",
+    images: ["/property/image.png"],
   },
 
   // Telangana
@@ -99,6 +107,7 @@ export const DUMMY_PROPERTIES: Property[] = [
     lat: 17.3850,
     lng: 78.4867,
     district: "Hyderabad",
+    images: ["/property/image.png"],
   },
   {
     id: "10",
@@ -109,6 +118,7 @@ export const DUMMY_PROPERTIES: Property[] = [
     lat: 17.9689,
     lng: 79.5941,
     district: "Warangal",
+    images: ["/property/image.png"],
   },
 
   // Andhra Pradesh
@@ -121,6 +131,7 @@ export const DUMMY_PROPERTIES: Property[] = [
     lat: 17.6869,
     lng: 83.2185,
     district: "Visakhapatnam",
+    images: ["/property/image.png"],
   },
   {
     id: "12",
@@ -131,6 +142,7 @@ export const DUMMY_PROPERTIES: Property[] = [
     lat: 16.5062,
     lng: 80.6480,
     district: "Vijayawada",
+    images: ["/property/image.png"],
   },
 
   // Maharashtra
@@ -143,6 +155,7 @@ export const DUMMY_PROPERTIES: Property[] = [
     lat: 19.0760,
     lng: 72.8777,
     district: "Mumbai",
+    images: ["/property/image.png"],
   },
   {
     id: "14",
@@ -153,6 +166,7 @@ export const DUMMY_PROPERTIES: Property[] = [
     lat: 18.5204,
     lng: 73.8567,
     district: "Pune",
+    images: ["/property/image.png"],
   },
   {
     id: "15",
@@ -163,6 +177,7 @@ export const DUMMY_PROPERTIES: Property[] = [
     lat: 21.1458,
     lng: 79.0882,
     district: "Nagpur",
+    images: ["/property/image.png"],
   },
 
   // Delhi/NCR
@@ -175,6 +190,7 @@ export const DUMMY_PROPERTIES: Property[] = [
     lat: 28.7041,
     lng: 77.1025,
     district: "Delhi",
+    images: ["/property/image.png"],
   },
   {
     id: "17",
@@ -185,6 +201,7 @@ export const DUMMY_PROPERTIES: Property[] = [
     lat: 28.4595,
     lng: 77.0266,
     district: "Gurgaon",
+    images: ["/property/image.png"],
   },
 
   // Uttar Pradesh
@@ -197,6 +214,7 @@ export const DUMMY_PROPERTIES: Property[] = [
     lat: 26.8467,
     lng: 80.9462,
     district: "Lucknow",
+    images: ["/property/image.png"],
   },
   {
     id: "19",
@@ -207,6 +225,7 @@ export const DUMMY_PROPERTIES: Property[] = [
     lat: 26.4499,
     lng: 80.3319,
     district: "Kanpur",
+    images: ["/property/image.png"],
   },
 
   // Gujarat
@@ -219,6 +238,7 @@ export const DUMMY_PROPERTIES: Property[] = [
     lat: 23.0225,
     lng: 72.5714,
     district: "Ahmedabad",
+    images: ["/property/image.png"],
   },
   {
     id: "21",
@@ -229,6 +249,7 @@ export const DUMMY_PROPERTIES: Property[] = [
     lat: 21.1702,
     lng: 72.8311,
     district: "Surat",
+    images: ["/property/image.png"],
   },
 
   // Rajasthan
@@ -241,6 +262,7 @@ export const DUMMY_PROPERTIES: Property[] = [
     lat: 26.9124,
     lng: 75.7873,
     district: "Jaipur",
+    images: ["/property/image.png"],
   },
   {
     id: "23",
@@ -251,6 +273,7 @@ export const DUMMY_PROPERTIES: Property[] = [
     lat: 26.2389,
     lng: 73.0243,
     district: "Jodhpur",
+    images: ["/property/image.png"],
   },
 
   // West Bengal
@@ -263,6 +286,7 @@ export const DUMMY_PROPERTIES: Property[] = [
     lat: 22.5726,
     lng: 88.3639,
     district: "Kolkata",
+    images: ["/property/image.png"],
   },
   {
     id: "25",
@@ -273,6 +297,7 @@ export const DUMMY_PROPERTIES: Property[] = [
     lat: 27.0410,
     lng: 88.2663,
     district: "Darjeeling",
+    images: ["/property/image.png"],
   },
 
   // Kerala
@@ -285,6 +310,7 @@ export const DUMMY_PROPERTIES: Property[] = [
     lat: 9.9312,
     lng: 76.2673,
     district: "Kochi",
+    images: ["/property/image.png"],
   },
   {
     id: "27",
@@ -295,6 +321,7 @@ export const DUMMY_PROPERTIES: Property[] = [
     lat: 8.5241,
     lng: 76.9366,
     district: "Thiruvananthapuram",
+    images: ["/property/image.png"],
   },
 
   // Punjab
@@ -307,6 +334,7 @@ export const DUMMY_PROPERTIES: Property[] = [
     lat: 30.7333,
     lng: 76.7794,
     district: "Chandigarh",
+    images: ["/property/image.png"],
   },
   {
     id: "29",
@@ -317,6 +345,7 @@ export const DUMMY_PROPERTIES: Property[] = [
     lat: 30.9010,
     lng: 75.8573,
     district: "Ludhiana",
+    images: ["/property/image.png"],
   },
 
   // Haryana
@@ -329,5 +358,6 @@ export const DUMMY_PROPERTIES: Property[] = [
     lat: 28.4089,
     lng: 77.3178,
     district: "Faridabad",
+    images: ["/property/image.png"],
   },
 ];

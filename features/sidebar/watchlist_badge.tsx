@@ -12,7 +12,7 @@ export default function WatchlistBadge({
 }: {
   property: any;
   isSelected: boolean;
-  onClick: () => void;
+  onClick: (e: React.MouseEvent) => void;
 }) {
   return (
     <div

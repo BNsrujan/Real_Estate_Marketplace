@@ -13,6 +13,7 @@ import {
   IndianRupee,
 } from "lucide-react";
 import type { Property } from "@/shared/types";
+import PropertyHoverCard from "@/features/properties/components/property_card";
 
 /* ─── per-type config ─────────────────────────────────────── */
 const TYPE_CONFIG: Record<
@@ -72,11 +73,14 @@ interface PropertyPopupProps {
   property: Property | null;
   onClose: () => void;
   isHoverMode?: boolean;
+  markerLngLat?: { lng: number; lat: number } | null;
+  mapInstance?: any;
 }
 
 /* ─── component ───────────────────────────────────────────── */
-export default function PropertyPopup({ property, onClose, isHoverMode = false }: PropertyPopupProps) {
+export default function PropertyPopup({ property, onClose, isHoverMode = false, markerLngLat, mapInstance }: PropertyPopupProps) {
   const [mounted, setMounted] = useState(false);
+  const [screenPos, setScreenPos] = useState<{ x: number; y: number } | null>(null);
   const prevProp = useRef<Property | null>(null);
 
   /* drag-to-dismiss */
@@ -84,6 +88,29 @@ export default function PropertyPopup({ property, onClose, isHoverMode = false }
   const currentY = useRef(0);
 
   const visible = property !== null;
+
+  // Calculate screen position from marker coordinates
+  useEffect(() => {
+    if (!markerLngLat || !mapInstance?.current || !visible) {
+      setScreenPos(null);
+      return;
+    }
+
+    try {
+      const map = mapInstance.current;
+      const screenCoord = map.project([markerLngLat.lng, markerLngLat.lat]);
+      const mapContainer = map.getContainer();
+      const mapRect = mapContainer.getBoundingClientRect();
+
+      setScreenPos({
+        x: screenCoord.x + mapRect.left,
+        y: screenCoord.y + mapRect.top,
+      });
+    } catch (e) {
+      console.error('Error projecting marker position:', e);
+      setScreenPos(null);
+    }
+  }, [markerLngLat, mapInstance, visible]);
 
   useEffect(() => { setMounted(true); }, []);
 
@@ -111,10 +138,33 @@ export default function PropertyPopup({ property, onClose, isHoverMode = false }
     currentY.current = 0;
   };
 
-  if (!mounted || !display) return null;
+  if (!mounted || !display || typeof document === "undefined") return null;
 
   const cfg = TYPE_CONFIG[display.type] ?? FALLBACK;
   const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
+
+  // Render PropertyHoverCard for hover mode as requested
+  if (isHoverMode && screenPos && !isMobile) {
+    return createPortal(
+      <div
+        className="fixed transition-all duration-200"
+        style={{
+          left: `${Math.round(screenPos.x + 24)}px`,
+          top: `${Math.round(screenPos.y - 120)}px`,
+          zIndex: 99999,
+          pointerEvents: "auto",
+          opacity: visible ? 1 : 0,
+          transform: visible ? "scale(1)" : "scale(0.95)",
+        }}
+      >
+        <PropertyHoverCard 
+          property={display as any} 
+          onOpen={() => {}} 
+        />
+      </div>,
+      document.body
+    );
+  }
 
   return createPortal(
     <>
@@ -138,21 +188,58 @@ export default function PropertyPopup({ property, onClose, isHoverMode = false }
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
-        className="fixed bottom-0 left-1/2"
+        className="fixed"
         style={{
-          transform: `translateX(-50%) translateY(${visible ? "0" : "100%"})`,
+          ...(() => {
+            // If we have marker position and map instance, position beside marker
+            if (screenPos && !isMobile) {
+              const cardWidth = 520;
+              const cardHeight = 420;
+              const padding = 20;
+              const markerSize = 56;
+
+              let x = screenPos.x;
+              let y = screenPos.y - cardHeight / 2;
+
+              // Position to the right of marker, or left if near right edge
+              if (x + cardWidth + markerSize/2 + padding < window.innerWidth) {
+                x = x + markerSize/2 + padding;
+              } else {
+                x = x - cardWidth - markerSize/2 - padding;
+              }
+
+              // Clamp Y to viewport
+              y = Math.max(padding, Math.min(y, window.innerHeight - cardHeight - padding));
+
+              return {
+                left: `${Math.round(x)}px`,
+                top: `${Math.round(y)}px`,
+                transform: visible ? "scale(1)" : "scale(0.95)",
+                opacity: visible ? 1 : 0,
+                pointerEvents: visible ? "auto" : "none" as const,
+              };
+            } else {
+              // Fallback to bottom positioning for mobile or when marker position unavailable
+              return {
+                bottom: 0,
+                left: "50%",
+                transform: `translateX(-50%) translateY(${visible ? "0" : "100%"})`,
+                pointerEvents: visible ? "auto" : "none" as const,
+              };
+            }
+          })(),
           width: isMobile ? "100vw" : "520px",
           zIndex: 99999,
-          transition: `transform ${isHoverMode ? "0.25s" : "0.42s"} cubic-bezier(${isHoverMode ? "0.4, 0, 0.2, 1" : "0.32, 0.72, 0, 1"})`,
+          transition: `all ${isHoverMode ? "0.25s" : "0.42s"} cubic-bezier(${isHoverMode ? "0.4, 0, 0.2, 1" : "0.32, 0.72, 0, 1"})`,
 
           /* glossy dark surface */
           background:
             "linear-gradient(160deg, rgba(15,17,28,0.97) 0%, rgba(8,10,20,0.99) 100%)",
           backdropFilter: "blur(24px)",
-          borderRadius: "24px 24px 0 0",
+          borderRadius: isMobile ? "24px 24px 0 0" : "24px",
           border: `1px solid ${cfg.neon}33`,
-          borderBottom: "none",
-          boxShadow: `${cfg.glow}, inset 0 1px 0 ${cfg.neon}22`,
+          borderBottom: isMobile ? "none" : undefined,
+          boxShadow: isMobile ? `${cfg.glow}, inset 0 1px 0 ${cfg.neon}22` : `${cfg.glow}, 0 16px 40px rgba(0,0,0,0.4)`,
           padding: isMobile ? "20px 16px 32px" : "28px 28px 40px",
         }}
       >
@@ -272,6 +359,6 @@ export default function PropertyPopup({ property, onClose, isHoverMode = false }
         </div>
       </div>
     </>,
-    document.body,
+    document.body
   );
 }

@@ -48,12 +48,6 @@ const MENU_CONTENT: Record<string, MenuContent> = {
     description: "Chat with agents and property owners.",
     Icon: MessageSquare,
   },
-  profile: {
-    id: "profile",
-    title: "Profile",
-    description: "Manage your account and preferences.",
-    Icon: User,
-  },
 };
 
 /**
@@ -156,21 +150,7 @@ export default function SidebarDetailPanel() {
           )}
 
           {/* PROFILE */}
-          {activeMenu === "profile" && (
-            <>
-              <SidebarCard className="flex items-center gap-4 p-5">
-                <div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-white/10 bg-white/3" />
-                <div>
-                  <h3 className="font-semibold text-white">Srujan BN</h3>
-                  <p className="text-sm text-white/45">Premium Member</p>
-                </div>
-              </SidebarCard>
 
-              <button className="w-full rounded-3xl border border-white/10 bg-white/3 py-4 font-semibold text-white transition-all duration-300 hover:bg-white/6">
-                Edit Profile
-              </button>
-            </>
-          )}
         </div>
 
         {/* Quick Actions Section (always visible) */}

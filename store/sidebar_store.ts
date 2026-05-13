@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { DUMMY_PROPERTIES } from "@/features/properties/data/dummy_properties";
 
-export type SidebarMenuId = "map" | "search" | "saved" | "messages" | "profile";
+export type SidebarMenuId = "map" | "search" | "saved" | "messages" | "profile" | null;
 
 export interface Property {
   id: string;
@@ -19,7 +19,7 @@ interface SidebarStore {
   activeMenu: SidebarMenuId;
   setActiveMenu: (menu: SidebarMenuId) => void;
 
-  // Detail panel visibility (only relevant for mobile/tablet)
+  // Detail panel visibility
   isPanelOpen: boolean;
   openPanel: () => void;
   closePanel: () => void;
@@ -37,10 +37,10 @@ interface SidebarStore {
 }
 
 export const useSidebarStore = create<SidebarStore>((set) => ({
-  activeMenu: "map",
+  activeMenu: null,
   setActiveMenu: (menu) => set({ activeMenu: menu, selectedPropertyId: null }),
 
-  isPanelOpen: true,
+  isPanelOpen: false,
   openPanel: () => set({ isPanelOpen: true }),
   closePanel: () => set({ isPanelOpen: false }),
   togglePanel: () => set((state) => ({ isPanelOpen: !state.isPanelOpen })),
