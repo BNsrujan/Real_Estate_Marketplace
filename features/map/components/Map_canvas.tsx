@@ -26,6 +26,8 @@ export function MapCanvas({ setIsLoaded }: Props) {
 
   const [showButton, setShowButton] = useState(true);
   const [activeProperty, setActiveProperty] = useState<Property | null>(null);
+  const [hoveredProperty, setHoveredProperty] = useState<Property | null>(null);
+  const hoverTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const handleMarkerClick = useCallback((prop: Property) => {
     setActiveProperty(null);
@@ -33,6 +35,18 @@ export function MapCanvas({ setIsLoaded }: Props) {
     setTimeout(() => {
       setActiveProperty({ ...prop });
     }, 0);
+  }, []);
+
+  const handleMarkerHover = useCallback((prop: Property) => {
+    if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
+    setHoveredProperty(prop);
+  }, []);
+
+  const handleMarkerLeave = useCallback(() => {
+    if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
+    hoverTimeoutRef.current = setTimeout(() => {
+      setHoveredProperty(null);
+    }, 150); // Small delay to prevent flickering
   }, []);
 
   const filterByDistrictRef = useRef<(name: string) => void>(() => {});
@@ -67,6 +81,8 @@ export function MapCanvas({ setIsLoaded }: Props) {
     mapRef: mapInstance,
     isStyleLoaded,
     onMarkerClick: handleMarkerClick,
+    onMarkerHover: handleMarkerHover,
+    onMarkerLeave: handleMarkerLeave,
   });
 
   filterByDistrictRef.current = filterByDistrict;
@@ -136,12 +152,24 @@ export function MapCanvas({ setIsLoaded }: Props) {
         </div>
       )}
 
-      {/* Property Popup */}
+      {/* Property Popup - Show on hover with smooth animation */}
+      {hoveredProperty && (
+        <div className="fixed bottom-0 w-full z-2147483647 pointer-events-auto">
+          <PropertyPopup
+            property={hoveredProperty}
+            onClose={() => setHoveredProperty(null)}
+            isHoverMode={true}
+          />
+        </div>
+      )}
+
+      {/* Property Popup - Show on click */}
       {activeProperty && (
         <div className="fixed bottom-0 w-full z-2147483647 pointer-events-auto">
           <PropertyPopup
             property={activeProperty}
             onClose={() => setActiveProperty(null)}
+            isHoverMode={false}
           />
         </div>
       )}

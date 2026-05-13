@@ -15,6 +15,8 @@ interface UsePropertyMarkersOptions {
   mapRef: React.RefObject<maplibregl.Map | null>;
   isStyleLoaded: boolean;
   onMarkerClick?: (property: Property) => void;
+  onMarkerHover?: (property: Property) => void;
+  onMarkerLeave?: () => void;
 }
 
 /**
@@ -25,6 +27,8 @@ export function usePropertyMarkers({
   mapRef,
   isStyleLoaded,
   onMarkerClick,
+  onMarkerHover,
+  onMarkerLeave,
 }: UsePropertyMarkersOptions) {
   const markerServiceRef = useRef<PropertyMarkerService | null>(null);
   const activeMarkerRef = useRef<string | null>(null);
@@ -46,10 +50,21 @@ export function usePropertyMarkers({
     const handleAddMarkers = () => {
       const zoom = map.getZoom();
       if (zoom >= PROPERTY_MARKER_MIN_ZOOM) {
-        markerServiceRef.current?.addMarkers(DUMMY_PROPERTIES, (prop) => {
-          // Handle marker click: zoom, select, and update UI
-          handleMarkerClick(prop, map);
-        });
+        markerServiceRef.current?.addMarkers(
+          DUMMY_PROPERTIES,
+          (prop) => {
+            // Handle marker click: zoom, select, and update UI
+            handleMarkerClick(prop, map);
+          },
+          (prop) => {
+            // Handle marker hover
+            onMarkerHover?.(prop);
+          },
+          () => {
+            // Handle marker leave
+            onMarkerLeave?.();
+          },
+        );
       }
     };
 
@@ -101,7 +116,7 @@ export function usePropertyMarkers({
       markerServiceRef.current?.dispose();
       markerServiceRef.current = null;
     };
-  }, [mapRef, isStyleLoaded, onMarkerClick, setSelectedPropertyId, setActiveMenu]);
+  }, [mapRef, isStyleLoaded, onMarkerClick, onMarkerHover, onMarkerLeave, setSelectedPropertyId, setActiveMenu]);
 
   return {
     setActiveMarker: (propertyId: string) => {

@@ -37,7 +37,6 @@ export function addMapLayers(map: maplibregl.Map): void {
     minzoom: 5,
   });
 
-  // ── Cities + districts ──────────────────────────────────────────────────────
   map.addSource("cities", { type: "geojson", data: "/data/cities.json" });
   map.addSource("district-centers", {
     type: "geojson",

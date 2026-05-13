@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { fetchProperties } from "../services/propertyService";
+import { fetchProperties } from "../services/property_service";
 import type { Property } from "@/shared/types";
 
 interface UsePropertiesOptions {
@@ -15,10 +15,7 @@ interface UsePropertiesResult {
   error: string | null;
 }
 
-/**
- * Client-side hook for fetching and optionally filtering properties.
- * Re-runs automatically when `district` changes.
- */
+
 export function useProperties(
   options: UsePropertiesOptions = {},
 ): UsePropertiesResult {

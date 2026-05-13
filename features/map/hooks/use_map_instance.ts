@@ -36,7 +36,6 @@ export function useMapInstance({
     if (!containerRef.current || mapRef.current) return;
 
     const loadStart = Date.now();
-console.log("Container size:", containerRef.current?.offsetWidth, containerRef.current?.offsetHeight);
     const cfg = getResponsiveMapConfig();
     const map = new maplibregl.Map({
       container: containerRef.current,

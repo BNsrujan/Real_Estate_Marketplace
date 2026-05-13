@@ -49,8 +49,18 @@ export class PropertyMarkerService {
     const { color, icon, label } = this.getTypeConfig(property.type);
 
     const wrapper = document.createElement("div");
-    wrapper.className = "relative flex flex-col items-center select-none marker-pop";
-    wrapper.style.cursor = "pointer";
+    wrapper.className = "select-none marker-pop";
+    wrapper.style.cssText = `
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-end;
+      cursor: pointer;
+      transform-origin: center bottom;
+      position: relative;
+      width: auto;
+      height: auto;
+    `;
 
     // ── Pulse ring (active only) ──────────────────────────────────────────
     if (isActive) {
@@ -135,7 +145,12 @@ export class PropertyMarkerService {
     return wrapper;
   }
 
-  addMarkers(properties: Property[], onMarkerClick?: (prop: Property) => void) {
+  addMarkers(
+    properties: Property[],
+    onMarkerClick?: (prop: Property) => void,
+    onMarkerHover?: (prop: Property) => void,
+    onMarkerLeave?: () => void,
+  ) {
     if (!this.map) return;
     this.clearMarkers();
 
@@ -149,6 +164,16 @@ export class PropertyMarkerService {
       el.addEventListener("click", (e) => {
         e.stopPropagation();
         onMarkerClick?.(property);
+      });
+
+      el.addEventListener("mouseenter", (e) => {
+        e.stopPropagation();
+        onMarkerHover?.(property);
+      });
+
+      el.addEventListener("mouseleave", (e) => {
+        e.stopPropagation();
+        onMarkerLeave?.();
       });
 
       this.markers.set(property.id, marker);

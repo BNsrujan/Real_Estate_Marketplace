@@ -28,7 +28,6 @@ export function useMarkerSync({
   const cameFromDistrictRef = useRef(false);
   const blockMarkerRenderRef = useRef(false);
 
-  // Always-fresh refs — avoids stale closures inside marker DOM handlers
   const onMarkerClickRef = useRef(onMarkerClick);
   onMarkerClickRef.current = onMarkerClick;
 
@@ -108,7 +107,6 @@ export function useMarkerSync({
 
   filterByDistrictRef.current = filterByDistrict;
 
-  // ── Zoom listener ─────────────────────────────────────────────────────────
   useEffect(() => {
     const map = mapRef.current;
     if (!map || !isStyleLoaded) return;

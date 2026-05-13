@@ -9,37 +9,36 @@ type LayerType = {
   name: string;
   image: string;
   color: string;
-  items: string[];
 };
 
 const mapLayers: LayerType[] = [
   {
-    id: "terrain",
-    name: "Terrain",
+    id: "satellite",
+    name: "Satellite",
     image: "/pics/layers/satellite.png",
     color: "from-emerald-400/20 to-green-500/10",
-    items: ["Mountains", "Elevation", "Forests", "Rivers"],
+
+  },
+  {
+    id: "standerd",
+    name: "Standard",
+    image: "/pics/layers/standard.png",
+    color: "from-orange-400/20 to-red-500/10",
+  
   },
   {
     id: "traffic",
     name: "Traffic",
-    image: "/layers/traffic.jpg",
-    color: "from-orange-400/20 to-red-500/10",
-    items: ["Live Traffic", "Road Blocks", "Accidents", "Signals"],
-  },
-  {
-    id: "transit",
-    name: "Transit",
-    image: "/layers/transit.jpg",
+    image: "/pics/layers/traffic.png",
     color: "from-cyan-400/20 to-blue-500/10",
-    items: ["Metro", "Railway", "Bus Stops", "Stations"],
+   
   },
   {
-    id: "biking",
-    name: "Biking",
-    image: "/layers/biking.jpg",
+    id: "osm",
+    name: "OSM",
+    image: "/pics/layers/osm.png",
     color: "from-purple-400/20 to-pink-500/10",
-    items: ["Bike Routes", "Trails", "Parking", "Repair Shops"],
+
   },
 ];
 
@@ -60,9 +59,9 @@ const MapLayerSelector = () => {
 
   return (
     <div className="relative w-full z-500 flex items-end gap-2 md:gap-4 flex-wrap md:flex-nowrap justify-start">
-      {/* Main Layer System */}
-      <div className="relative">
-        {/* Active Layer */}
+
+      <div className="relative flex items-end">
+
         <button
           onClick={() => setIsExpanded((prev) => !prev)}
           className="
@@ -80,18 +79,18 @@ const MapLayerSelector = () => {
             w-full md:w-auto
           "
         >
-          {/* Background Glow */}
+         
           <div
             className={`absolute inset-0 bg-gradient-to-br ${activeLayer.color}`}
           />
 
           <div className="relative flex items-center gap-2 md:gap-4 p-2 md:p-0">
-            {/* Layer Preview Image */}
+           
             <div
               className="
                 relative
-                h-16 md:h-24
-                w-16 md:w-24
+                h-14 md:h-20
+                w-14 md:w-20
                 overflow-hidden
                 rounded-lg md:rounded-2xl
                 border border-white/10
@@ -149,16 +148,15 @@ const MapLayerSelector = () => {
                 backdrop-blur-xl
                 shadow-2xl
                 transition-all duration-500
-                hover:-translate-y-2
                 hover:scale-[1.02]
-                active:scale-[0.97]
+                active:scale-[0.98]
               "
               style={{
                 transitionDelay: `${index * 90}ms`,
               }}
             >
               {/* Image */}
-              <div className="relative h-16 md:h-24 w-16 md:w-24 overflow-hidden">
+              <div className="relative h-14 md:h-20 w-14 md:w-20 overflow-hidden">
                 <Image
                   src={layer.image}
                   alt={layer.name}
@@ -178,7 +176,7 @@ const MapLayerSelector = () => {
                 <div className="absolute text-left bottom-2 center left-1/2 -translate-x-1/2">
                   <div className="flex items-center gap-2 text-white/60">
                     
-                    <h3 className="text-sm font-semibold text-white/30">
+                    <h3 className="text-xs  text-wrap font-semibold text-white/30">
                       {layer.name}
                     </h3>
                   </div>

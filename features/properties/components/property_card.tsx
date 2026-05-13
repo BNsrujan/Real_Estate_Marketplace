@@ -9,6 +9,7 @@ import {
   Landmark,
   Factory,
 } from "lucide-react";
+import { useSidebarStore } from "@/store/sidebar_store";
 
 export interface Property {
   id: string;
@@ -47,10 +48,16 @@ export default function PropertyHoverCard({
   onOpen,
 }: PropertyHoverCardProps) {
   const Icon = TYPE_ICON[property.type];
+  const setSelectedPropertyId = useSidebarStore((s) => s.setSelectedPropertyId);
+
+  const handleClick = () => {
+    setSelectedPropertyId(property.id);
+    onOpen(property);
+  };
 
   return (
     <div
-      onClick={() => onOpen(property)}
+      onClick={handleClick}
       className="w-72 overflow-hidden rounded-3xl border border-white/10 bg-black/80 backdrop-blur-2xl shadow-2xl cursor-pointer transition-all duration-300 hover:scale-[1.02]"
     >
       {/* Image */}

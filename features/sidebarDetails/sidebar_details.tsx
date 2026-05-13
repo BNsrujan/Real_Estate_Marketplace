@@ -5,6 +5,7 @@ import { Search, X, MapPin, Grid2x2, DollarSign, Home } from "lucide-react";
 import { SidebarCard } from "@/shared/ui/sidebar_card";
 import { useSidebarStore } from "@/store/sidebar_store";
 import { PropertyCard } from "@/features/properties/components/property_card";
+import { DUMMY_PROPERTIES } from "@/features/properties/data/dummy_properties";
 
 type MenuId = "map" | "search" | "saved" | "messages" | "profile";
 
@@ -27,9 +28,10 @@ export function DetailPanel({ activeMenu: propActiveMenu, activeData }: DetailPa
   const setSelectedPropertyId = useSidebarStore((s) => s.setSelectedPropertyId);
   const activeMenu = propActiveMenu ?? storeActiveMenu;
 
-  // Find the selected property from saved properties
+  // Find the selected property from DUMMY_PROPERTIES (all properties) or saved properties
   const selectedProperty = selectedPropertyId
-    ? savedProperties.find((p) => p.id === selectedPropertyId)
+    ? DUMMY_PROPERTIES.find((p) => p.id === selectedPropertyId) || 
+      savedProperties.find((p) => p.id === selectedPropertyId)
     : null;
   return (
     <aside
