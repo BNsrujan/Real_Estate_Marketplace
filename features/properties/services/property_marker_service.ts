@@ -49,7 +49,7 @@ export class PropertyMarkerService {
     const { color, icon, label } = this.getTypeConfig(property.type);
 
     const wrapper = document.createElement("div");
-    wrapper.className = "select-none marker-pop";
+    wrapper.className = "select-none";
     wrapper.style.cssText = `
       display: flex;
       flex-direction: column;
@@ -78,7 +78,7 @@ export class PropertyMarkerService {
     // ── Main bubble ───────────────────────────────────────────────────────
     const bubble = document.createElement("div");
     bubble.className = [
-      "marker-bubble",
+      "marker-bubble marker-pop",
       "relative flex items-center justify-center",
       "rounded-full backdrop-blur-xl",
       "transition-all duration-300 ease-out",

@@ -57,7 +57,6 @@ export function useMapInstance({
           {
             id: "background",
             type: "background",
- 
             paint: { "background-color": "#000000" },
           },
           { id: "satellite", type: "raster", source: "satellite",paint: { 

@@ -11,7 +11,7 @@ import {
   UserCircle,
 } from "lucide-react";
 import { useAuthStore } from "@/store/auth_store";
-import DialogModule, { FormField } from "@/shared/components/common/dialogmodule";
+import DialogModule from "@/shared/components/common/dialogmodule";
 
 type ProfileModalProps = {
   user?: {
@@ -107,7 +107,7 @@ const ProfileModal = ({
       </div>
 
       <div className="px-3 pb-3 space-y-1">
-        {/* Profile Dialog */}
+       
         <DialogModule
           title="Edit Profile"
           description="Update your personal information and how others see you."
@@ -146,7 +146,7 @@ const ProfileModal = ({
         />
       </div>
 
-      {/* Logout Footer */}
+      
       <div className="p-3 border-t border-white/5 bg-white/[0.02]">
         <button
           onClick={handleLogout}

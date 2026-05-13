@@ -57,3 +57,20 @@ export const SETTINGS_FORM_FIELDS: FormField[] = [
     defaultValue: true,
   },
 ];
+
+export const LOGIN_FORM_FIELDS: FormField[] = [
+  {
+    type: "email",
+    name: "email",
+    label: "Email ID",
+    placeholder: "Enter your email",
+    required: true,
+  },
+  {
+    type: "password",
+    name: "password",
+    label: "Password",
+    placeholder: "Enter your password",
+    required: true,
+  },
+];
