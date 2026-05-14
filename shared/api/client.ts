@@ -14,15 +14,15 @@ export async function apiFetch<T>(
   const { body, headers, ...rest } = options;
 
   const token = getAuthToken();
-  const authHeader = token ? { Authorization: `Bearer ${token}` } : {};
+  const mergedHeaders: Record<string, string> = {
+    "Content-Type": "application/json",
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    ...(headers as Record<string, string> | undefined),
+  };
 
   const response = await fetch(`${env.apiUrl}${path}`, {
     ...rest,
-    headers: {
-      "Content-Type": "application/json",
-      ...authHeader,
-      ...(headers as Record<string, string>),
-    },
+    headers: mergedHeaders,
     body: body !== undefined ? JSON.stringify(body) : undefined,
   });
 

@@ -7,7 +7,6 @@ interface SidebarStore {
   activeMenu: SidebarMenuId;
   setActiveMenu: (menu: SidebarMenuId) => void;
 
-  // Detail panel visibility
   isPanelOpen: boolean;
   openPanel: () => void;
   closePanel: () => void;
@@ -15,6 +14,9 @@ interface SidebarStore {
 
   selectedPropertyId: string | null;
   setSelectedPropertyId: (id: string | null) => void;
+
+  selectedProperty: Property | null;
+  setSelectedProperty: (property: Property | null) => void;
 
   savedProperties: Property[];
   setSavedProperties: (props: Property[]) => void;
@@ -24,7 +26,7 @@ interface SidebarStore {
 
 export const useSidebarStore = create<SidebarStore>((set) => ({
   activeMenu: null,
-  setActiveMenu: (menu) => set({ activeMenu: menu, selectedPropertyId: null }),
+  setActiveMenu: (menu) => set({ activeMenu: menu, selectedPropertyId: null, selectedProperty: null }),
 
   isPanelOpen: false,
   openPanel: () => set({ isPanelOpen: true }),
@@ -33,6 +35,12 @@ export const useSidebarStore = create<SidebarStore>((set) => ({
 
   selectedPropertyId: null,
   setSelectedPropertyId: (id) => set({ selectedPropertyId: id }),
+
+  selectedProperty: null,
+  setSelectedProperty: (property) => set({
+    selectedProperty: property,
+    selectedPropertyId: property?.id ?? null,
+  }),
 
   savedProperties: [],
   setSavedProperties: (props) => set({ savedProperties: props }),

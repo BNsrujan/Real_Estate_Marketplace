@@ -30,7 +30,7 @@ export function usePropertyMarkers({
   const activeMarkerRef = useRef<string | null>(null);
   const propertiesRef = useRef<Property[]>([]);
 
-  const setSelectedPropertyId = useSidebarStore((s) => s.setSelectedPropertyId);
+  const setSelectedProperty = useSidebarStore((s) => s.setSelectedProperty);
   const setActiveMenu = useSidebarStore((s) => s.setActiveMenu);
 
   useEffect(() => {
@@ -53,7 +53,7 @@ export function usePropertyMarkers({
       activeMarkerRef.current = property.id;
       markerServiceRef.current?.updateMarkerActive(property.id, true);
 
-      setSelectedPropertyId(property.id);
+      setSelectedProperty(property);
       onMarkerClick?.(property);
     };
 
@@ -90,7 +90,7 @@ export function usePropertyMarkers({
       markerServiceRef.current?.dispose();
       markerServiceRef.current = null;
     };
-  }, [mapRef, isStyleLoaded, onMarkerClick, onMarkerHover, onMarkerLeave, setSelectedPropertyId, setActiveMenu]);
+  }, [mapRef, isStyleLoaded, onMarkerClick, onMarkerHover, onMarkerLeave, setSelectedProperty, setActiveMenu]);
 
   return {
     setActiveMarker: (propertyId: string) => {

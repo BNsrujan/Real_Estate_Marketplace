@@ -4,7 +4,6 @@ import React from "react";
 import { Search, X, MapPin, Grid2x2, DollarSign, Home } from "lucide-react";
 import { SidebarCard } from "@/shared/ui/sidebar_card";
 import { useSidebarStore } from "@/store/sidebar_store";
-import { DUMMY_PROPERTIES } from "@/features/properties/data/dummy_properties";
 import PropertyCard from "@/features/properties/components/property_card";
 
 type MenuId = "map" | "search" | "saved" | "messages" | "profile";
@@ -24,15 +23,10 @@ export type DetailPanelProps = {
 export function DetailPanel({ activeMenu: propActiveMenu, activeData }: DetailPanelProps) {
   const storeActiveMenu = useSidebarStore((s) => s.activeMenu);
   const savedProperties = useSidebarStore((s) => s.savedProperties);
-  const selectedPropertyId = useSidebarStore((s) => s.selectedPropertyId);
-  const setSelectedPropertyId = useSidebarStore((s) => s.setSelectedPropertyId);
+  const selectedProperty = useSidebarStore((s) => s.selectedProperty);
+  const setSelectedProperty = useSidebarStore((s) => s.setSelectedProperty);
   const activeMenu = propActiveMenu ?? storeActiveMenu;
 
-  // Find the selected property from DUMMY_PROPERTIES (all properties) or saved properties
-  const selectedProperty = selectedPropertyId
-    ? DUMMY_PROPERTIES.find((p) => p.id === selectedPropertyId) || 
-      savedProperties.find((p) => p.id === selectedPropertyId)
-    : null;
   return (
     <aside
       className="relative w-105 overflow-hidden border-r h-screen border-white/10 p-7 backdrop-blur-3xl z-100"
@@ -43,19 +37,16 @@ export function DetailPanel({ activeMenu: propActiveMenu, activeData }: DetailPa
 
       {/* Content */}
       <div className="relative z-10">
-       
         {selectedProperty ? (
           <>
-            {/* Close button */}
             <button
-              onClick={() => setSelectedPropertyId(null)}
+              onClick={() => setSelectedProperty(null)}
               className="mb-6 p-2 hover:bg-white/10 rounded-lg transition-all"
               title="Close property details"
             >
               <X size={24} className="text-white" />
             </button>
 
-            {/* Property details hero */}
             <div className="mb-8">
               <div className="flex items-center gap-3 mb-4">
                 <div className="p-3 rounded-lg bg-emerald-500/20 border border-emerald-500/40">
@@ -65,13 +56,12 @@ export function DetailPanel({ activeMenu: propActiveMenu, activeData }: DetailPa
                   <h1 className="text-2xl font-bold text-white">{selectedProperty.title}</h1>
                   <p className="text-sm text-white/60 flex items-center gap-1 mt-1">
                     <MapPin size={14} />
-                    {selectedProperty.district}, Karnataka
+                    {selectedProperty.district}
                   </p>
                 </div>
               </div>
             </div>
 
-            {/* Property info grid */}
             <div className="space-y-3">
               <SidebarCard className="p-4 border border-white/10 bg-white/5">
                 <div className="flex items-center justify-between mb-2">
@@ -103,7 +93,7 @@ export function DetailPanel({ activeMenu: propActiveMenu, activeData }: DetailPa
               </SidebarCard>
 
               <button
-                onClick={() => setSelectedPropertyId(null)}
+                onClick={() => setSelectedProperty(null)}
                 className="w-full mt-6 px-4 py-3 rounded-2xl border border-emerald-500/50 bg-emerald-500/10 text-emerald-400 font-semibold transition-all duration-300 hover:bg-emerald-500/20 hover:border-emerald-500/80"
               >
                 View on Map
@@ -112,7 +102,6 @@ export function DetailPanel({ activeMenu: propActiveMenu, activeData }: DetailPa
           </>
         ) : (
           <>
-            {/* Hero */}
             <div className="mb-8">
               <div
                 className="relative mb-5 flex h-20 w-20 items-center justify-center rounded-3xl border border-white/10 backdrop-blur-xl"
@@ -127,19 +116,13 @@ export function DetailPanel({ activeMenu: propActiveMenu, activeData }: DetailPa
               </p>
             </div>
 
-            {/* Dynamic content */}
             <div className="space-y-4">
               {activeMenu === "map" &&
-                [
-                  "Live Property Layers",
-                  "Nearby Infrastructure",
-                  "Satellite Intelligence",
-                ].map((item) => (
+                ["Live Property Layers", "Nearby Infrastructure", "Satellite Intelligence"].map((item) => (
                   <SidebarCard key={item} className="p-5">
                     <h3 className="mb-2 font-semibold text-white">{item}</h3>
                     <p className="text-sm leading-relaxed text-white/50">
-                      Advanced real estate visualization powered by Karnataka
-                      geo-spatial intelligence.
+                      Advanced real estate visualization powered by Karnataka geo-spatial intelligence.
                     </p>
                   </SidebarCard>
                 ))}
@@ -155,16 +138,14 @@ export function DetailPanel({ activeMenu: propActiveMenu, activeData }: DetailPa
                   </div>
 
                   <div className="grid grid-cols-2 gap-3">
-                    {["Under ₹50L", "Villa", "Apartment", "Commercial"].map(
-                      (item) => (
-                        <button
-                          key={item}
-                          className="rounded-2xl border border-white/10 bg-[rgba(255,255,255,0.03)] px-4 py-4 text-sm text-white/80 transition-all duration-300 hover:bg-[rgba(255,255,255,0.06)]"
-                        >
-                          {item}
-                        </button>
-                      ),
-                    )}
+                    {["Under ₹50L", "Villa", "Apartment", "Commercial"].map((item) => (
+                      <button
+                        key={item}
+                        className="rounded-2xl border border-white/10 bg-[rgba(255,255,255,0.03)] px-4 py-4 text-sm text-white/80 transition-all duration-300 hover:bg-[rgba(255,255,255,0.06)]"
+                      >
+                        {item}
+                      </button>
+                    ))}
                   </div>
                 </>
               )}
@@ -174,8 +155,7 @@ export function DetailPanel({ activeMenu: propActiveMenu, activeData }: DetailPa
                   {savedProperties.length === 0 ? (
                     <SidebarCard className="p-5">
                       <p className="text-sm text-white/50">
-                        No saved properties yet. Start exploring the map to
-                        bookmark listings.
+                        No saved properties yet. Start exploring the map to bookmark listings.
                       </p>
                     </SidebarCard>
                   ) : (
@@ -183,8 +163,9 @@ export function DetailPanel({ activeMenu: propActiveMenu, activeData }: DetailPa
                       <PropertyCard
                         key={property.id}
                         property={property as any}
-                        onOpen={(p) => setSelectedPropertyId(p.id)}
-                      />       ))
+                        onOpen={(p) => setSelectedProperty(p)}
+                      />
+                    ))
                   )}
                 </div>
               )}
