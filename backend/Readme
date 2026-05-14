@@ -1,0 +1,22 @@
+cd Backend-node-mongo
+
+
+npm init -y
+
+touch .env .env.sample Readme
+
+touch .prettierignore .prettierrc .gitignore 
+
+mkdir src
+
+cd src  
+
+mkdir  controllers db middlewares models routes utils
+
+touch app.js constants.js index.js 
+
+cd ..
+
+npm i express mongoose cors dotenv
+
+npm i -D nodemon prettier
