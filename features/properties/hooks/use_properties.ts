@@ -1,12 +1,12 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { fetchProperties } from "../services/property_service";
+import { getProperties, type PropertyFilters } from "../api/property_api";
 import type { Property } from "@/shared/types";
 
 interface UsePropertiesOptions {
-  /** Optional district filter — pass null/undefined for all properties */
   district?: string | null;
+  filters?: Omit<PropertyFilters, "district">;
 }
 
 interface UsePropertiesResult {
@@ -15,10 +15,7 @@ interface UsePropertiesResult {
   error: string | null;
 }
 
-
-export function useProperties(
-  options: UsePropertiesOptions = {},
-): UsePropertiesResult {
+export function useProperties(options: UsePropertiesOptions = {}): UsePropertiesResult {
   const [properties, setProperties] = useState<Property[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -29,16 +26,14 @@ export function useProperties(
     setIsLoading(true);
     setError(null);
 
-    fetchProperties()
+    const filters: PropertyFilters = {
+      ...options.filters,
+      ...(options.district ? { district: options.district } : {}),
+    };
+
+    getProperties(filters)
       .then((data) => {
-        if (cancelled) return;
-        const filtered = options.district
-          ? data.filter(
-              (p) =>
-                p.district.toLowerCase() === options.district!.toLowerCase(),
-            )
-          : data;
-        setProperties(filtered);
+        if (!cancelled) setProperties(data);
       })
       .catch((err: Error) => {
         if (!cancelled) setError(err.message);

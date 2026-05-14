@@ -5,7 +5,8 @@ import maplibregl from "maplibre-gl";
 
 import { addPropertyMarkers } from "@/features/properties/components/property_markers";
 import type { Property } from "@/shared/types";
-import rawData from "@/public/data/properties.json";
+import { getProperties } from "@/features/properties/api/property_api";
+
 const MARKER_MIN_ZOOM = 5.5;
 const MARKER_MAX_ZOOM = 16;
 const DISTRICT_ZOOM = 11;
@@ -37,14 +38,9 @@ export function useMarkerSync({
   const filterByDistrictRef = useRef<(name: string) => void>(() => {});
 
   useEffect(() => {
-    propertiesRef.current = rawData.map((p, i) => ({
-      ...p,
-      id: p.id || String(i),
-      type:
-        p.type === "site"
-          ? "house"
-          : (p.type as "house" | "site" | "agriculture land" | "commercial space" | "apartment" | "commercial plots"),
-    }));
+    getProperties().then((data) => {
+      propertiesRef.current = data;
+    });
   }, []);
 
   const clearMarkers = useCallback(() => {
