@@ -10,7 +10,25 @@ import { ApiError } from './utils/apiErrors.js';
 
 const app = express();
 
-app.use(cors({ origin: process.env.CORS_ORIGIN || '*' }));
+// CORS_ORIGIN can be a comma-separated list of allowed origins.
+// e.g. "http://localhost:3000,https://your-frontend.vercel.app"
+const rawOrigins = process.env.CORS_ORIGIN ?? 'http://localhost:3000';
+const allowedOrigins = rawOrigins.split(',').map((o) => o.trim());
+
+app.use(
+    cors({
+        origin: (origin, callback) => {
+            // Allow requests with no origin (curl, mobile apps, same-origin SSR)
+            if (!origin) return callback(null, true);
+            if (allowedOrigins.includes('*') || allowedOrigins.includes(origin)) {
+                return callback(null, true);
+            }
+            callback(new Error(`CORS: origin ${origin} not allowed`));
+        },
+        credentials: true,
+    }),
+);
+
 app.use(express.json({ limit: '16kb' }));
 app.use(express.urlencoded({ extended: true, limit: '16kb' }));
 
