@@ -5,26 +5,76 @@ import { ApiResponse } from '../utils/apiResponse.js';
 import { ApiError } from '../utils/apiErrors.js';
 import { asyncHandler } from '../utils/asynHandler.js';
 
+// Full property row projection — aligned with the architecture's Property interface
 const propertyRow = {
     id: properties.id,
+    slug: properties.slug,
     title: properties.title,
     type: properties.type,
     priceLabel: properties.priceLabel,
     priceValue: properties.priceValue,
     sizeLabel: properties.sizeLabel,
     sizeValue: properties.sizeValue,
+    areaUnit: properties.areaUnit,
     lat: properties.lat,
     lng: properties.lng,
     listingType: properties.listingType,
     status: properties.status,
-    createdAt: properties.createdAt,
+    thumbnailUrl: properties.thumbnailUrl,
+    description: properties.description,
+    features: properties.features,
+    sellerId: properties.sellerId,
+    city: properties.city,
+    taluk: properties.taluk,
     districtName: districts.name,
     districtState: districts.state,
     districtId: districts.id,
+    createdAt: properties.createdAt,
+    updatedAt: properties.updatedAt,
 };
 
+function buildProperty(row, images = []) {
+    return {
+        id: row.id,
+        slug: row.slug ?? row.id,
+        title: row.title,
+        type: row.type,
+        priceLabel: row.priceLabel,
+        priceValue: row.priceValue,
+        sizeLabel: row.sizeLabel,
+        sizeValue: row.sizeValue,
+        areaUnit: row.areaUnit ?? 'sqft',
+        lat: row.lat,
+        lng: row.lng,
+        listingType: row.listingType,
+        status: row.status,
+        isActive: row.status === 'active',
+        thumbnailUrl: row.thumbnailUrl ?? null,
+        imageUrls: images.map((i) => i.url),
+        description: row.description ?? '',
+        features: row.features ?? [],
+        sellerId: row.sellerId ?? null,
+        city: row.city ?? '',
+        taluk: row.taluk ?? '',
+        districtName: row.districtName,
+        districtState: row.districtState,
+        districtId: row.districtId,
+        createdAt: row.createdAt,
+        updatedAt: row.updatedAt,
+    };
+}
+
 const getProperties = asyncHandler(async (req, res) => {
-    const { type, district, listing, minPrice, maxPrice, search, page = 1, limit = 50 } = req.query;
+    const {
+        type,
+        district,
+        listing,
+        minPrice,
+        maxPrice,
+        search,
+        page = 1,
+        limit = 50,
+    } = req.query;
 
     const conditions = [eq(properties.status, 'active')];
 
@@ -46,7 +96,11 @@ const getProperties = asyncHandler(async (req, res) => {
         .offset(offset);
 
     return res.status(200).json(
-        new ApiResponse(200, { data: rows, page: Number(page), limit: Number(limit) })
+        new ApiResponse(200, {
+            data: rows.map((r) => buildProperty(r)),
+            page: Number(page),
+            limit: Number(limit),
+        }),
     );
 });
 
@@ -68,9 +122,7 @@ const getPropertyById = asyncHandler(async (req, res) => {
         .where(eq(propertyImages.propertyId, id))
         .orderBy(propertyImages.displayOrder);
 
-    return res.status(200).json(
-        new ApiResponse(200, { ...rows[0], images })
-    );
+    return res.status(200).json(new ApiResponse(200, buildProperty(rows[0], images)));
 });
 
 const getPropertiesByDistrict = asyncHandler(async (req, res) => {
@@ -80,9 +132,16 @@ const getPropertiesByDistrict = asyncHandler(async (req, res) => {
         .select(propertyRow)
         .from(properties)
         .leftJoin(districts, eq(properties.districtId, districts.id))
-        .where(and(eq(properties.districtId, districtId), eq(properties.status, 'active')));
+        .where(
+            and(
+                eq(properties.districtId, districtId),
+                eq(properties.status, 'active'),
+            ),
+        );
 
-    return res.status(200).json(new ApiResponse(200, { data: rows }));
+    return res.status(200).json(
+        new ApiResponse(200, { data: rows.map((r) => buildProperty(r)) }),
+    );
 });
 
 export { getProperties, getPropertyById, getPropertiesByDistrict };

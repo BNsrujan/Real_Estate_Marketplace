@@ -10,10 +10,40 @@ import { asyncHandler } from '../utils/asynHandler.js';
 const SALT_ROUNDS = 10;
 
 const signToken = (userId) =>
-    jwt.sign({ id: userId }, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRES_IN || '7d' });
+    jwt.sign({ id: userId }, process.env.JWT_SECRET, {
+        expiresIn: process.env.JWT_EXPIRES_IN || '7d',
+    });
+
+const safeUserColumns = {
+    id: users.id,
+    username: users.username,
+    name: users.name,
+    email: users.email,
+    phone: users.phone,
+    avatarUrl: users.avatarUrl,
+    role: users.role,
+    isVerified: users.isVerified,
+    isPro: users.isPro,
+    createdAt: users.createdAt,
+};
+
+function buildUserProfile(u) {
+    return {
+        id: u.id,
+        username: u.username,
+        name: u.name ?? u.username,
+        email: u.email,
+        phone: u.phone ?? '',
+        avatarUrl: u.avatarUrl ?? null,
+        role: u.role,
+        isVerified: u.isVerified ?? false,
+        isPro: u.isPro ?? false,
+        createdAt: u.createdAt,
+    };
+}
 
 const registerUser = asyncHandler(async (req, res) => {
-    const { username, email, password } = req.body;
+    const { username, name, email, password } = req.body;
 
     if (!username || !email || !password) {
         throw new ApiError(400, 'username, email, and password are required');
@@ -26,12 +56,14 @@ const registerUser = asyncHandler(async (req, res) => {
 
     const [user] = await db
         .insert(users)
-        .values({ username, email, passwordHash })
-        .returning({ id: users.id, username: users.username, email: users.email, role: users.role });
+        .values({ username, name: name ?? username, email, passwordHash })
+        .returning(safeUserColumns);
 
     const token = signToken(user.id);
 
-    return res.status(201).json(new ApiResponse(201, { user, token }, 'Registered successfully'));
+    return res.status(201).json(
+        new ApiResponse(201, { user: buildUserProfile(user), token }, 'Registered successfully'),
+    );
 });
 
 const loginUser = asyncHandler(async (req, res) => {
@@ -42,26 +74,47 @@ const loginUser = asyncHandler(async (req, res) => {
     const rows = await db.select().from(users).where(eq(users.email, email)).limit(1);
     if (!rows.length) throw new ApiError(401, 'Invalid credentials');
 
-    const user = rows[0];
-    const match = await bcrypt.compare(password, user.passwordHash);
+    const u = rows[0];
+    const match = await bcrypt.compare(password, u.passwordHash);
     if (!match) throw new ApiError(401, 'Invalid credentials');
 
-    const token = signToken(user.id);
-    const { passwordHash: _, ...safeUser } = user;
+    const token = signToken(u.id);
 
-    return res.status(200).json(new ApiResponse(200, { user: safeUser, token }, 'Login successful'));
+    return res.status(200).json(
+        new ApiResponse(200, { user: buildUserProfile(u), token }, 'Login successful'),
+    );
 });
 
 const getProfile = asyncHandler(async (req, res) => {
     const rows = await db
-        .select({ id: users.id, username: users.username, email: users.email, role: users.role, createdAt: users.createdAt })
+        .select(safeUserColumns)
         .from(users)
         .where(eq(users.id, req.userId))
         .limit(1);
 
     if (!rows.length) throw new ApiError(404, 'User not found');
 
-    return res.status(200).json(new ApiResponse(200, rows[0]));
+    return res.status(200).json(new ApiResponse(200, buildUserProfile(rows[0])));
 });
 
-export { registerUser, loginUser, getProfile };
+const updateProfile = asyncHandler(async (req, res) => {
+    const { name, phone, avatarUrl } = req.body;
+
+    const [updated] = await db
+        .update(users)
+        .set({
+            ...(name !== undefined && { name }),
+            ...(phone !== undefined && { phone }),
+            ...(avatarUrl !== undefined && { avatarUrl }),
+        })
+        .where(eq(users.id, req.userId))
+        .returning(safeUserColumns);
+
+    if (!updated) throw new ApiError(404, 'User not found');
+
+    return res.status(200).json(
+        new ApiResponse(200, buildUserProfile(updated), 'Profile updated'),
+    );
+});
+
+export { registerUser, loginUser, getProfile, updateProfile };
