@@ -15,6 +15,13 @@
       "when": 1778920517413,
       "tag": "0001_silent_lord_hawal",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1778949077492,
+      "tag": "0002_calm_bloodaxe",
+      "breakpoints": true
     }
   ]
 }

@@ -25,12 +25,14 @@ export const users = pgTable('users', {
     username: varchar('username', { length: 50 }).unique().notNull(),
     name: varchar('name', { length: 100 }),
     email: varchar('email', { length: 255 }).unique().notNull(),
-    passwordHash: varchar('password_hash', { length: 255 }).notNull(),
+    passwordHash: varchar('password_hash', { length: 255 }),        // nullable — Google users have no password
     phone: varchar('phone', { length: 20 }),
     avatarUrl: varchar('avatar_url', { length: 500 }),
     role: userRoleEnum('role').default('buyer'),
     isVerified: boolean('is_verified').default(false),
     isPro: boolean('is_pro').default(false),
+    provider: varchar('provider', { length: 20 }).default('local'), // 'local' | 'google'
+    googleId: varchar('google_id', { length: 255 }).unique(),
     createdAt: timestamp('created_at', { withTimezone: true }).default(sql`now()`),
     updatedAt: timestamp('updated_at', { withTimezone: true }).default(sql`now()`),
 });
