@@ -11,6 +11,7 @@ import {
   Bell,
   Activity,
   TrendingUp,
+  Inbox,
 } from "lucide-react";
 
 import { useSidebarStore } from "../store/sidebar_store";
@@ -46,15 +47,11 @@ const MENU_CONTENT: Record<string, MenuContent> = {
     id: "messages",
     title: "Messages",
     description: "Chat with agents and property owners.",
-    Icon: MessageSquare,
+    Icon: Inbox,
   },
-
 };
 
-/**
- * SidebarDetailPanel — Slides in from the left when menu is active.
- * Shows menu-specific content (map features, search filters, profile, etc.).
- */
+
 export default function SidebarDetailPanel() {
   const activeMenu = useSidebarStore((s) => s.activeMenu);
   const isPanelOpen = useSidebarStore((s) => s.isPanelOpen);
@@ -149,7 +146,7 @@ export default function SidebarDetailPanel() {
           {activeMenu === "messages" && (
             <SidebarCard className="p-5">
               <p className="text-sm text-white/50">
-                No messages yet. Connect with agents to start conversations.
+                You have no recent conversations
               </p>
             </SidebarCard>
           )}

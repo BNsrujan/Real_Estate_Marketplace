@@ -25,11 +25,11 @@ export default function WatchlistBadge({
         }`}
       >
         <Avatar>
-          <AvatarImage src={property.images[0].image} alt={property.images[0].alt} />
+          <AvatarImage src={property.images[0]?.image} alt={property.images[0].alt} />
           <AvatarFallback>CN</AvatarFallback>
         </Avatar>
         <Avatar>
-          <AvatarImage src={property.images[1].image} alt={property.images[1].alt} />
+          <AvatarImage src={property.images[1]?.image} alt={property.images[1]?.alt || "property"} />
           <AvatarFallback>CN</AvatarFallback>
         </Avatar>
         <AvatarGroupCount>+{property.images.length}</AvatarGroupCount>

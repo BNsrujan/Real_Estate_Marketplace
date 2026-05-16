@@ -50,7 +50,7 @@ const MapLayerSelector = ({ onLayerChange }: MapLayerSelectorProps) => {
             group relative overflow-hidden rounded-2xl md:rounded-3xl
             border border-white/10 bg-black/40 backdrop-blur-2xl
             shadow-[0_10px_50px_rgba(0,0,0,0.45)]
-            transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]
+            transition-all duration-300 hover:scale-[1.02]  
             w-full md:w-auto
           `}
         >
@@ -61,14 +61,14 @@ const MapLayerSelector = ({ onLayerChange }: MapLayerSelectorProps) => {
                 src={activeLayer.image}
                 alt={activeLayer.name}
                 fill
-                className="object-cover transition-transform duration-500 group-hover:scale-110"
+                className="object-cover transition-transform duration-500 group-hover:scale-110  "
               />
-              <div className="absolute inset-0 bg-black/20" />
+              <div className="absolute inset-0 bg-black/50 bg-linear-to-t from-black/90 via-black/30 to-transparent" />
             </div>
             <div className="hidden md:block absolute text-left bottom-2 left-1/2 -translate-x-1/2">
-              <div className="flex items-center gap-2 text-white/60">
-                <Layers3 size={14} />
-                <h3 className="text-sm font-semibold text-white/30">{activeLayer.name}</h3>
+              <div className="flex items-center gap-1 text-white/60">
+                {/* <Layers3 size={14} /> */}
+                <h3 className="text-sm font-semibold text-white/40">{activeLayer.name}</h3>
               </div>
             </div>
           </div>
@@ -89,7 +89,7 @@ const MapLayerSelector = ({ onLayerChange }: MapLayerSelectorProps) => {
               className="
                 group relative overflow-hidden rounded-2xl md:rounded-3xl
                 border border-white/10 bg-black/35 backdrop-blur-xl shadow-2xl
-                transition-all duration-500 hover:scale-[1.02] active:scale-[0.98]
+                transition-all duration-500 hover:scale-[1.02]  
               "
               style={{ transitionDelay: `${index * 90}ms` }}
             >

@@ -56,7 +56,6 @@ interface NammaDharaniStore {
 
   // ─── MAP ─────────────────────────────────────────────────────────────────
   map: {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     instance: any | null; // maplibregl.Map — typed as any to avoid SSR import
     isLoaded: boolean;
     currentZoom: number;
@@ -217,7 +216,7 @@ export const useStore = create<NammaDharaniStore>()(
         currentZoom: 4,
         currentBearing: 0,
         viewportBounds: null,
-        activeLayer: 'standard',
+        activeLayer: 'satellite',
         isAnimating: false,
       },
       setMap: (patch) =>

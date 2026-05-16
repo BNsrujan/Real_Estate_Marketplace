@@ -67,15 +67,15 @@ const NavBar = () => {
     activeTypes.includes("commercial_plot");
 
   return (
-    <div className="relative z-50 w-full flex-col md:flex-row flex justify-between items-center gap-3 md:gap-4 lg:h-24">
+    <div className="relative z-50 w-full flex-col md:flex-row flex justify-between md:items-center gap-3 md:gap-4 lg:h-24">
       {/* Search */}
-      <div className="relative w-full md:w-auto">
+      <div className="relative w-full min-w-68 md:w-auto">
         <input
           type="text"
           value={inputValue}
           onChange={(e) => handleSearchChange(e.target.value)}
           placeholder="Search properties..."
-          className="w-full md:w-60 lg:w-72 pl-10 pr-8 py-2 rounded-full bg-white/20 backdrop-blur-md text-white placeholder:text-white/60 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+          className="w-full min-w-68 md:w-60 lg:w-72 pl-10 pr-8 py-2 rounded-full bg-white/20 backdrop-blur-md text-white placeholder:text-white/60 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
         />
         <Search
           className="absolute left-3 top-1/2 -translate-y-1/2 text-white/70"
@@ -92,7 +92,7 @@ const NavBar = () => {
       </div>
 
       {/* Filters */}
-      <div className="flex gap-2 justify-center md:justify-end flex-wrap">
+      <div className="flex gap-2  md:justify-end ">
         {/* District reset pill */}
         {activeDistrict && (
           <button
@@ -106,7 +106,7 @@ const NavBar = () => {
 
         <button
           onClick={() => handleListingFilter("sale")}
-          className={`px-2 md:px-4 py-2 text-xs text-nowrap md:text-sm rounded-full backdrop-blur-md text-white hover:bg-white/30 transition ${
+          className={`px-2 md:px-4  text-xs text-nowrap md:text-sm rounded-full backdrop-blur-md text-white hover:bg-white/30 transition ${
             activeListingType === "sale"
               ? "bg-blue-500/40 border border-blue-400/60"
               : "bg-white/20"

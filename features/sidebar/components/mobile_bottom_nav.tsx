@@ -1,6 +1,6 @@
 "use client";
 
-import { Map, Bookmark, MessageSquare, User, Search } from "lucide-react";
+import { Map, Bookmark,  User, Search, Inbox } from "lucide-react";
 import { useSidebarStore, type SidebarMenuId } from "../store/sidebar_store";
 import { useStore } from "@/shared/store";
 
@@ -14,8 +14,8 @@ const NAV_ITEMS: NavItem[] = [
   { id: "map", label: "Map", Icon: Map },
   { id: "search", label: "Search", Icon: Search },
   { id: "saved", label: "Saved", Icon: Bookmark },
-  { id: "messages", label: "Messages", Icon: MessageSquare },
-  { id: "profile", label: "Profile", Icon: User },
+  { id: "messages", label: "Messages", Icon: Inbox },
+  
 ];
 
 const AUTH_GATED: Exclude<SidebarMenuId, null>[] = ["saved", "messages"];
@@ -47,7 +47,7 @@ export default function MobileBottomNav() {
       className="
         md:hidden
         fixed bottom-0 left-0 right-0
-        z-50
+        z-[51]
         flex items-center justify-around
         h-16
         border-t border-white/10

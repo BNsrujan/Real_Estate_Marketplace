@@ -114,7 +114,7 @@ const ProfileModal = ({
           fields={PROFILE_FORM_FIELDS(user)}
           onSubmit={handleProfileUpdate}
           trigger={
-            <button className="group flex w-full items-center justify-between rounded-2xl px-4 py-3 text-left transition-all hover:bg-white/5 active:scale-[0.98]">
+            <button className="group flex w-full items-center justify-between rounded-2xl px-4 py-3 text-left transition-all hover:bg-white/5  ">
               <div className="flex items-center gap-3">
                 <div className="rounded-xl bg-zinc-800/50 p-2 text-zinc-400 group-hover:text-white transition-colors">
                   <User size={18} />
@@ -133,7 +133,7 @@ const ProfileModal = ({
           fields={SETTINGS_FORM_FIELDS}
           onSubmit={handleSettingsUpdate}
           trigger={
-            <button className="group flex w-full items-center justify-between rounded-2xl px-4 py-3 text-left transition-all hover:bg-white/5 active:scale-[0.98]">
+            <button className="group flex w-full items-center justify-between rounded-2xl px-4 py-3 text-left transition-all hover:bg-white/5  ">
               <div className="flex items-center gap-3">
                 <div className="rounded-xl bg-zinc-800/50 p-2 text-zinc-400 group-hover:text-white transition-colors">
                   <Settings size={18} />
@@ -151,7 +151,7 @@ const ProfileModal = ({
         <button
           onClick={handleLogout}
           disabled={isLoggingOut}
-          className="flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-left transition-all hover:bg-red-500/10 active:scale-[0.98] disabled:opacity-50"
+          className="flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-left transition-all hover:bg-red-500/10   disabled:opacity-50"
         >
           <div className="rounded-xl bg-red-500/10 p-2 text-red-400">
             <LogOut size={18} />

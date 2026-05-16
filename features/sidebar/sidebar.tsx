@@ -98,7 +98,7 @@ function SidebarMenuItem({
         aria-label={item.title}
         title={item.title}
         onClick={() => onActivate(item.id)}
-        className={`group relative flex h-14 w-14 items-center justify-center overflow-hidden rounded-2xl transition-all duration-200 active:scale-[0.98] ${
+        className={`group relative flex h-14 w-14 items-center justify-center overflow-hidden rounded-2xl transition-all duration-200   ${
           pressed
             ? "border border-white/20 bg-white/6"
             : "border border-white/10 hover:bg-white/6"

@@ -29,11 +29,11 @@ export default function StartExploreButton({ onClick }: Props) {
           group
           relative
           overflow-hidden
-          rounded-3xl
+          rounded-lg md:rounded-3xl
           border-3
           border-white/20 backdrop-blur-md hover:border-white/30 transition
           bg-black/40
-          px-6 py-4
+          px-4 py-2 md:px-6 md:py-4
           duration-300
 
         "

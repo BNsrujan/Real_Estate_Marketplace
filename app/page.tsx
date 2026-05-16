@@ -7,6 +7,7 @@ import LoadingScreen from "@/shared/components/loading_screen";
 import { AppSidebar } from "@/features/sidebar/sidebar";
 import DetailPanel from "@/features/sidebar/components/sidebar_detail_panel";
 import MobileBottomNav from "@/features/sidebar/components/mobile_bottom_nav";
+import MobileBottomDrawer from "@/features/sidebar/components/mobile_bottom_drawer";
 import { useState, useCallback, useRef, useEffect } from "react";
 import { useStore } from "@/shared/store";
 
@@ -59,6 +60,7 @@ export default function HomePage() {
       </div>
 
       <MobileBottomNav />
+      <MobileBottomDrawer />
     </main>
   );
 }

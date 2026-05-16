@@ -119,13 +119,11 @@ export default function MapControls({ map }: MapControlsProps) {
       locateTimeoutRef.current = null;
     }
 
-
     watchIdRef.current = navigator.geolocation.watchPosition(
       (position) => {
         const lng = position.coords.longitude;
         const lat = position.coords.latitude;
         const accuracy = position.coords.accuracy ?? Infinity;
-
 
         if (accuracy <= ACCURACY_THRESHOLD) {
           setLocationState("active");
@@ -162,11 +160,20 @@ export default function MapControls({ map }: MapControlsProps) {
         setLocationState("error");
 
         if (err.code === err.PERMISSION_DENIED) {
-          addToast({ type: "error", message: "Location access denied. Enable it in browser settings." });
+          addToast({
+            type: "error",
+            message: "Location access denied. Enable it in browser settings.",
+          });
         } else if (err.code === err.POSITION_UNAVAILABLE) {
-          addToast({ type: "error", message: "Location unavailable. Check your device GPS." });
+          addToast({
+            type: "error",
+            message: "Location unavailable. Check your device GPS.",
+          });
         } else {
-          addToast({ type: "warning", message: "Location timed out. Tap to try again." });
+          addToast({
+            type: "warning",
+            message: "Location timed out. Tap to try again.",
+          });
         }
 
         setTimeout(() => {
@@ -230,11 +237,11 @@ export default function MapControls({ map }: MapControlsProps) {
           group
           relative
           flex
-          h-14
-          w-14
+          h-10 w-10 md:h-14 md:w-14
           items-center
           justify-center
-          rounded-3xl
+          rounded-lg md:rounded-3xl
+          p-1
           border
           backdrop-blur-2xl
           shadow-[0_10px_50px_rgba(0,0,0,0.45)]
@@ -248,13 +255,14 @@ export default function MapControls({ map }: MapControlsProps) {
         `}
       >
         {locationState === "locating" ? (
-          <Loader2 size={20} className="animate-spin" />
+          <Loader2  className="animate-spin " />
         ) : (
           <LocateFixed
-            size={20}
+            
             className="
               transition-transform duration-300
               group-hover:scale-110
+
             "
           />
         )}
@@ -275,7 +283,7 @@ export default function MapControls({ map }: MapControlsProps) {
       <div
         className="
           overflow-hidden
-          rounded-3xl
+          rounded-lg md:rounded-3xl
           border border-white/10
           bg-black/35
           backdrop-blur-2xl
@@ -289,8 +297,7 @@ export default function MapControls({ map }: MapControlsProps) {
           className="
             group
             flex
-            h-14
-            w-14
+            h-10 w-10 md:h-14 md:w-14 p-1
             items-center
             justify-center
             text-white/80
@@ -301,7 +308,7 @@ export default function MapControls({ map }: MapControlsProps) {
           "
         >
           <Plus
-            size={20}
+            
             className="transition-transform group-hover:scale-110"
           />
         </button>
@@ -316,8 +323,7 @@ export default function MapControls({ map }: MapControlsProps) {
           className="
             group
             flex
-            h-14
-            w-14
+            h-10 w-10 md:h-14 md:w-14 p-1
             items-center
             justify-center
             text-white/80
@@ -328,7 +334,6 @@ export default function MapControls({ map }: MapControlsProps) {
           "
         >
           <Minus
-            size={20}
             className="transition-transform group-hover:scale-110"
           />
         </button>

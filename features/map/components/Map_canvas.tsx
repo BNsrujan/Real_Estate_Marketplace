@@ -1,10 +1,10 @@
 "use client";
 
 import { useRef, useState, useCallback, useEffect } from "react";
+import { createPortal } from "react-dom";
 
 import StarField from "@/features/space/components/star_field";
 import StartExploreButton from "@/shared/components/common/startbtn";
-import PropertyPopup from "./property_popup";
 import { useMapInstance } from "../hooks/use_map_instance";
 import { useMarkerSync } from "../hooks/use_marker_sync";
 import { useDistrictZoom } from "../hooks/use_district_zoom";
@@ -16,6 +16,8 @@ import MapLayerSelector from "./layer_selector";
 import MapControls from "./map_controller";
 import Profile from "@/features/profile/components/Profile";
 import { usePropertyStore } from "@/features/properties/hooks/use_property_store";
+import PropertyHoverCard from "@/features/properties/components/property_card";
+import { useStore } from "@/shared/store";
 
 interface Props {
   setIsLoaded: React.Dispatch<React.SetStateAction<boolean>>;
@@ -26,17 +28,20 @@ export function MapCanvas({ setIsLoaded }: Props) {
   const titleRef = useRef<HTMLDivElement>(null);
 
   const [showButton, setShowButton] = useState(true);
-  const [activeProperty, setActiveProperty] = useState<Property | null>(null);
   const [hoveredProperty, setHoveredProperty] = useState<Property | null>(null);
+  const [hoverScreenPos, setHoverScreenPos] = useState<{ x: number; y: number } | null>(null);
   const hoverTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const [mounted, setMounted] = useState(false);
+
+  const setSelectedProperty = useStore((s) => s.setSelectedProperty);
+  const setUI = useStore((s) => s.setUI);
+
+  useEffect(() => { setMounted(true); }, []);
 
   const handleMarkerClick = useCallback((prop: Property) => {
-    setActiveProperty(null);
-
-    setTimeout(() => {
-      setActiveProperty({ ...prop });
-    }, 0);
-  }, []);
+    setSelectedProperty(prop);
+    setUI({ isPanelOpen: true });
+  }, [setSelectedProperty, setUI]);
 
   const handleMarkerHover = useCallback((prop: Property) => {
     if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
@@ -93,6 +98,24 @@ export function MapCanvas({ setIsLoaded }: Props) {
     filterByDistrictRef.current = filterByDistrict;
   }, [filterByDistrict]);
 
+  // Compute hover card screen position whenever hoveredProperty changes
+  useEffect(() => {
+    if (!hoveredProperty || !mapInstance.current) {
+      setHoverScreenPos(null);
+      return;
+    }
+    try {
+      const map = mapInstance.current;
+      const pt = map.project([hoveredProperty.lng, hoveredProperty.lat]);
+      const rect = map.getContainer().getBoundingClientRect();
+      setHoverScreenPos({ x: pt.x + rect.left, y: pt.y + rect.top });
+    } catch {
+      setHoverScreenPos(null);
+    }
+  // mapInstance is a stable ref — omitting it is intentional
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hoveredProperty]);
+
   // Expose district reset to Navbar (store-driven via resetFilters) and map controls
   const resetDistrictFilterRef = useRef(resetDistrictFilter);
   useEffect(() => {
@@ -108,7 +131,7 @@ export function MapCanvas({ setIsLoaded }: Props) {
     if (!map) return;
 
     try {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      
       const satSource = map.getSource("satellite") as any;
 
       if (layer === "osm") {
@@ -146,6 +169,14 @@ export function MapCanvas({ setIsLoaded }: Props) {
     }
   }, [mapInstance]);
 
+  // Sync store's activeLayer to map on initial load and whenever it changes
+  const activeLayer = useStore((s) => s.map.activeLayer);
+  useEffect(() => {
+    if (isStyleLoaded && mapInstance.current) {
+      handleLayerChange(activeLayer);
+    }
+  }, [isStyleLoaded, activeLayer, handleLayerChange]);
+
   return (
     <div className="relative w-full h-full overflow-hidden">
       {/* Map */}
@@ -159,7 +190,7 @@ export function MapCanvas({ setIsLoaded }: Props) {
         <StarField />
       </div>
 
-      <div className="absolute inset-0 z-2 pointer-events-none">
+      <div className="absolute md:bottom-0 bottom-14 inset-0 z-2 pointer-events-none">
         {showButton && (
           <div className="pointer-events-auto">
             <StartExploreButton onClick={zoomToKarnataka} />
@@ -196,7 +227,7 @@ export function MapCanvas({ setIsLoaded }: Props) {
             <NavBar />
           </div>
 
-          <div className="absolute bottom-0 left-0 right-0 pointer-events-auto p-3 md:p-4 lg:p-6">
+          <div className="absolute bottom-18 md:bottom-0 left-0 right-0 pointer-events-auto p-3 md:p-4 lg:p-6">
             <MapLayerSelector onLayerChange={handleLayerChange} />
           </div>
 
@@ -207,27 +238,17 @@ export function MapCanvas({ setIsLoaded }: Props) {
         </div>
       )}
 
-      {/* Property Popup - Show on hover with smooth animation */}
-      {hoveredProperty && (
-        <PropertyPopup
-          property={hoveredProperty}
-          onClose={() => setHoveredProperty(null)}
-          isHoverMode={true}
-          markerLngLat={{ lng: hoveredProperty.lng, lat: hoveredProperty.lat }}
-          mapInstance={mapInstance}
-        />
-      )}
-
-      {/* Property Popup - Show on click */}
-      {activeProperty && (
-        <PropertyPopup
-          property={activeProperty}
-          onClose={() => setActiveProperty(null)}
-          isHoverMode={false}
-          markerLngLat={{ lng: activeProperty.lng, lat: activeProperty.lat }}
-          mapInstance={mapInstance}
-        />
-      )}
+      {/* Hover card — floating near marker, desktop only */}
+      {mounted && hoveredProperty && hoverScreenPos &&
+        createPortal(
+          <div
+            className="fixed pointer-events-none transition-all duration-200"
+            style={{ left: hoverScreenPos.x + 24, top: hoverScreenPos.y - 120, zIndex: 99999 }}
+          >
+            <PropertyHoverCard property={hoveredProperty} onOpen={() => {}} />
+          </div>,
+          document.body,
+        )}
     </div>
   );
 }
