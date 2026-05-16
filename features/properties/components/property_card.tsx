@@ -61,7 +61,7 @@ export default function PropertyHoverCard({
 
         {/* Listing type badge */}
         <div className="absolute right-3 top-3 rounded-full bg-emerald-500/80 px-2 py-0.5 text-[10px] font-semibold text-white backdrop-blur-md capitalize">
-          {property.listingType}
+          For {property.listingType}
         </div>
       </div>
 

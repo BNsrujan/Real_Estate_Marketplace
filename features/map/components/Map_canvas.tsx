@@ -40,7 +40,7 @@ export function MapCanvas({ setIsLoaded }: Props) {
 
   const handleMarkerClick = useCallback((prop: Property) => {
     setSelectedProperty(prop);
-    setUI({ isPanelOpen: true });
+    setUI({ isPanelOpen: true, activeSidebarTab: 'map' });
   }, [setSelectedProperty, setUI]);
 
   const handleMarkerHover = useCallback((prop: Property) => {

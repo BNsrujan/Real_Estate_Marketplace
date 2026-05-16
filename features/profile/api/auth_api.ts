@@ -117,17 +117,32 @@ export function hasAuthToken(): boolean {
 
 // ─── Auth API calls ───────────────────────────────────────────────────────────
 
-export async function register(
-  username: string,
-  email: string,
-  password: string,
-): Promise<{ user: UserProfile; token: string }> {
+export async function register(opts: {
+  firstName: string;
+  lastName: string;
+  mobile: string;
+  email: string;
+  password: string;
+}): Promise<{ user: UserProfile; token: string }> {
+  const name = `${opts.firstName.trim()} ${opts.lastName.trim()}`.trim();
+  const username = opts.email.split('@')[0].toLowerCase().replace(/[^a-z0-9_]/g, '_');
+
   const res = await apiService.post<AuthResponse>('/api/v1/auth/register', {
     username,
-    name: username,
-    email,
-    password,
+    name,
+    email: opts.email,
+    password: opts.password,
+    phone: opts.mobile,
   });
+  const user = mapBackendUser(res.data.user);
+  saveAuthToken(res.data.token);
+  return { user, token: res.data.token };
+}
+
+export async function googleAuth(
+  credential: string,
+): Promise<{ user: UserProfile; token: string }> {
+  const res = await apiService.post<AuthResponse>('/api/v1/auth/google', { credential });
   const user = mapBackendUser(res.data.user);
   saveAuthToken(res.data.token);
   return { user, token: res.data.token };
@@ -172,4 +187,21 @@ export async function saveToWatchlist(propertyId: string): Promise<void> {
 
 export async function removeFromWatchlist(propertyId: string): Promise<void> {
   await apiService.delete(`/api/v1/watchlist/${propertyId}`);
+}
+
+// ─── OTP API calls ────────────────────────────────────────────────────────────
+
+export async function requestOtp(contact: string, type: 'email' | 'phone'): Promise<void> {
+  await apiService.post('/api/v1/auth/otp/send', { contact, type });
+}
+
+export async function verifyOtp(
+  contact: string,
+  type: 'email' | 'phone',
+  otp: string,
+): Promise<{ user: UserProfile; token: string }> {
+  const res = await apiService.post<AuthResponse>('/api/v1/auth/otp/verify', { contact, type, otp });
+  const user = mapBackendUser(res.data.user);
+  saveAuthToken(res.data.token);
+  return { user, token: res.data.token };
 }

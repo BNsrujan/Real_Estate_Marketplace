@@ -2,7 +2,7 @@
 
 import { useCallback, useState, useRef, useEffect } from "react";
 import { createPortal } from "react-dom";
-import { Map, Bookmark, MessageSquare, User, Search } from "lucide-react";
+import { Map, Bookmark, MessageSquare, Search } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,

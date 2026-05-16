@@ -3,12 +3,14 @@
 import React, { useState } from "react";
 import Image from "next/image";
 import {
-  Search, X, Lock,
+  Map, Search, MessageSquare,
+  X, Lock,
   Bookmark, BookmarkCheck,
   Phone, MapPin, Home, Wheat, MapPinned,
   Building2, Landmark, Factory,
   Send, CheckCircle,
 } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { SidebarCard } from "@/shared/ui/sidebar_card";
 import { useSidebarStore } from "../store/sidebar_store";
 import { useStore } from "@/shared/store";
@@ -16,53 +18,57 @@ import PropertyCard from "@/features/properties/components/property_card";
 import { useWatchlistSync } from "@/features/properties/hooks/use_watchlist_sync";
 import { submitEnquiry } from "@/features/properties/api/enquiry_api";
 
-type MenuId = "map" | "search" | "saved" | "messages" | "profile";
+// ─── Menu metadata ─────────────────────────────────────────────────────────────
 
-type SidebarMenu = {
-  id: MenuId;
+type MenuMeta = {
   title: string;
   description: string;
   Icon: React.ComponentType<{ size?: number; className?: string }>;
 };
 
-export type DetailPanelProps = {
-  activeMenu?: MenuId;
-  activeData?: SidebarMenu | null;
+const MENU_META: Record<string, MenuMeta> = {
+  map:      { title: "Map Explorer",     description: "Explore Karnataka properties with interactive layers.", Icon: Map },
+  search:   { title: "Smart Search",     description: "Search properties by filters, location, and landmarks.", Icon: Search },
+  saved:    { title: "Saved Properties", description: "Your bookmarked properties and recent views.", Icon: Bookmark },
+  messages: { title: "Messages",         description: "Chat with agents and property owners.", Icon: MessageSquare },
 };
+
+// ─── Property type icons ───────────────────────────────────────────────────────
 
 const TYPE_ICON: Record<string, React.ComponentType<{ size?: number; className?: string }>> = {
-  house: Home,
-  agriculture: Wheat,
-  site: MapPinned,
+  house:            Home,
+  agriculture:      Wheat,
+  site:             MapPinned,
   commercial_space: Building2,
-  apartment: Landmark,
-  commercial_plot: Factory,
-  "agriculture land": Wheat,
-  "commercial space": Building2,
-  "commercial plots": Factory,
+  apartment:        Landmark,
+  commercial_plot:  Factory,
+  "agriculture land":  Wheat,
+  "commercial space":  Building2,
+  "commercial plots":  Factory,
 };
 
-export function DetailPanel({ activeMenu: propActiveMenu, activeData }: DetailPanelProps) {
-  const storeActiveMenu = useSidebarStore((s) => s.activeMenu);
-  const savedProperties = useSidebarStore((s) => s.savedProperties);
-  const selectedProperty = useSidebarStore((s) => s.selectedProperty);
-  const setSelectedProperty = useSidebarStore((s) => s.setSelectedProperty);
-  const activeMenu = propActiveMenu ?? storeActiveMenu;
+// ─── Component ────────────────────────────────────────────────────────────────
 
-  const saved = useStore((s) => s.watchlist.saved);
+export function DetailPanel() {
+  const activeMenu          = useSidebarStore((s) => s.activeMenu);
+  const isPanelOpen         = useSidebarStore((s) => s.isPanelOpen);
+  const savedProperties     = useSidebarStore((s) => s.savedProperties);
+  const selectedProperty    = useSidebarStore((s) => s.selectedProperty);
+  const setSelectedProperty = useSidebarStore((s) => s.setSelectedProperty);
+
+  const saved           = useStore((s) => s.watchlist.saved);
   const isAuthenticated = useStore((s) => s.auth.isAuthenticated);
-  const openLoginModal = useStore((s) => s.openLoginModal);
+  const openLoginModal  = useStore((s) => s.openLoginModal);
   const { saveProperty, unsaveProperty } = useWatchlistSync();
 
-  const [showEnquiry, setShowEnquiry] = useState(false);
-  const [enquiryMsg, setEnquiryMsg] = useState("");
-  const [enquiryPhone, setEnquiryPhone] = useState("");
+  const [showEnquiry,       setShowEnquiry]       = useState(false);
+  const [enquiryMsg,        setEnquiryMsg]        = useState("");
+  const [enquiryPhone,      setEnquiryPhone]      = useState("");
   const [enquirySubmitting, setEnquirySubmitting] = useState(false);
-  const [enquirySent, setEnquirySent] = useState(false);
+  const [enquirySent,       setEnquirySent]       = useState(false);
 
-  const isSaved = selectedProperty
-    ? saved.some((p) => p.id === selectedProperty.id)
-    : false;
+  const isSaved       = selectedProperty ? saved.some((p) => p.id === selectedProperty.id) : false;
+  const menuContent   = activeMenu ? MENU_META[activeMenu] ?? null : null;
 
   const handleClose = () => {
     setSelectedProperty(null);
@@ -96,8 +102,8 @@ export function DetailPanel({ activeMenu: propActiveMenu, activeData }: DetailPa
     try {
       await submitEnquiry({
         propertyId: selectedProperty.id,
-        message: enquiryMsg.trim(),
-        phone: enquiryPhone.trim() || undefined,
+        message:    enquiryMsg.trim(),
+        phone:      enquiryPhone.trim() || undefined,
       });
       setEnquirySent(true);
       setTimeout(() => {
@@ -114,13 +120,20 @@ export function DetailPanel({ activeMenu: propActiveMenu, activeData }: DetailPa
   };
 
   return (
+    // Fixed overlay — floats above the map, does NOT push the map.
+    // translate-x animation matches the original slide-in/out behaviour.
+    // md:hidden keeps it off-screen on mobile (mobile uses MobileBottomDrawer).
     <aside
-      className="relative w-105 overflow-hidden border-r h-screen border-white/10 backdrop-blur-3xl z-100 flex flex-col"
-      style={{ backgroundColor: "rgba(20,20,20,0.7)" }}
+      className={cn(
+        "hidden md:flex flex-col",
+        "fixed left-16 md:left-22.5 top-0 h-screen",
+        "w-80 md:w-96 lg:w-105",
+        "border-r border-white/10 backdrop-blur-3xl overflow-hidden",
+        "transition-transform duration-300 ease-in-out z-40",
+        isPanelOpen ? "translate-x-0" : "-translate-x-full",
+      )}
+      style={{ backgroundColor: "rgba(20,20,20,0.85)" }}
     >
-      {/* Background glow */}
-      <div className="absolute -top-20 right-0 h-72 w-72 rounded-full bg-[rgba(255,255,255,0.02)] opacity-5 blur-3xl pointer-events-none" />
-
       {/* Content */}
       <div className="relative z-10 flex flex-col h-full">
         {selectedProperty ? (
@@ -133,7 +146,7 @@ export function DetailPanel({ activeMenu: propActiveMenu, activeData }: DetailPa
                 fill
                 className="object-cover"
               />
-              <div className="absolute inset-0 bg-linear-to-b from-black/20 to-black/70" />
+              <div className="absolute inset-0 bg-gradient-to-b from-black/20 to-black/70" />
 
               <button
                 onClick={handleClose}
@@ -158,7 +171,7 @@ export function DetailPanel({ activeMenu: propActiveMenu, activeData }: DetailPa
 
             {/* ── Scrollable body ── */}
             <div className="flex-1 overflow-y-auto p-5 space-y-4">
-              {/* Title & location */}
+              {/* Type chip + title + location */}
               <div>
                 {(() => {
                   const Icon = TYPE_ICON[selectedProperty.type] ?? Home;
@@ -280,11 +293,12 @@ export function DetailPanel({ activeMenu: propActiveMenu, activeData }: DetailPa
               )}
               <button
                 onClick={handleSave}
-                className={`w-full flex items-center justify-center gap-2 rounded-2xl border py-3.5 font-semibold transition ${
+                className={cn(
+                  "w-full flex items-center justify-center gap-2 rounded-2xl border py-3.5 font-semibold transition",
                   isSaved
                     ? "border-emerald-500/50 bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20"
-                    : "border-white/20 bg-white/5 text-white hover:bg-white/10"
-                }`}
+                    : "border-white/20 bg-white/5 text-white hover:bg-white/10",
+                )}
               >
                 {isSaved ? <BookmarkCheck size={16} /> : <Bookmark size={16} />}
                 {isSaved ? "Saved" : "Save Property"}
@@ -292,17 +306,17 @@ export function DetailPanel({ activeMenu: propActiveMenu, activeData }: DetailPa
             </div>
           </>
         ) : (
+          // ── Menu content ──
           <div className="flex-1 overflow-y-auto p-7">
             <div className="mb-8">
               <div
                 className="relative mb-5 flex h-20 w-20 items-center justify-center rounded-3xl border border-white/10 backdrop-blur-xl"
                 style={{ backgroundColor: "rgba(255,255,255,0.02)" }}
               >
-                {activeData && <activeData.Icon size={34} className="text-white" />}
+                {menuContent && <menuContent.Icon size={34} className="text-white" />}
               </div>
-
-              <h1 className="mb-3 text-3xl font-bold text-white">{activeData?.title}</h1>
-              <p className="leading-relaxed text-white/55">{activeData?.description}</p>
+              <h1 className="mb-3 text-3xl font-bold text-white">{menuContent?.title}</h1>
+              <p className="leading-relaxed text-white/55">{menuContent?.description}</p>
             </div>
 
             <div className="space-y-4">
@@ -388,21 +402,6 @@ export function DetailPanel({ activeMenu: propActiveMenu, activeData }: DetailPa
                     </p>
                   )}
                 </SidebarCard>
-              )}
-
-              {activeMenu === "profile" && (
-                <>
-                  <div className="flex items-center gap-4 rounded-3xl border border-white/10 bg-[rgba(255,255,255,0.03)] p-5">
-                    <div className="h-16 w-16 rounded-2xl bg-transparent border border-white/6" />
-                    <div>
-                      <h3 className="font-semibold text-white">Srujan BN</h3>
-                      <p className="text-sm text-white/45">Premium Member</p>
-                    </div>
-                  </div>
-                  <button className="w-full rounded-3xl border border-white/10 bg-transparent py-4 font-semibold text-white transition-all duration-300 hover:bg-[rgba(255,255,255,0.06)]">
-                    Edit Profile
-                  </button>
-                </>
               )}
             </div>
           </div>

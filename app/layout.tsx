@@ -1,6 +1,7 @@
 export const dynamic = "force-static";
 
 import { Manrope, Plus_Jakarta_Sans, Geist } from "next/font/google";
+import Script from "next/script";
 import "./globals.css";
 import { cn } from "@/lib/utils";
 import { SidebarProvider } from "@/shared/components/ui/sidebar";
@@ -49,6 +50,7 @@ export default function RootLayout({
       )}
     >
       <body className="antialiased">
+        <Script src="https://accounts.google.com/gsi/client" strategy="lazyOnload" />
         <SidebarProvider>
           <main>{children}</main>
         </SidebarProvider>

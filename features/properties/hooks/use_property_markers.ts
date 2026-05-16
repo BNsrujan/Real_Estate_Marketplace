@@ -87,11 +87,19 @@ export function usePropertyMarkers({
   function handleMarkerClick(property: Property, map: maplibregl.Map) {
     if (isAnimating) return;
 
+    // On desktop the detail panel slides in from the left (~400px wide).
+    // Adding left padding shifts the viewport centre into the visible area
+    // so the clicked marker lands to the right of the panel, not behind it.
+    // On mobile the panel is a bottom drawer, so no left offset is needed.
+    const isDesktop = typeof window !== 'undefined' && window.innerWidth >= 768;
+    const panelLeftPx = isDesktop ? 400 : 0;
+
     map.flyTo({
       center: [property.lng, property.lat],
       zoom: MARKER_ZOOM_LEVEL,
       duration: MARKER_ZOOM_DURATION,
       curve: 1.42,
+      padding: { left: panelLeftPx, top: 0, right: 0, bottom: 0 },
     });
 
     if (activeMarkerRef.current) {

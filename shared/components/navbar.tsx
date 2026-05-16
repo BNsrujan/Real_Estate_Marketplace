@@ -69,13 +69,15 @@ const NavBar = () => {
   return (
     <div className="relative z-50 w-full flex-col md:flex-row flex justify-between md:items-center gap-3 md:gap-4 lg:h-24">
       {/* Search */}
+
+      
       <div className="relative w-full min-w-68 md:w-auto">
         <input
           type="text"
           value={inputValue}
           onChange={(e) => handleSearchChange(e.target.value)}
           placeholder="Search properties..."
-          className="w-full min-w-68 md:w-60 lg:w-72 pl-10 pr-8 py-2 rounded-full bg-white/20 backdrop-blur-md text-white placeholder:text-white/60 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+          className="w-full min-w-68 md:w-60 lg:w-72 pl-10 pr-8 py-2 rounded-full bg-white/20 backdrop-blur-md text-white placeholder:text-white/60 focus:outline-none focus:ring-2 focus:ring-emerald-500/60 text-sm"
         />
         <Search
           className="absolute left-3 top-1/2 -translate-y-1/2 text-white/70"
@@ -90,9 +92,10 @@ const NavBar = () => {
           </button>
         )}
       </div>
+     
 
       {/* Filters */}
-      <div className="flex gap-2  md:justify-end ">
+      <div className="flex gap-2 md:mx-4  md:justify-end ">
         {/* District reset pill */}
         {activeDistrict && (
           <button
@@ -106,9 +109,9 @@ const NavBar = () => {
 
         <button
           onClick={() => handleListingFilter("sale")}
-          className={`px-2 md:px-4  text-xs text-nowrap md:text-sm rounded-full backdrop-blur-md text-white hover:bg-white/30 transition ${
+          className={`px-2 md:px-4 py-2 text-xs text-nowrap md:text-sm rounded-full backdrop-blur-md text-white hover:bg-white/30 transition ${
             activeListingType === "sale"
-              ? "bg-blue-500/40 border border-blue-400/60"
+              ? "bg-emerald-500/30 border border-emerald-500/50 text-emerald-300"
               : "bg-white/20"
           }`}
         >
@@ -119,14 +122,14 @@ const NavBar = () => {
           onClick={() => handleListingFilter("rent")}
           className={`px-2 md:px-4 py-2 text-xs text-nowrap md:text-sm rounded-full backdrop-blur-md text-white hover:bg-white/30 transition ${
             activeListingType === "rent"
-              ? "bg-blue-500/40 border border-blue-400/60"
+              ? "bg-emerald-500/30 border border-emerald-500/50 text-emerald-300"
               : "bg-white/20"
           }`}
         >
           For Rent
         </button>
 
-        <button
+        {/* <button
           onClick={() => handleTypeFilter("commercial")}
           className={`hidden sm:block px-2 md:px-4 text-nowrap py-2 text-xs md:text-sm rounded-full backdrop-blur-md text-white hover:bg-white/30 transition ${
             isCommercialActive
@@ -135,7 +138,7 @@ const NavBar = () => {
           }`}
         >
           Commercial
-        </button>
+        </button> */}
 
         {/* Clear all filters */}
         {hasActiveFilters && (
