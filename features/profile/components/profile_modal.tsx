@@ -11,7 +11,7 @@ import {
   UserCircle,
 } from "lucide-react";
 import { useAuthStore } from "../store/auth_store";
-import DialogModule from "@/shared/components/common/dialogmodule";
+import FormDialog from "@/shared/components/common/form_dialog";
 
 type ProfileModalProps = {
   user?: {
@@ -108,7 +108,7 @@ const ProfileModal = ({
 
       <div className="px-3 pb-3 space-y-1">
        
-        <DialogModule
+        <FormDialog
           title="Edit Profile"
           description="Update your personal information and how others see you."
           fields={PROFILE_FORM_FIELDS(user)}
@@ -127,7 +127,7 @@ const ProfileModal = ({
         />
 
         {/* Settings Dialog */}
-        <DialogModule
+        <FormDialog
           title="App Settings"
           description="Customize your experience and notification preferences."
           fields={SETTINGS_FORM_FIELDS}

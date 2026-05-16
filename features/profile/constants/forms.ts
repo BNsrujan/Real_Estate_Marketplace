@@ -1,4 +1,4 @@
-import { FormField } from "@/shared/components/common/dialogmodule";
+import type { FormField } from "@/shared/components/common/form_dialog";
 
 export const PROFILE_FORM_FIELDS = (user?: { name?: string; email?: string; avatar?: string }): FormField[] => [
   {
