@@ -6,12 +6,11 @@ import authRouter from './routes/auth.routes.js';
 import propertyRouter from './routes/property.routes.js';
 import districtRouter from './routes/district.routes.js';
 import watchlistRouter from './routes/watchlist.routes.js';
+import enquiryRouter from './routes/enquiry.routes.js';
 import { ApiError } from './utils/apiErrors.js';
 
 const app = express();
 
-// CORS_ORIGIN can be a comma-separated list of allowed origins.
-// e.g. "http://localhost:3000,https://your-frontend.vercel.app"
 const rawOrigins = process.env.CORS_ORIGIN ?? 'http://localhost:3000';
 const allowedOrigins = rawOrigins.split(',').map((o) => o.trim());
 
@@ -37,6 +36,7 @@ app.use('/api/v1/auth', authRouter);
 app.use('/api/v1/properties', propertyRouter);
 app.use('/api/v1/districts', districtRouter);
 app.use('/api/v1/watchlist', watchlistRouter);
+app.use('/api/v1/enquiries', enquiryRouter);
 
 app.use((err, _req, res, _next) => {
     if (err instanceof ApiError) {

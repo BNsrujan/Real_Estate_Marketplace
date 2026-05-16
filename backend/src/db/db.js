@@ -11,7 +11,7 @@ const pool = new Pool({
         : false,
 });
 
-export const db = drizzle(pool, { schema });
+export const db = drizzle(pool, { schema });                
 
 const connectDB = async () => {
     try {
