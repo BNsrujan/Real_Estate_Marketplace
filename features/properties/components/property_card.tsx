@@ -9,7 +9,7 @@ import {
   Landmark,
   Factory,
 } from "lucide-react";
-import { useSidebarStore } from "@/store/sidebar_store";
+import { useSidebarStore } from "@/features/sidebar/store/sidebar_store";
 
 export interface Property {
   id: string;

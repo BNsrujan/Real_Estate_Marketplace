@@ -90,8 +90,8 @@ export default function MapControls({ map }: MapControlsProps) {
 
     setLocationState("locating");
 
-    const ACCURACY_THRESHOLD = 30; 
-    const LOCATE_TIMEOUT = 25000; 
+    const ACCURACY_THRESHOLD = 30;
+    const LOCATE_TIMEOUT = 25000;
 
     const markerElement = document.createElement("div");
 
@@ -117,14 +117,14 @@ export default function MapControls({ map }: MapControlsProps) {
       locateTimeoutRef.current = null;
     }
 
-  
+
     watchIdRef.current = navigator.geolocation.watchPosition(
       (position) => {
         const lng = position.coords.longitude;
         const lat = position.coords.latitude;
         const accuracy = position.coords.accuracy ?? Infinity;
 
-      
+
         if (accuracy <= ACCURACY_THRESHOLD) {
           setLocationState("active");
         } else {

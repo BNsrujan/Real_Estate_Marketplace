@@ -24,14 +24,14 @@ const mapLayers: LayerType[] = [
     name: "Standard",
     image: "/pics/layers/standard.png",
     color: "from-orange-400/20 to-red-500/10",
-  
+
   },
   {
     id: "traffic",
     name: "Traffic",
     image: "/pics/layers/traffic.png",
     color: "from-cyan-400/20 to-blue-500/10",
-   
+
   },
   {
     id: "osm",
@@ -79,13 +79,13 @@ const MapLayerSelector = () => {
             w-full md:w-auto
           "
         >
-         
+
           <div
             className={`absolute inset-0 bg-gradient-to-br ${activeLayer.color}`}
           />
 
           <div className="relative flex items-center gap-2 md:gap-4 p-2 md:p-0">
-           
+
             <div
               className="
                 relative
@@ -113,7 +113,7 @@ const MapLayerSelector = () => {
             {/* Content */}
             <div className="hidden md:block absolute text-left bottom-2 center left-1/2 -translate-x-1/2">
               <div className="flex items-center gap-2 text-white/60">
-                
+
                 <Layers3 size={14} />
                 <h3 className="text-sm font-semibold text-white/30">
                   {activeLayer.name}
@@ -175,7 +175,7 @@ const MapLayerSelector = () => {
                 {/* Layer Name */}
                 <div className="absolute text-left bottom-2 center left-1/2 -translate-x-1/2">
                   <div className="flex items-center gap-2 text-white/60">
-                    
+
                     <h3 className="text-xs  text-wrap font-semibold text-white/30">
                       {layer.name}
                     </h3>

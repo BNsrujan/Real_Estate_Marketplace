@@ -3,7 +3,7 @@
 import React from "react";
 import { Search, X, MapPin, Grid2x2, DollarSign, Home } from "lucide-react";
 import { SidebarCard } from "@/shared/ui/sidebar_card";
-import { useSidebarStore } from "@/store/sidebar_store";
+import { useSidebarStore } from "../store/sidebar_store";
 import PropertyCard from "@/features/properties/components/property_card";
 
 type MenuId = "map" | "search" | "saved" | "messages" | "profile";

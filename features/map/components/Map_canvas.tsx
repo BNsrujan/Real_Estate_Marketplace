@@ -2,9 +2,9 @@
 
 import { useRef, useState, useCallback, useEffect } from "react";
 
-import StarField from "@/features/space/star_field";
+import StarField from "@/features/space/components/star_field";
 import StartExploreButton from "@/shared/components/common/startbtn";
-import PropertyPopup from "@/shared/components/map/property_popup";
+import PropertyPopup from "./property_popup";
 import { useMapInstance } from "../hooks/use_map_instance";
 import { useMarkerSync } from "../hooks/use_marker_sync";
 import { useDistrictZoom } from "../hooks/use_district_zoom";
@@ -12,8 +12,8 @@ import { usePropertyMarkers } from "@/features/properties/hooks/use_property_mar
 import { TITLE_FADE_ZOOM } from "@/lib/globe/map_config";
 import type { Property } from "@/shared/types";
 import NavBar from "@/shared/components/navbar";
-import MapLayerSelector from "@/features/mapLayerSelector/map_layer_selector";
-import MapControls from "@/features/map/components/map_contoler";
+import MapLayerSelector from "./layer_selector";
+import MapControls from "./map_controller";
 import Profile from "@/features/profile/components/Profile";
 
 interface Props {

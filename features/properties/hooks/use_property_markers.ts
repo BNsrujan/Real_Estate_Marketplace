@@ -4,7 +4,7 @@ import { useEffect, useRef } from "react";
 import maplibregl from "maplibre-gl";
 import { PropertyMarkerService } from "@/features/properties/services/property_marker_service";
 import { getProperties } from "@/features/properties/api/property_api";
-import { useSidebarStore } from "@/store/sidebar_store";
+import { useSidebarStore } from "@/features/sidebar/store/sidebar_store";
 import type { Property } from "@/shared/types";
 
 const PROPERTY_MARKER_MIN_ZOOM = 5.5;

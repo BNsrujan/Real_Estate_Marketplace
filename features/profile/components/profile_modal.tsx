@@ -10,7 +10,7 @@ import {
   Mail,
   UserCircle,
 } from "lucide-react";
-import { useAuthStore } from "@/store/auth_store";
+import { useAuthStore } from "../store/auth_store";
 import DialogModule from "@/shared/components/common/dialogmodule";
 
 type ProfileModalProps = {

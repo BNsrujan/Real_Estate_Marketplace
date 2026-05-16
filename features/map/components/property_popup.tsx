@@ -80,9 +80,9 @@ export default function PropertyPopup({ property, onClose, isHoverMode = false, 
           transform: visible ? "scale(1)" : "scale(0.95)",
         }}
       >
-        <PropertyHoverCard 
-          property={display as any} 
-          onOpen={() => {}} 
+        <PropertyHoverCard
+          property={display as any}
+          onOpen={() => {}}
         />
       </div>,
       document.body

@@ -2,8 +2,8 @@
 
 import { useEffect, useRef, useState } from "react";
 import ProfileModal from "./profile_modal";
-import LoginModal from "./LoginModal";
-import { useAuthStore } from "@/store/auth_store";
+import LoginModal from "./login_modal";
+import { useAuthStore } from "../store/auth_store";
 
 const Profile = () => {
   const { isLoggedIn, user } = useAuthStore();

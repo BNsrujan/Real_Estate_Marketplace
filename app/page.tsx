@@ -3,7 +3,7 @@
 import { MapCanvasLoader } from "@/features/map/components/map_canvas_loader";
 import LoadingScreen from "@/shared/components/loading_screen";
 import { AppSidebar } from "@/features/sidebar/sidebar";
-import DetailPanel from "@/features/sidebarDetails/sidebar_detail_panel";
+import DetailPanel from "@/features/sidebar/components/sidebar_detail_panel";
 import { useState } from "react";
 
 export default function HomePage() {

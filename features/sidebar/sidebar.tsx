@@ -10,7 +10,7 @@ import {
 } from "@/shared/components/ui/sidebar";
 import { Separator } from "@/shared/components/ui/separator";
 import React from "react";
-import { useSidebarStore, type SidebarMenuId } from "@/store/sidebar_store";
+import { useSidebarStore, type SidebarMenuId } from "./store/sidebar_store";
 import WatchlistBadge from "./watchlist_badge";
 import Image from "next/image";
 

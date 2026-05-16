@@ -40,16 +40,14 @@ function Stars3D() {
 
     pointsRef.current.rotation.y = clock.getElapsedTime() * 0.008;
 
-    const targetX = mouseRef.current.x * 3; 
+    const targetX = mouseRef.current.x * 3;
     const targetY = mouseRef.current.y * 2;
-
 
     const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
 
     const nextX = lerp(pointsRef.current.position.x, targetX, 0.03);
     const nextY = lerp(pointsRef.current.position.y, targetY, 0.03);
 
-   
     const clamp = (v: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, v));
 
     pointsRef.current.position.x = clamp(nextX, -8, 8);

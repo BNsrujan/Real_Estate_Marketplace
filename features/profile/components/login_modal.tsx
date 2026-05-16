@@ -1,6 +1,6 @@
 "use client";
 
-import { useAuthStore } from "@/store/auth_store";
+import { useAuthStore } from "../store/auth_store";
 import DialogModule from "@/shared/components/common/dialogmodule";
 import { LOGIN_FORM_FIELDS } from "../constants/forms";
 
@@ -16,7 +16,7 @@ const LoginModal = ({ open, onOpenChange }: LoginModalProps) => {
     const { email, password } = data;
 
     try {
-      
+
       await new Promise((resolve) => setTimeout(resolve, 1500));
 
 
@@ -27,13 +27,13 @@ const LoginModal = ({ open, onOpenChange }: LoginModalProps) => {
           name: email.split("@")[0],
           email: email,
         });
-       
+
       } else {
         throw new Error("Invalid email or password. Use test@example.com");
       }
     } catch (err) {
       console.error("Login error:", err);
-      throw err; 
+      throw err;
     }
   };
 
