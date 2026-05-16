@@ -9,32 +9,18 @@ import {
   Landmark,
   Factory,
 } from "lucide-react";
-import { useSidebarStore } from "@/features/sidebar/store/sidebar_store";
+import type { Property } from "@/shared/types";
 
-export interface Property {
-  id: string;
-  title: string;
-  type:
-    | "house"
-    | "site"
-    | "agriculture land"
-    | "commercial space"
-    | "apartment"
-    | "commercial plots";
-  price: string;
-  size: string;
-  lat: number;
-  lng: number;
-  district: string;
-  images: string[];
-}
-
-const TYPE_ICON = {
+const TYPE_ICON: Record<string, React.ComponentType<{ size?: number; className?: string }>> = {
   house: Home,
-  "agriculture land": Wheat,
+  agriculture: Wheat,
   site: MapPinned,
-  "commercial space": Building2,
+  commercial_space: Building2,
   apartment: Landmark,
+  commercial_plot: Factory,
+  // legacy labels (in case old data still flows through)
+  "agriculture land": Wheat,
+  "commercial space": Building2,
   "commercial plots": Factory,
 };
 
@@ -47,23 +33,19 @@ export default function PropertyHoverCard({
   property,
   onOpen,
 }: PropertyHoverCardProps) {
-  const Icon = TYPE_ICON[property.type];
-  const setSelectedPropertyId = useSidebarStore((s) => s.setSelectedPropertyId);
-
-  const handleClick = () => {
-    setSelectedPropertyId(property.id);
-    onOpen(property);
-  };
+  const Icon = TYPE_ICON[property.type] ?? Home;
+  const thumbnail = property.thumbnailUrl || property.imageUrls?.[0] || "/property/image.png";
+  const location = [property.city, property.district].filter(Boolean).join(", ");
 
   return (
     <div
-      onClick={handleClick}
+      onClick={() => onOpen(property)}
       className="w-72 overflow-hidden rounded-3xl border border-white/10 bg-black/80 backdrop-blur-2xl shadow-2xl cursor-pointer transition-all duration-300 hover:scale-[1.02]"
     >
       {/* Image */}
       <div className="relative h-40 w-full">
         <Image
-          src={property.images?.[0] || "/property/image.png"}
+          src={thumbnail}
           alt={property.title}
           fill
           className="object-cover"
@@ -73,8 +55,13 @@ export default function PropertyHoverCard({
         <div className="absolute left-3 top-3 flex items-center gap-2 rounded-full bg-black/60 px-3 py-1 backdrop-blur-md">
           <Icon size={14} className="text-white/80" />
           <span className="text-xs text-white/80 capitalize">
-            {property.type}
+            {property.type.replace(/_/g, " ")}
           </span>
+        </div>
+
+        {/* Listing type badge */}
+        <div className="absolute right-3 top-3 rounded-full bg-emerald-500/80 px-2 py-0.5 text-[10px] font-semibold text-white backdrop-blur-md capitalize">
+          {property.listingType}
         </div>
       </div>
 
@@ -85,7 +72,7 @@ export default function PropertyHoverCard({
         </h3>
 
         <p className="mt-1 text-sm text-white/45">
-          {property.district}, Karnataka
+          {location || "Karnataka"}
         </p>
 
         <div className="mt-4 flex items-end justify-between">
@@ -94,16 +81,16 @@ export default function PropertyHoverCard({
               Price
             </p>
             <p className="text-sm font-semibold text-white">
-              {property.price}
+              {property.priceLabel}
             </p>
           </div>
 
           <div className="text-right">
             <p className="text-[11px] uppercase tracking-wider text-white/35">
-              Size
+              Area
             </p>
             <p className="text-sm font-semibold text-white">
-              {property.size}
+              {property.area} {property.areaUnit}
             </p>
           </div>
         </div>

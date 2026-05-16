@@ -9,8 +9,8 @@ import { useMapInstance } from "../hooks/use_map_instance";
 import { useMarkerSync } from "../hooks/use_marker_sync";
 import { useDistrictZoom } from "../hooks/use_district_zoom";
 import { usePropertyMarkers } from "@/features/properties/hooks/use_property_markers";
-import { TITLE_FADE_ZOOM } from "@/lib/globe/map_config";
-import type { Property } from "@/shared/types";
+import { TILE_SOURCES, TITLE_FADE_ZOOM } from "@/lib/globe/map_config";
+import type { Property, LayerType } from "@/shared/types";
 import NavBar from "@/shared/components/navbar";
 import MapLayerSelector from "./layer_selector";
 import MapControls from "./map_controller";
@@ -93,6 +93,49 @@ export function MapCanvas({ setIsLoaded }: Props) {
     mapRef: mapInstance,
   });
 
+  const handleLayerChange = useCallback((layer: LayerType) => {
+    const map = mapInstance.current;
+    if (!map) return;
+
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const satSource = map.getSource("satellite") as any;
+
+      if (layer === "osm") {
+        satSource?.setTiles(TILE_SOURCES.osm.tiles);
+        map.setPaintProperty("satellite", "raster-opacity", 1);
+        map.setPaintProperty("roads", "raster-opacity", 0);
+        map.setPaintProperty("labels", "raster-opacity", 0);
+      } else if (layer === "standard") {
+        satSource?.setTiles(TILE_SOURCES.topo.tiles);
+        map.setPaintProperty("satellite", "raster-opacity", 1);
+        map.setPaintProperty("roads", "raster-opacity", 0);
+        map.setPaintProperty("labels", "raster-opacity", 0);
+      } else if (layer === "traffic") {
+        satSource?.setTiles(TILE_SOURCES.satellite.tiles);
+        map.setPaintProperty("satellite", "raster-opacity", 0.7);
+        map.setPaintProperty("roads", "raster-opacity", [
+          "interpolate", ["linear"], ["zoom"], 8, 0, 11, 1, 18, 1,
+        ]);
+        map.setPaintProperty("labels", "raster-opacity", [
+          "interpolate", ["linear"], ["zoom"], 9, 0, 12, 1,
+        ]);
+      } else {
+        // satellite (default)
+        satSource?.setTiles(TILE_SOURCES.satellite.tiles);
+        map.setPaintProperty("satellite", "raster-opacity", 1);
+        map.setPaintProperty("roads", "raster-opacity", [
+          "interpolate", ["linear"], ["zoom"], 8, 0, 11, 0.9, 18, 1,
+        ]);
+        map.setPaintProperty("labels", "raster-opacity", [
+          "interpolate", ["linear"], ["zoom"], 9, 0, 12, 0.95,
+        ]);
+      }
+    } catch (e) {
+      console.warn("Layer switch failed:", e);
+    }
+  }, [mapInstance]);
+
   return (
     <div className="relative w-full h-full overflow-hidden">
       {/* Map */}
@@ -144,7 +187,7 @@ export function MapCanvas({ setIsLoaded }: Props) {
           </div>
 
           <div className="absolute bottom-0 left-0 right-0 pointer-events-auto p-3 md:p-4 lg:p-6">
-            <MapLayerSelector />
+            <MapLayerSelector onLayerChange={handleLayerChange} />
           </div>
 
           </div>

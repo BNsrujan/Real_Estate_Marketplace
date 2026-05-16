@@ -11,6 +11,7 @@ import {
 import { Separator } from "@/shared/components/ui/separator";
 import React from "react";
 import { useSidebarStore, type SidebarMenuId } from "./store/sidebar_store";
+import { useStore } from "@/shared/store";
 import WatchlistBadge from "./watchlist_badge";
 import Image from "next/image";
 
@@ -115,6 +116,8 @@ function SidebarMenuItem({
   );
 }
 
+const AUTH_GATED_MENUS: Exclude<MenuId, null>[] = ["saved", "messages"];
+
 export function AppSidebar() {
   const activeMenu = useSidebarStore((s) => s.activeMenu);
   const setActiveMenu = useSidebarStore((s) => s.setActiveMenu);
@@ -122,6 +125,8 @@ export function AppSidebar() {
   const openPanel = useSidebarStore((s) => s.openPanel);
   const togglePanel = useSidebarStore((s) => s.togglePanel);
   const savedProperties = useSidebarStore((s) => s.savedProperties);
+  const isAuthenticated = useStore((s) => s.auth.isAuthenticated);
+  const openLoginModal = useStore((s) => s.openLoginModal);
 
   const [selectedPropertyId, setSelectedPropertyId] = useState<string | null>(null);
   const [popupPos, setPopupPos] = useState<{ top: number; left: number } | null>(null);
@@ -130,13 +135,17 @@ export function AppSidebar() {
   const watchlistItems: WatchlistItem[] = savedProperties.map((p) => ({
     id: p.id,
     area: p.district || p.title,
-    images: (p.images ?? []).length > 0
-      ? (p.images as string[]).map((img) => ({ image: img, alt: p.title }))
-      : [{ image: "/property/image.png", alt: p.title }],
+    images: (p.imageUrls ?? []).length > 0
+      ? p.imageUrls.map((img) => ({ image: img, alt: p.title }))
+      : [{ image: p.thumbnailUrl || "/property/image.png", alt: p.title }],
   }));
 
   const handleMenuActivate = useCallback(
     (id: MenuId) => {
+      if (id && AUTH_GATED_MENUS.includes(id) && !isAuthenticated) {
+        openLoginModal();
+        return;
+      }
       if (id === activeMenu) {
         togglePanel();
       } else {
@@ -144,7 +153,7 @@ export function AppSidebar() {
         openPanel();
       }
     },
-    [activeMenu, setActiveMenu, openPanel, togglePanel],
+    [activeMenu, setActiveMenu, openPanel, togglePanel, isAuthenticated, openLoginModal],
   );
 
   const handleBadgeClick = (e: React.MouseEvent, id: string) => {

@@ -6,7 +6,7 @@ import LoginModal from "./login_modal";
 import { useAuthStore } from "../store/auth_store";
 
 const Profile = () => {
-  const { isLoggedIn, user } = useAuthStore();
+  const { isLoggedIn, user } = useAuthStore((s) => s);
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
   const [loginModalOpen, setLoginModalOpen] = useState(false);
 

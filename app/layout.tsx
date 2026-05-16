@@ -2,6 +2,8 @@ import { Manrope, Plus_Jakarta_Sans, Geist } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
 import { SidebarProvider } from "@/shared/components/ui/sidebar";
+import ToastContainer from "@/shared/components/common/toast_container";
+import GlobalLoginModal from "@/shared/components/common/global_login_modal";
 import { Metadata } from "next";
 
 const geist = Geist({ subsets: ["latin"], variable: "--font-sans" ,  display: "swap",
@@ -48,6 +50,8 @@ export default function RootLayout({
         <SidebarProvider>
           <main>{children}</main>
         </SidebarProvider>
+        <ToastContainer />
+        <GlobalLoginModal />
       </body>
     </html>
   );

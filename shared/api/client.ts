@@ -1,37 +1,40 @@
-import { env } from "@/lib/env";
+/**
+ * shared/api/client — Compatibility shim over apiService (SERVICE-001).
+ *
+ * Existing code that imports `apiFetch` continues to work.
+ * New code should import apiService from @/shared/services/api.service directly.
+ */
 
-type RequestOptions = Omit<RequestInit, "body"> & { body?: unknown };
+import { apiService } from '@/shared/services/api.service';
 
-function getAuthToken(): string | null {
-  if (typeof window === "undefined") return null;
-  return localStorage.getItem("auth_token");
-}
+type RequestOptions = Omit<RequestInit, 'body'> & { body?: unknown };
 
 export async function apiFetch<T>(
   path: string,
   options: RequestOptions = {},
 ): Promise<T> {
-  const { body, headers, ...rest } = options;
+  const { method = 'GET', body, headers } = options;
 
-  const token = getAuthToken();
-  const mergedHeaders: Record<string, string> = {
-    "Content-Type": "application/json",
-    ...(token ? { Authorization: `Bearer ${token}` } : {}),
-    ...(headers as Record<string, string> | undefined),
-  };
-
-  const response = await fetch(`${env.apiUrl}${path}`, {
-    ...rest,
-    headers: mergedHeaders,
-    body: body !== undefined ? JSON.stringify(body) : undefined,
-  });
-
-  if (!response.ok) {
-    const error = await response.json().catch(() => ({}));
-    throw new Error(
-      (error as { message?: string }).message ?? `API error ${response.status}`,
-    );
+  switch ((method as string).toUpperCase()) {
+    case 'POST':
+      return apiService.post<T>(path, body, {
+        headers: headers as Record<string, string>,
+      });
+    case 'PUT':
+      return apiService.put<T>(path, body, {
+        headers: headers as Record<string, string>,
+      });
+    case 'PATCH':
+      return apiService.patch<T>(path, body, {
+        headers: headers as Record<string, string>,
+      });
+    case 'DELETE':
+      return apiService.delete<T>(path, {
+        headers: headers as Record<string, string>,
+      });
+    default:
+      return apiService.get<T>(path, {
+        headers: headers as Record<string, string>,
+      });
   }
-
-  return response.json() as Promise<T>;
 }

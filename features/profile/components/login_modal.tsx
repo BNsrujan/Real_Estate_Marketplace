@@ -1,8 +1,9 @@
-"use client";
+'use client';
 
-import { useAuthStore } from "../store/auth_store";
-import DialogModule from "@/shared/components/common/dialogmodule";
-import { LOGIN_FORM_FIELDS } from "../constants/forms";
+import { useStore } from '@/shared/store';
+import { login as loginApi } from '../api/auth_api';
+import DialogModule from '@/shared/components/common/dialogmodule';
+import { LOGIN_FORM_FIELDS } from '../constants/forms';
 
 interface LoginModalProps {
   open: boolean;
@@ -10,31 +11,13 @@ interface LoginModalProps {
 }
 
 const LoginModal = ({ open, onOpenChange }: LoginModalProps) => {
-  const login = useAuthStore((state) => state.login);
+  const loginSuccess = useStore((s) => s.loginSuccess);
 
-  const handleLogin = async (data: Record<string, any>) => {
+  const handleLogin = async (data: Record<string, string>) => {
     const { email, password } = data;
-
-    try {
-
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-
-
-      const isSuccess = email === "test@example.com";
-
-      if (isSuccess || email.includes("success")) {
-        login({
-          name: email.split("@")[0],
-          email: email,
-        });
-
-      } else {
-        throw new Error("Invalid email or password. Use test@example.com");
-      }
-    } catch (err) {
-      console.error("Login error:", err);
-      throw err;
-    }
+    const { user, token } = await loginApi(email, password);
+    loginSuccess(user, token);
+    onOpenChange(false);
   };
 
   return (

@@ -1,9 +1,10 @@
 "use client";
 
 import React from "react";
-import { Search, X, MapPin, Grid2x2, DollarSign, Home } from "lucide-react";
+import { Search, X, MapPin, Grid2x2, DollarSign, Home, Lock } from "lucide-react";
 import { SidebarCard } from "@/shared/ui/sidebar_card";
 import { useSidebarStore } from "../store/sidebar_store";
+import { useStore } from "@/shared/store";
 import PropertyCard from "@/features/properties/components/property_card";
 
 type MenuId = "map" | "search" | "saved" | "messages" | "profile";
@@ -26,6 +27,8 @@ export function DetailPanel({ activeMenu: propActiveMenu, activeData }: DetailPa
   const selectedProperty = useSidebarStore((s) => s.selectedProperty);
   const setSelectedProperty = useSidebarStore((s) => s.setSelectedProperty);
   const activeMenu = propActiveMenu ?? storeActiveMenu;
+  const isAuthenticated = useStore((s) => s.auth.isAuthenticated);
+  const openLoginModal = useStore((s) => s.openLoginModal);
 
   return (
     <aside
@@ -86,9 +89,9 @@ export function DetailPanel({ activeMenu: propActiveMenu, activeData }: DetailPa
                 <div className="flex items-center justify-between mb-2">
                   <div className="flex items-center gap-2">
                     <Grid2x2 size={16} className="text-blue-400" />
-                    <span className="text-xs uppercase tracking-wider text-white/60 font-semibold">Size</span>
+                    <span className="text-xs uppercase tracking-wider text-white/60 font-semibold">Area</span>
                   </div>
-                  <span className="text-lg font-semibold text-white">{selectedProperty.size}</span>
+                  <span className="text-lg font-semibold text-white">{selectedProperty.area} {selectedProperty.areaUnit}</span>
                 </div>
               </SidebarCard>
 
@@ -152,7 +155,20 @@ export function DetailPanel({ activeMenu: propActiveMenu, activeData }: DetailPa
 
               {activeMenu === "saved" && (
                 <div className="space-y-3">
-                  {savedProperties.length === 0 ? (
+                  {!isAuthenticated ? (
+                    <SidebarCard className="p-5 flex flex-col items-center gap-3 text-center">
+                      <Lock size={28} className="text-white/30" />
+                      <p className="text-sm text-white/50">
+                        Login to view your saved properties.
+                      </p>
+                      <button
+                        onClick={() => openLoginModal()}
+                        className="mt-1 w-full rounded-xl bg-emerald-500/20 border border-emerald-500/40 px-4 py-2.5 text-sm font-semibold text-emerald-400 hover:bg-emerald-500/30 transition"
+                      >
+                        Login
+                      </button>
+                    </SidebarCard>
+                  ) : savedProperties.length === 0 ? (
                     <SidebarCard className="p-5">
                       <p className="text-sm text-white/50">
                         No saved properties yet. Start exploring the map to bookmark listings.
@@ -162,7 +178,7 @@ export function DetailPanel({ activeMenu: propActiveMenu, activeData }: DetailPa
                     savedProperties.map((property) => (
                       <PropertyCard
                         key={property.id}
-                        property={property as any}
+                        property={property}
                         onOpen={(p) => setSelectedProperty(p)}
                       />
                     ))
@@ -172,9 +188,22 @@ export function DetailPanel({ activeMenu: propActiveMenu, activeData }: DetailPa
 
               {activeMenu === "messages" && (
                 <SidebarCard className="p-5">
-                  <p className="text-sm text-white/50">
-                    No messages yet. Connect with agents to start a conversation.
-                  </p>
+                  {!isAuthenticated ? (
+                    <div className="flex flex-col items-center gap-3 text-center">
+                      <Lock size={28} className="text-white/30" />
+                      <p className="text-sm text-white/50">Login to see your messages.</p>
+                      <button
+                        onClick={() => openLoginModal()}
+                        className="w-full rounded-xl bg-emerald-500/20 border border-emerald-500/40 px-4 py-2.5 text-sm font-semibold text-emerald-400 hover:bg-emerald-500/30 transition"
+                      >
+                        Login
+                      </button>
+                    </div>
+                  ) : (
+                    <p className="text-sm text-white/50">
+                      No messages yet. Connect with agents to start a conversation.
+                    </p>
+                  )}
                 </SidebarCard>
               )}
 

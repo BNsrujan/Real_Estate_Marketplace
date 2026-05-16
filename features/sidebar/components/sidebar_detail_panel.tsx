@@ -56,7 +56,8 @@ const MENU_CONTENT: Record<string, MenuContent> = {
  * Shows menu-specific content (map features, search filters, profile, etc.).
  */
 export default function SidebarDetailPanel() {
-  const { activeMenu, isPanelOpen } = useSidebarStore();
+  const activeMenu = useSidebarStore((s) => s.activeMenu);
+  const isPanelOpen = useSidebarStore((s) => s.isPanelOpen);
 
   const menuData = useMemo(() => {
     if (!activeMenu) return null;

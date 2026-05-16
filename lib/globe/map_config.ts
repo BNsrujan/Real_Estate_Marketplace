@@ -56,6 +56,56 @@ export const TILE_SOURCES = {
     tileSize: 256,
     maxzoom: 19,
   },
+
+  osm: {
+    type: "raster" as const,
+    tiles: ["https://tile.openstreetmap.org/{z}/{x}/{y}.png"],
+    tileSize: 256,
+    maxzoom: 19,
+    attribution: "© OpenStreetMap contributors",
+  },
+
+  topo: {
+    type: "raster" as const,
+    tiles: [
+      "https://services.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}",
+    ],
+    tileSize: 256,
+    maxzoom: 19,
+  },
+};
+
+export type LayerPreset = "satellite" | "standard" | "osm" | "traffic";
+
+// Per-preset opacity values for the three base tile layers
+export const LAYER_PRESETS: Record<
+  LayerPreset,
+  { satelliteOpacity: number; roadsOpacity: [number, number, number, number]; labelsOpacity: [number, number, number, number]; baseColor: string }
+> = {
+  satellite: {
+    satelliteOpacity: 1,
+    roadsOpacity: [8, 0, 11, 0.9],
+    labelsOpacity: [9, 0, 12, 0.95],
+    baseColor: "#000000",
+  },
+  standard: {
+    satelliteOpacity: 0,
+    roadsOpacity: [6, 0.6, 11, 1],
+    labelsOpacity: [7, 0.7, 12, 1],
+    baseColor: "#1a1a2e",
+  },
+  osm: {
+    satelliteOpacity: 0,
+    roadsOpacity: [6, 0.5, 11, 0.9],
+    labelsOpacity: [7, 0.6, 12, 0.95],
+    baseColor: "#1b1b2f",
+  },
+  traffic: {
+    satelliteOpacity: 0.6,
+    roadsOpacity: [8, 0, 11, 1],
+    labelsOpacity: [9, 0, 12, 1],
+    baseColor: "#000000",
+  },
 };
 
 // Property type has moved to types/index.ts — import from there.

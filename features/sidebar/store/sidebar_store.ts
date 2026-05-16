@@ -1,53 +1,57 @@
-import { create } from "zustand";
-import type { Property } from "@/shared/types";
+/**
+ * sidebar_store — Compatibility shim over the unified NammaDharaniStore.
+ *
+ * Existing consumers import from here. New features should use @/shared/store.
+ */
 
-export type SidebarMenuId = "map" | "search" | "saved" | "messages" | "profile" | null;
+import { useStore, type SidebarMenuId } from '@/shared/store';
+import type { Property } from '@/shared/types';
 
-interface SidebarStore {
-  activeMenu: SidebarMenuId;
-  setActiveMenu: (menu: SidebarMenuId) => void;
+export type { SidebarMenuId };
 
-  isPanelOpen: boolean;
-  openPanel: () => void;
-  closePanel: () => void;
-  togglePanel: () => void;
+export function useSidebarStore<T>(
+  selector: (state: {
+    activeMenu: SidebarMenuId;
+    setActiveMenu: (menu: SidebarMenuId) => void;
+    isPanelOpen: boolean;
+    openPanel: () => void;
+    closePanel: () => void;
+    togglePanel: () => void;
+    selectedPropertyId: string | null;
+    setSelectedPropertyId: (id: string | null) => void;
+    selectedProperty: Property | null;
+    setSelectedProperty: (property: Property | null) => void;
+    savedProperties: Property[];
+    setSavedProperties: (props: Property[]) => void;
+    addSavedProperty: (prop: Property) => void;
+    removeSavedProperty: (id: string) => void;
+  }) => T,
+): T {
+  return useStore((s) =>
+    selector({
+      activeMenu: s.ui.activeSidebarTab,
+      setActiveMenu: (menu) => {
+        s.setActiveSidebarTab(menu);
+        if (menu !== null) s.setUI({ isPanelOpen: true });
+      },
 
-  selectedPropertyId: string | null;
-  setSelectedPropertyId: (id: string | null) => void;
+      isPanelOpen: s.ui.isPanelOpen,
+      openPanel: () => s.setUI({ isPanelOpen: true }),
+      closePanel: () => s.setUI({ isPanelOpen: false }),
+      togglePanel: () => s.setUI({ isPanelOpen: !s.ui.isPanelOpen }),
 
-  selectedProperty: Property | null;
-  setSelectedProperty: (property: Property | null) => void;
+      selectedPropertyId: s.properties.selectedProperty?.id ?? null,
+      setSelectedPropertyId: (id) => {
+        if (!id) s.setSelectedProperty(null);
+      },
 
-  savedProperties: Property[];
-  setSavedProperties: (props: Property[]) => void;
-  addSavedProperty: (prop: Property) => void;
-  removeSavedProperty: (id: string) => void;
+      selectedProperty: s.properties.selectedProperty,
+      setSelectedProperty: s.setSelectedProperty,
+
+      savedProperties: s.watchlist.saved,
+      setSavedProperties: (props) => s.setWatchlist({ saved: props }),
+      addSavedProperty: s.addToWatchlist,
+      removeSavedProperty: s.removeFromWatchlist,
+    }),
+  );
 }
-
-export const useSidebarStore = create<SidebarStore>((set) => ({
-  activeMenu: null,
-  setActiveMenu: (menu) => set({ activeMenu: menu, selectedPropertyId: null, selectedProperty: null }),
-
-  isPanelOpen: false,
-  openPanel: () => set({ isPanelOpen: true }),
-  closePanel: () => set({ isPanelOpen: false }),
-  togglePanel: () => set((state) => ({ isPanelOpen: !state.isPanelOpen })),
-
-  selectedPropertyId: null,
-  setSelectedPropertyId: (id) => set({ selectedPropertyId: id }),
-
-  selectedProperty: null,
-  setSelectedProperty: (property) => set({
-    selectedProperty: property,
-    selectedPropertyId: property?.id ?? null,
-  }),
-
-  savedProperties: [],
-  setSavedProperties: (props) => set({ savedProperties: props }),
-  addSavedProperty: (prop) =>
-    set((state) => ({ savedProperties: [...state.savedProperties, prop] })),
-  removeSavedProperty: (id) =>
-    set((state) => ({
-      savedProperties: state.savedProperties.filter((p) => p.id !== id),
-    })),
-}));
