@@ -15,6 +15,7 @@ import NavBar from "@/shared/components/navbar";
 import MapLayerSelector from "./layer_selector";
 import MapControls from "./map_controller";
 import Profile from "@/features/profile/components/Profile";
+import { usePropertyStore } from "@/features/properties/hooks/use_property_store";
 
 interface Props {
   setIsLoaded: React.Dispatch<React.SetStateAction<boolean>>;
@@ -71,7 +72,10 @@ export function MapCanvas({ setIsLoaded }: Props) {
     },
   });
 
-  const { filterByDistrict } = useMarkerSync({
+  // Load all properties into global store + maintain filtered list
+  usePropertyStore();
+
+  const { filterByDistrict, resetDistrictFilter } = useMarkerSync({
     mapRef: mapInstance,
     isStyleLoaded,
     onMarkerClick: handleMarkerClick,
@@ -88,6 +92,12 @@ export function MapCanvas({ setIsLoaded }: Props) {
   useEffect(() => {
     filterByDistrictRef.current = filterByDistrict;
   }, [filterByDistrict]);
+
+  // Expose district reset to Navbar (store-driven via resetFilters) and map controls
+  const resetDistrictFilterRef = useRef(resetDistrictFilter);
+  useEffect(() => {
+    resetDistrictFilterRef.current = resetDistrictFilter;
+  }, [resetDistrictFilter]);
 
   const { zoomToKarnataka } = useDistrictZoom({
     mapRef: mapInstance,

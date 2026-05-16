@@ -3,8 +3,7 @@
 import { useEffect, useRef } from "react";
 import maplibregl from "maplibre-gl";
 import { PropertyMarkerService } from "@/features/properties/services/property_marker_service";
-import { getProperties } from "@/features/properties/api/property_api";
-import { useSidebarStore } from "@/features/sidebar/store/sidebar_store";
+import { useStore } from "@/shared/store";
 import type { Property } from "@/shared/types";
 
 const PROPERTY_MARKER_MIN_ZOOM = 5.5;
@@ -28,58 +27,29 @@ export function usePropertyMarkers({
 }: UsePropertyMarkersOptions) {
   const markerServiceRef = useRef<PropertyMarkerService | null>(null);
   const activeMarkerRef = useRef<string | null>(null);
-  const propertiesRef = useRef<Property[]>([]);
 
-  const setSelectedProperty = useSidebarStore((s) => s.setSelectedProperty);
-  const setActiveMenu = useSidebarStore((s) => s.setActiveMenu);
+  // Read from global store — updated by usePropertyStore + filter changes
+  const filtered = useStore((s) => s.properties.filtered);
+  const isLoading = useStore((s) => s.properties.isLoading);
+  const setSelectedProperty = useStore((s) => s.setSelectedProperty);
+  const isAnimating = useStore((s) => s.map.isAnimating);
 
+  // Initialize marker service
   useEffect(() => {
     const map = mapRef.current;
     if (!map || !isStyleLoaded) return;
 
     markerServiceRef.current = new PropertyMarkerService(map);
 
-    const handleMarkerClick = (property: Property, map: maplibregl.Map) => {
-      map.flyTo({
-        center: [property.lng, property.lat],
-        zoom: MARKER_ZOOM_LEVEL,
-        duration: MARKER_ZOOM_DURATION,
-        curve: 1.42,
-      });
-
-      if (activeMarkerRef.current) {
-        markerServiceRef.current?.updateMarkerActive(activeMarkerRef.current, false);
-      }
-      activeMarkerRef.current = property.id;
-      markerServiceRef.current?.updateMarkerActive(property.id, true);
-
-      setSelectedProperty(property);
-      onMarkerClick?.(property);
-    };
-
-    const handleAddMarkers = () => {
-      const zoom = map.getZoom();
-      if (zoom >= PROPERTY_MARKER_MIN_ZOOM && propertiesRef.current.length > 0) {
-        markerServiceRef.current?.addMarkers(
-          propertiesRef.current,
-          (prop) => { handleMarkerClick(prop, map); },
-          (prop) => { onMarkerHover?.(prop); },
-          () => { onMarkerLeave?.(); },
-        );
-      }
-    };
-
-    getProperties().then((data) => {
-      propertiesRef.current = data;
-      handleAddMarkers();
-    });
-
     const handleZoom = () => {
       const zoom = map.getZoom();
       if (zoom < PROPERTY_MARKER_MIN_ZOOM) {
         markerServiceRef.current?.clearMarkers();
-      } else if (markerServiceRef.current?.getMarkers().length === 0) {
-        handleAddMarkers();
+      } else if (
+        markerServiceRef.current?.getMarkers().length === 0 &&
+        filtered.length > 0
+      ) {
+        renderMarkers();
       }
     };
 
@@ -90,7 +60,49 @@ export function usePropertyMarkers({
       markerServiceRef.current?.dispose();
       markerServiceRef.current = null;
     };
-  }, [mapRef, isStyleLoaded, onMarkerClick, onMarkerHover, onMarkerLeave, setSelectedProperty, setActiveMenu]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mapRef, isStyleLoaded]);
+
+  // Re-render markers whenever filtered properties change
+  useEffect(() => {
+    if (!isStyleLoaded || isLoading) return;
+    renderMarkers();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filtered, isStyleLoaded, isLoading]);
+
+  function renderMarkers() {
+    const map = mapRef.current;
+    if (!map || !markerServiceRef.current) return;
+    const zoom = map.getZoom();
+    if (zoom < PROPERTY_MARKER_MIN_ZOOM) return;
+
+    markerServiceRef.current.addMarkers(
+      filtered,
+      (prop) => handleMarkerClick(prop, map),
+      (prop) => onMarkerHover?.(prop),
+      () => onMarkerLeave?.(),
+    );
+  }
+
+  function handleMarkerClick(property: Property, map: maplibregl.Map) {
+    if (isAnimating) return;
+
+    map.flyTo({
+      center: [property.lng, property.lat],
+      zoom: MARKER_ZOOM_LEVEL,
+      duration: MARKER_ZOOM_DURATION,
+      curve: 1.42,
+    });
+
+    if (activeMarkerRef.current) {
+      markerServiceRef.current?.updateMarkerActive(activeMarkerRef.current, false);
+    }
+    activeMarkerRef.current = property.id;
+    markerServiceRef.current?.updateMarkerActive(property.id, true);
+
+    setSelectedProperty(property);
+    onMarkerClick?.(property);
+  }
 
   return {
     setActiveMarker: (propertyId: string) => {

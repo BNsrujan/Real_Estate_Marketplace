@@ -360,7 +360,24 @@ export const useStore = create<NammaDharaniStore>()(
           'ui/removeToast',
         ),
     }),
-    { name: 'NammaDharaniStore' },
+    {
+      name: 'NammaDharaniStore',
+      serialize: {
+        replacer: (_key: string, value: unknown) => {
+          // MapLibre Map instance is not serializable and contains DOM refs
+          // that cause Next.js searchParams Proxy warnings during JSON.stringify
+          if (
+            value !== null &&
+            typeof value === 'object' &&
+            'getCanvas' in (value as object) &&
+            'getZoom' in (value as object)
+          ) {
+            return '[MapInstance]';
+          }
+          return value;
+        },
+      },
+    },
   ),
 );
 

@@ -14,12 +14,16 @@ import {
   Building2,
   Landmark,
   Factory,
+  Send,
+  CheckCircle,
 } from "lucide-react";
 import Image from "next/image";
 
 import type { Property } from "@/shared/types";
 import PropertyHoverCard from "@/features/properties/components/property_card";
 import { useStore } from "@/shared/store";
+import { useWatchlistSync } from "@/features/properties/hooks/use_watchlist_sync";
+import { submitEnquiry } from "@/features/properties/api/enquiry_api";
 
 const TYPE_ICON: Record<string, React.ComponentType<{ size?: number; className?: string }>> = {
   house: Home,
@@ -50,12 +54,16 @@ export default function PropertyPopup({
 }: PropertyPopupProps) {
   const [mounted, setMounted] = useState(false);
   const [screenPos, setScreenPos] = useState<{ x: number; y: number } | null>(null);
+  const [showEnquiry, setShowEnquiry] = useState(false);
+  const [enquiryMsg, setEnquiryMsg] = useState("");
+  const [enquiryPhone, setEnquiryPhone] = useState("");
+  const [enquirySubmitting, setEnquirySubmitting] = useState(false);
+  const [enquirySent, setEnquirySent] = useState(false);
 
   const saved = useStore((s) => s.watchlist.saved);
-  const addToWatchlist = useStore((s) => s.addToWatchlist);
-  const removeFromWatchlist = useStore((s) => s.removeFromWatchlist);
   const isAuthenticated = useStore((s) => s.auth.isAuthenticated);
   const openLoginModal = useStore((s) => s.openLoginModal);
+  const { saveProperty, unsaveProperty } = useWatchlistSync();
 
   const visible = property !== null;
   const isSaved = property ? saved.some((p) => p.id === property.id) : false;
@@ -124,15 +132,40 @@ export default function PropertyPopup({
       return;
     }
     if (isSaved) {
-      removeFromWatchlist(property.id);
+      unsaveProperty(property.id);
     } else {
-      addToWatchlist(property);
+      saveProperty(property);
     }
   };
 
   const handleContact = () => {
     if (!isAuthenticated) {
       openLoginModal({ type: "CONTACT_SELLER", payload: { propertyId: property.id } });
+      return;
+    }
+    setShowEnquiry(true);
+  };
+
+  const handleEnquirySubmit = async () => {
+    if (enquiryMsg.trim().length < 10 || enquirySubmitting) return;
+    setEnquirySubmitting(true);
+    try {
+      await submitEnquiry({
+        propertyId: property.id,
+        message: enquiryMsg.trim(),
+        phone: enquiryPhone.trim() || undefined,
+      });
+      setEnquirySent(true);
+      setTimeout(() => {
+        setEnquirySent(false);
+        setShowEnquiry(false);
+        setEnquiryMsg("");
+        setEnquiryPhone("");
+      }, 2500);
+    } catch {
+      // error toast handled by apiService
+    } finally {
+      setEnquirySubmitting(false);
     }
   };
 
@@ -140,12 +173,12 @@ export default function PropertyPopup({
     <>
       {/* Backdrop (mobile only) */}
       {isMobile && (
-        <div className="fixed inset-0 z-[99998] bg-black/40" onClick={onClose} />
+        <div className="fixed inset-0 z-99998 bg-black/40" onClick={onClose} />
       )}
 
       {/* Detail panel */}
       <div
-        className="fixed z-[99999] flex flex-col overflow-hidden bg-black/90 backdrop-blur-2xl border-l border-white/10 shadow-2xl transition-all duration-300"
+        className="fixed z-99999 flex flex-col overflow-hidden bg-black/90 backdrop-blur-2xl border-l border-white/10 shadow-2xl transition-all duration-300"
         style={
           isMobile
             ? { bottom: 0, left: 0, right: 0, maxHeight: "75vh", borderRadius: "24px 24px 0 0" }
@@ -153,9 +186,9 @@ export default function PropertyPopup({
         }
       >
         {/* Hero image */}
-        <div className="relative h-52 w-full flex-shrink-0">
+        <div className="relative h-52 w-full shrink-0">
           <Image src={thumbnail} alt={property.title} fill className="object-cover" />
-          <div className="absolute inset-0 bg-gradient-to-b from-black/20 to-black/70" />
+          <div className="absolute inset-0 bg-linear-to-b from-black/20 to-black/70" />
 
           {/* Close */}
           <button
@@ -235,15 +268,62 @@ export default function PropertyPopup({
           )}
         </div>
 
+        {/* Enquiry form (slides in when Contact is tapped) */}
+        {showEnquiry && (
+          <div className="shrink-0 px-4 pb-3 space-y-2">
+            {enquirySent ? (
+              <div className="flex flex-col items-center gap-2 py-4 text-emerald-400">
+                <CheckCircle size={28} />
+                <p className="text-sm font-semibold">Enquiry sent!</p>
+              </div>
+            ) : (
+              <>
+                <textarea
+                  value={enquiryMsg}
+                  onChange={(e) => setEnquiryMsg(e.target.value)}
+                  placeholder="Hi, I'm interested in this property..."
+                  rows={3}
+                  className="w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder:text-white/30 focus:outline-none focus:ring-1 focus:ring-emerald-500 resize-none"
+                />
+                <input
+                  value={enquiryPhone}
+                  onChange={(e) => setEnquiryPhone(e.target.value)}
+                  placeholder="Phone number (optional)"
+                  type="tel"
+                  className="w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder:text-white/30 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                />
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => setShowEnquiry(false)}
+                    className="flex-1 rounded-xl border border-white/20 py-2.5 text-sm text-white/60 hover:bg-white/5 transition"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleEnquirySubmit}
+                    disabled={enquiryMsg.trim().length < 10 || enquirySubmitting}
+                    className="flex-1 flex items-center justify-center gap-1.5 rounded-xl bg-emerald-500 py-2.5 text-sm font-semibold text-white hover:bg-emerald-600 disabled:opacity-50 transition"
+                  >
+                    <Send size={14} />
+                    {enquirySubmitting ? "Sending..." : "Send"}
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+        )}
+
         {/* CTA buttons */}
-        <div className="flex-shrink-0 p-4 pt-0 space-y-2">
-          <button
-            onClick={handleContact}
-            className="w-full flex items-center justify-center gap-2 rounded-2xl bg-emerald-500 py-3.5 font-semibold text-white hover:bg-emerald-600 transition"
-          >
-            <Phone size={16} />
-            {isAuthenticated ? "Contact Seller" : "Login to Contact"}
-          </button>
+        <div className="shrink-0 p-4 pt-0 space-y-2">
+          {!showEnquiry && (
+            <button
+              onClick={handleContact}
+              className="w-full flex items-center justify-center gap-2 rounded-2xl bg-emerald-500 py-3.5 font-semibold text-white hover:bg-emerald-600 transition"
+            >
+              <Phone size={16} />
+              {isAuthenticated ? "Contact Seller" : "Login to Contact"}
+            </button>
+          )}
           <button
             onClick={handleSave}
             className={`w-full flex items-center justify-center gap-2 rounded-2xl border py-3.5 font-semibold transition ${

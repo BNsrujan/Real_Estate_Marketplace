@@ -6,6 +6,7 @@ import "maplibre-gl/dist/maplibre-gl.css";
 
 import { MAP_CONFIG, TILE_SOURCES, getResponsiveMapConfig } from "@/lib/globe/map_config";
 import { addMapLayers } from "../services/map_layer_service";
+import { useStore } from "@/shared/store";
 
 interface UseMapInstanceOptions {
   containerRef: React.RefObject<HTMLDivElement | null>;
@@ -23,6 +24,7 @@ export function useMapInstance({
 }: UseMapInstanceOptions) {
   const mapRef = useRef<maplibregl.Map | null>(null);
   const [isStyleLoaded, setIsStyleLoaded] = useState(false);
+  const setMap = useStore.getState().setMap;
 
   // Store callbacks in refs so the useEffect closure never goes stale
   const onLoadRef = useRef(onLoad);
@@ -124,8 +126,9 @@ export function useMapInstance({
     });
 
     map.on("load", () => {
-    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
         map.resize();
+        setMap({ isLoaded: true });
         const elapsed = Date.now() - loadStart;
         const delay = Math.max(0, 200 - elapsed);
         setTimeout(() => onLoadRef.current(), delay);
@@ -134,14 +137,31 @@ export function useMapInstance({
 
     map.on("zoom", () => {
       onZoomRef.current(map.getZoom());
+      setMap({ currentZoom: map.getZoom() });
     });
+
+    map.on("rotate", () => {
+      setMap({ currentBearing: map.getBearing() });
+    });
+
+    // Sync viewport bounds after every pan/zoom ends
+    map.on("moveend", () => {
+      const b = map.getBounds();
+      setMap({
+        viewportBounds: [b.getWest(), b.getSouth(), b.getEast(), b.getNorth()],
+      });
+    });
+
+    // Store map instance so any feature can access it via the store
+    setMap({ instance: map, isLoaded: false });
 
     return () => {
       ro.disconnect();
       map.remove();
       mapRef.current = null;
+      setMap({ instance: null, isLoaded: false });
     };
-  }, []);
+  }, [setMap]);
 
   return { mapRef, isStyleLoaded };
 }

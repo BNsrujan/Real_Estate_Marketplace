@@ -1,3 +1,5 @@
+export const dynamic = "force-static";
+
 import { Manrope, Plus_Jakarta_Sans, Geist } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";

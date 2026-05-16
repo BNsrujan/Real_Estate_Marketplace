@@ -4,6 +4,7 @@ import { useEffect, useRef, useState, useCallback } from "react";
 import maplibregl from "maplibre-gl";
 
 import { Plus, Minus, Compass, LocateFixed, Loader2 } from "lucide-react";
+import { useStore } from "@/shared/store";
 
 interface MapControlsProps {
   map: maplibregl.Map | null;
@@ -14,6 +15,7 @@ type LocationState = "idle" | "locating" | "active" | "error";
 export default function MapControls({ map }: MapControlsProps) {
   const [bearing, setBearing] = useState(0);
   const [locationState, setLocationState] = useState<LocationState>("idle");
+  const addToast = useStore((s) => s.addToast);
 
   const locationMarkerRef = useRef<maplibregl.Marker | null>(null);
   const watchIdRef = useRef<number | null>(null);
@@ -140,6 +142,7 @@ export default function MapControls({ map }: MapControlsProps) {
             .addTo(map);
 
           if (accuracy <= ACCURACY_THRESHOLD) {
+            map.stop();
             map.flyTo({
               center: [lng, lat],
               zoom: Math.max(map.getZoom(), 14),
@@ -155,8 +158,16 @@ export default function MapControls({ map }: MapControlsProps) {
           }
         }
       },
-      () => {
+      (err: GeolocationPositionError) => {
         setLocationState("error");
+
+        if (err.code === err.PERMISSION_DENIED) {
+          addToast({ type: "error", message: "Location access denied. Enable it in browser settings." });
+        } else if (err.code === err.POSITION_UNAVAILABLE) {
+          addToast({ type: "error", message: "Location unavailable. Check your device GPS." });
+        } else {
+          addToast({ type: "warning", message: "Location timed out. Tap to try again." });
+        }
 
         setTimeout(() => {
           setLocationState("idle");
