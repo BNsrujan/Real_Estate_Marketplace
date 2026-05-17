@@ -8,16 +8,82 @@ export type MobilePanel = 'map' | 'search' | 'saved' | 'profile';
 
 export type PropertyType =
   | 'house'
-  | 'site'
   | 'apartment'
+  | 'villa'
+  | 'site'
+  | 'plot'
   | 'agriculture'
   | 'commercial_space'
   | 'commercial_plot';
+
+export type ListingType = 'sale' | 'rent' | 'both';
+
+export type PropertyStatus = 'active' | 'sold' | 'rented';
+
+export type AreaUnit = 'sqft' | 'acres' | 'guntas';
+
+export type UserRole = 'buyer' | 'seller' | 'agent' | 'admin';
+
+export type AmenityCategory = 'infrastructure' | 'convenience' | 'safety' | 'nature' | 'nearby';
+
+export type BlogStatus = 'draft' | 'published' | 'archived';
 
 export type PendingAction = {
   type: 'SAVE_PROPERTY' | 'CONTACT_SELLER' | 'VIEW_PROPERTY' | 'SUBMIT_ENQUIRY';
   payload: Record<string, unknown>;
 };
+
+// ─── Amenity ─────────────────────────────────────────────────────────────────
+
+export interface Amenity {
+  id: string;
+  name: string;
+  icon: string | null;
+  category: AmenityCategory | null;
+  isCustom: boolean;
+}
+
+// ─── Property Images & Geometry ──────────────────────────────────────────────
+
+export interface PropertyImage {
+  id: string;
+  url: string;
+  alt: string;
+  displayOrder: number;
+  isCover: boolean;
+  width: number | null;
+  height: number | null;
+}
+
+export interface PropertyGeometry {
+  id: string;
+  type: 'point' | 'linestring' | 'polygon';
+  geojson: Record<string, unknown>;
+}
+
+// ─── Property Child Details ───────────────────────────────────────────────────
+
+export interface PropertyResidentialDetails {
+  bhkLabel: string | null;
+  bedrooms: number | null;
+  bathrooms: number | null;
+  balconies: number | null;
+  floors: number | null;
+  floorNumber: number | null;
+  furnishedStatus: string | null;
+}
+
+export interface PropertyRoadInfo {
+  roadWidth: string | null;
+  roadType: string | null;
+  roadFacing: boolean | null;
+}
+
+export interface PropertyAgricultureDetails {
+  waterSource: string | null;
+  soilType: string | null;
+  surveyNumber: string | null;
+}
 
 // ─── Domain Models ───────────────────────────────────────────────────────────
 
@@ -28,28 +94,51 @@ export interface PropertyFeature {
 
 export interface Property {
   id: string;
+  propertyRef: string | null;
   slug: string;
   title: string;
   type: PropertyType;
-  price: number;
   priceLabel: string;
-  area: number;
-  areaUnit: 'sqft' | 'acres' | 'guntas';
-  district: string;
-  districtId?: string;
-  city: string;
-  taluk: string;
-  lat: number;
-  lng: number;
-  thumbnailUrl: string;
-  imageUrls: string[];
-  listingType: 'sale' | 'rent' | 'both';
+  priceValue: string;
+  expectedPrice: string | null;
+  sizeLabel: string;
+  sizeValue: string | null;
+  areaUnit: AreaUnit;
+  lat: string;
+  lng: string;
+  listingType: ListingType;
+  status: PropertyStatus;
   isActive: boolean;
+  thumbnailUrl: string | null;
+  images: PropertyImage[];
+  imageUrls: string[];
   description: string;
   features: PropertyFeature[];
-  sellerId?: string;
-  updatedAt: string;
+  facing: string | null;
+  siteDimensions: string | null;
+  landUse: string | null;
+  documentStatus: string | null;
+  condition: string | null;
+  contactNumber: string | null;
+  roadAccess: boolean;
+  isFeatured: boolean;
+  address: string | null;
+  sellerId: string | null;
+  city: string;
+  taluk: string;
+  districtName: string;
+  districtState: string;
+  districtId: string;
   createdAt: string;
+  updatedAt: string;
+}
+
+export interface PropertyDetail extends Property {
+  residentialDetails: PropertyResidentialDetails | null;
+  roadInfo: PropertyRoadInfo | null;
+  agricultureDetails: PropertyAgricultureDetails | null;
+  amenities: Amenity[];
+  geometries: PropertyGeometry[];
 }
 
 export interface UserProfile {
@@ -58,7 +147,7 @@ export interface UserProfile {
   username: string;
   email: string;
   phone: string;
-  role: 'buyer' | 'seller' | 'agent' | 'admin';
+  role: UserRole;
   isVerified: boolean;
   isPro: boolean;
   avatarUrl: string | null;
@@ -84,19 +173,6 @@ export interface District {
   state: string;
   lat: number;
   lng: number;
-}
-
-export interface City {
-  name: string;
-  lat: number;
-  lng: number;
-}
-
-export interface PropertyImage {
-  id: string;
-  url: string;
-  alt: string;
-  displayOrder: number;
 }
 
 export interface ApiResponse<T> {
@@ -139,3 +215,72 @@ export interface ReverseGeocodeResult {
 }
 
 export type BBox = [number, number, number, number];
+
+// ─── Enquiry ──────────────────────────────────────────────────────────────────
+
+export interface Enquiry {
+  id: string;
+  propertyId: string;
+  buyerId: string;
+  message: string;
+  phone: string | null;
+  status: 'pending' | 'replied' | 'closed';
+  createdAt: string;
+}
+
+export interface EnquiryWithProperty extends Enquiry {
+  propertyTitle: string;
+  propertySlug: string;
+}
+
+// ─── Blog ─────────────────────────────────────────────────────────────────────
+
+export interface BlogCategory {
+  id: string;
+  name: string;
+  slug: string;
+}
+
+export interface BlogTag {
+  id: string;
+  name: string;
+  slug: string;
+}
+
+export interface BlogPostCard {
+  id: string;
+  slug: string;
+  title: string;
+  excerpt: string | null;
+  coverImage: string | null;
+  status: BlogStatus;
+  authorId: string | null;
+  authorName: string | null;
+  categoryId: string | null;
+  categoryName: string | null;
+  publishedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface BlogPostDetail extends BlogPostCard {
+  body: string | null;
+  tags: BlogTag[];
+}
+
+// ─── Dashboard ────────────────────────────────────────────────────────────────
+
+export interface DashboardStats {
+  activeCount: number;
+  soldCount: number;
+  rentedCount: number;
+  enquiryCount: number;
+}
+
+// ─── City (legacy) ────────────────────────────────────────────────────────────
+
+export interface City {
+  name: string;
+  lat: number;
+  lng: number;
+}

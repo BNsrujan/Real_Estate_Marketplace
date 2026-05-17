@@ -14,7 +14,7 @@ export function addPropertyMarkers(
 ): maplibregl.Marker[] {
   if (!map) return [];
 
-  // Helper to create pin image if it doesn't exist
+
   const ensurePinImage = async (type: string, color: string) => {
     const imgId = `sync-pin-${type}`;
     if (map.hasImage(imgId)) return imgId;
@@ -84,7 +84,7 @@ export function addPropertyMarkers(
     type: "FeatureCollection",
     features: properties.map((p) => ({
       type: "Feature",
-      geometry: { type: "Point", coordinates: [p.lng, p.lat] },
+      geometry: { type: "Point", coordinates: [Number(p.lng), Number(p.lat)] },
       properties: { ...p },
     })),
   });

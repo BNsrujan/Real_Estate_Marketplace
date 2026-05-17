@@ -65,23 +65,52 @@ function Stars3D() {
 }
 
 export default function StarField() {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const canvasWrapperRef = useRef<HTMLDivElement | null>(null);
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
     setIsMounted(true);
   }, []);
 
-  if (!isMounted) {
-    return null;
-  }
+  // After mount, forcibly kill pointer-events on R3F's internal wrapper div
+  // and use a MutationObserver to keep it none if R3F re-renders the wrapper.
+  useEffect(() => {
+    if (!canvasWrapperRef.current) return;
+    canvasWrapperRef.current.style.pointerEvents = "none";
+
+    const observer = new MutationObserver(() => {
+      if (canvasWrapperRef.current) {
+        canvasWrapperRef.current.style.pointerEvents = "none";
+      }
+    });
+    observer.observe(canvasWrapperRef.current, {
+      attributes: true,
+      attributeFilter: ["style"],
+    });
+    return () => observer.disconnect();
+  }, [isMounted]);
+
+  if (!isMounted) return null;
 
   return (
-    <div style={{ position: "absolute", inset: 0, pointerEvents: "none" }}>
+    <div
+      ref={containerRef}
+      style={{ position: "absolute", inset: 0, pointerEvents: "none" }}
+    >
       <Canvas
+        ref={canvasWrapperRef as React.Ref<HTMLCanvasElement>}
         camera={{ position: [0, 0, 100], fov: 75, far: 10000 }}
-        style={{ width: "100%", height: "100%", display: "block" }}
+        style={{ width: "100%", height: "100%", display: "block", pointerEvents: "none" }}
         dpr={typeof window !== "undefined" ? window.devicePixelRatio : 1}
         gl={{ antialias: true, alpha: false, stencil: false }}
+        resize={{ scroll: false, debounce: { scroll: 50, resize: 0 } }}
+        onCreated={({ gl }) => {
+          gl.domElement.style.pointerEvents = "none";
+          if (gl.domElement.parentElement) {
+            gl.domElement.parentElement.style.pointerEvents = "none";
+          }
+        }}
       >
         <Stars3D />
       </Canvas>

@@ -1,17 +1,14 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import {
-  ChevronRight,
-  LogOut,
-  Settings,
-  ShieldCheck,
-  User,
-  Mail,
-  UserCircle,
+  LogOut, Settings, User, Mail, Phone,
+  ChevronRight, Shield, Star,
 } from "lucide-react";
 import { useAuthStore } from "../store/auth_store";
-import FormDialog from "@/shared/components/common/form_dialog";
+import { useStore } from "@/shared/store";
+import ProfileDetailsDialog from "./profile_details_dialog";
+import AppSettingsDialog from "./app_settings_dialog";
 
 type ProfileModalProps = {
   user?: {
@@ -22,147 +19,140 @@ type ProfileModalProps = {
   onLogout?: () => Promise<void> | void;
 };
 
-import { PROFILE_FORM_FIELDS, SETTINGS_FORM_FIELDS } from "../constants/forms";
+const ROLE_META: Record<string, { label: string; color: string }> = {
+  admin:  { label: "Admin",  color: "text-red-400 bg-red-500/10 border-red-500/20" },
+  agent:  { label: "Agent",  color: "text-blue-400 bg-blue-500/10 border-blue-500/20" },
+  seller: { label: "Seller", color: "text-yellow-400 bg-yellow-500/10 border-yellow-500/20" },
+  buyer:  { label: "Buyer",  color: "text-emerald-400 bg-emerald-500/10 border-emerald-500/20" },
+};
 
-const ProfileModal = ({
-  user,
-  onLogout,
-}: ProfileModalProps) => {
+export default function ProfileModal({ user, onLogout }: ProfileModalProps) {
   const [isLoggingOut, setIsLoggingOut] = useState(false);
-  const modalRef = useRef<HTMLDivElement | null>(null);
-  const logout = useAuthStore((state) => state.logout);
+  const logout = useAuthStore((s) => s.logout);
+  const fullUser = useStore((s) => s.auth.user);
+
+  const role = fullUser?.role ?? "buyer";
+  const roleMeta = ROLE_META[role] ?? ROLE_META.buyer;
+  const isPro = fullUser?.isPro;
+  const isVerified = fullUser?.isVerified;
+  const initials = (user?.name ?? "U")
+    .split(" ")
+    .map((n) => n[0])
+    .join("")
+    .toUpperCase()
+    .slice(0, 2);
 
   const handleLogout = async () => {
+    setIsLoggingOut(true);
     try {
-      setIsLoggingOut(true);
       if (onLogout) await onLogout();
       logout();
-    } catch (error) {
-      console.error("Logout failed:", error);
+    } catch {
+      // silent
     } finally {
       setIsLoggingOut(false);
     }
   };
 
-  const handleProfileUpdate = async (data: any) => {
-    console.log("Updating profile:", data);
-    // In a real app, you'd call an API here
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    // toast.success("Profile updated successfully");
-  };
-
-  const handleSettingsUpdate = async (data: any) => {
-    console.log("Updating settings:", data);
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    // toast.success("Settings saved");
-  };
-
   return (
-    <div
-      ref={modalRef}
-      className="
-        absolute right-0 top-14
-        z-50
-        w-80
-        overflow-hidden
-        rounded-[2rem]
-        border border-white/10
-        bg-[#0a0a0a]/80
-        backdrop-blur-3xl
-        shadow-[0_20px_50px_rgba(0,0,0,0.5)]
-        animate-in fade-in zoom-in-95 duration-300
-      "
-    >
-      {/* User Info Section */}
-      <div className="relative p-6 pb-4">
-        <div className="flex items-center gap-4">
-          <div className="relative group">
-            <div className="absolute -inset-0.5 bg-gradient-to-r from-emerald-500 to-cyan-500 rounded-full blur opacity-30 group-hover:opacity-60 transition duration-500"></div>
-            <div className="relative flex h-16 w-16 items-center justify-center rounded-full bg-zinc-900 border border-white/10 overflow-hidden shadow-2xl">
-              {user?.avatar ? (
-                <img src={user.avatar} alt={user.name} className="h-full w-full object-cover" />
-              ) : (
-                <UserCircle className="w-10 h-10 text-zinc-400" />
+    <div className="absolute right-0 top-14 z-50 w-72 overflow-hidden rounded-2xl border border-white/10 bg-zinc-950 shadow-2xl shadow-black/60 animate-in fade-in zoom-in-95 duration-200">
+
+      {/* ── Header ── */}
+      <div className="px-5 pt-5 pb-4">
+        <div className="flex items-center gap-3.5">
+          {/* Avatar */}
+          <div className="relative shrink-0">
+            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500/30 to-cyan-500/20 border border-white/10 text-base font-bold text-white">
+              {user?.avatar
+                ? <img src={user.avatar} alt="" className="h-full w-full rounded-xl object-cover" />
+                : initials}
+            </div>
+            {isVerified && (
+              <div className="absolute -bottom-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-emerald-500 border-2 border-zinc-950">
+                <Shield size={8} className="text-white" />
+              </div>
+            )}
+          </div>
+
+          {/* Name + badges */}
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-semibold text-white truncate leading-snug">
+              {user?.name ?? "User"}
+            </p>
+            <div className="mt-1 flex items-center gap-1.5 flex-wrap">
+              <span className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider ${roleMeta.color}`}>
+                {roleMeta.label}
+              </span>
+              {isPro && (
+                <span className="inline-flex items-center gap-0.5 rounded-full border border-yellow-500/30 bg-yellow-500/10 px-2 py-0.5 text-[10px] font-semibold text-yellow-400">
+                  <Star size={8} fill="currentColor" /> Pro
+                </span>
               )}
             </div>
           </div>
+        </div>
 
-          <div className="flex-1 min-w-0">
-            <h3 className="text-base font-bold text-white truncate leading-tight">
-              {user?.name || "Premium User"}
-            </h3>
-            <div className="flex items-center gap-1.5 mt-1">
-              <div className="flex h-5 w-5 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-400">
-                <ShieldCheck size={12} />
-              </div>
-              <span className="text-[11px] font-medium text-emerald-400/90 uppercase tracking-wider">Verified Pro</span>
-            </div>
+        {/* Email */}
+        <div className="mt-3.5 flex items-center gap-2 rounded-xl border border-white/6 bg-white/4 px-3 py-2">
+          <Mail size={12} className="text-zinc-500 shrink-0" />
+          <span className="text-xs text-zinc-400 truncate">{user?.email ?? "—"}</span>
+        </div>
+
+        {/* Phone (if available) */}
+        {fullUser?.phone && (
+          <div className="mt-1.5 flex items-center gap-2 rounded-xl border border-white/6 bg-white/4 px-3 py-2">
+            <Phone size={12} className="text-zinc-500 shrink-0" />
+            <span className="text-xs text-zinc-400">{fullUser.phone}</span>
           </div>
-        </div>
-        
-        <div className="mt-4 flex items-center gap-2 px-3 py-2 rounded-xl bg-white/5 border border-white/5">
-          <Mail size={12} className="text-zinc-500" />
-          <span className="text-xs text-zinc-400 truncate">{user?.email || "user@example.com"}</span>
-        </div>
+        )}
       </div>
 
-      <div className="px-3 pb-3 space-y-1">
-       
-        <FormDialog
-          title="Edit Profile"
-          description="Update your personal information and how others see you."
-          fields={PROFILE_FORM_FIELDS(user)}
-          onSubmit={handleProfileUpdate}
-          trigger={
-            <button className="group flex w-full items-center justify-between rounded-2xl px-4 py-3 text-left transition-all hover:bg-white/5  ">
-              <div className="flex items-center gap-3">
-                <div className="rounded-xl bg-zinc-800/50 p-2 text-zinc-400 group-hover:text-white transition-colors">
-                  <User size={18} />
-                </div>
-                <span className="text-sm font-medium text-zinc-300 group-hover:text-white">Profile Details</span>
-              </div>
-              <ChevronRight size={16} className="text-zinc-600 group-hover:text-white transition-transform group-hover:translate-x-0.5" />
-            </button>
-          }
-        />
+      {/* ── Menu items ── */}
+      <div className="border-t border-white/8 px-2 py-2 space-y-0.5">
+        <ProfileDetailsDialog user={user} fullUser={fullUser}>
+          <MenuItem icon={User} label="Profile Details" />
+        </ProfileDetailsDialog>
 
-        {/* Settings Dialog */}
-        <FormDialog
-          title="App Settings"
-          description="Customize your experience and notification preferences."
-          fields={SETTINGS_FORM_FIELDS}
-          onSubmit={handleSettingsUpdate}
-          trigger={
-            <button className="group flex w-full items-center justify-between rounded-2xl px-4 py-3 text-left transition-all hover:bg-white/5  ">
-              <div className="flex items-center gap-3">
-                <div className="rounded-xl bg-zinc-800/50 p-2 text-zinc-400 group-hover:text-white transition-colors">
-                  <Settings size={18} />
-                </div>
-                <span className="text-sm font-medium text-zinc-300 group-hover:text-white">Preferences</span>
-              </div>
-              <ChevronRight size={16} className="text-zinc-600 group-hover:text-white transition-transform group-hover:translate-x-0.5" />
-            </button>
-          }
-        />
+        <AppSettingsDialog>
+          <MenuItem icon={Settings} label="App Settings" />
+        </AppSettingsDialog>
       </div>
 
-      
-      <div className="p-3 border-t border-white/5 bg-white/[0.02]">
+      {/* ── Sign out ── */}
+      <div className="border-t border-white/8 px-2 py-2">
         <button
           onClick={handleLogout}
           disabled={isLoggingOut}
-          className="flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-left transition-all hover:bg-red-500/10   disabled:opacity-50"
+          className="group flex w-full items-center gap-3 rounded-xl px-3 py-2.5 transition-colors hover:bg-red-500/10 disabled:opacity-50"
         >
-          <div className="rounded-xl bg-red-500/10 p-2 text-red-400">
-            <LogOut size={18} />
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-red-500/10 text-red-400 group-hover:bg-red-500/20 transition-colors">
+            <LogOut size={15} />
           </div>
-          <span className="text-sm font-semibold text-red-400">
-            {isLoggingOut ? "Signing out..." : "Sign Out"}
+          <span className="text-sm font-medium text-red-400">
+            {isLoggingOut ? "Signing out…" : "Sign Out"}
           </span>
         </button>
       </div>
     </div>
   );
-};
+}
 
-export default ProfileModal;
+function MenuItem({
+  icon: Icon,
+  label,
+}: {
+  icon: React.ComponentType<{ size?: number; className?: string }>;
+  label: string;
+}) {
+  return (
+    <div className="group flex w-full items-center gap-3 rounded-xl px-3 py-2.5 cursor-pointer transition-colors hover:bg-white/6">
+      <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/6 text-zinc-400 group-hover:text-white transition-colors">
+        <Icon size={15} />
+      </div>
+      <span className="flex-1 text-sm font-medium text-zinc-300 group-hover:text-white transition-colors">
+        {label}
+      </span>
+      <ChevronRight size={14} className="text-zinc-600 group-hover:text-zinc-400 transition-colors" />
+    </div>
+  );
+}

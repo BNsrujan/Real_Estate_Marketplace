@@ -63,24 +63,41 @@ function mapBackendUser(u: BackendUser): UserProfile {
 function mapWatchlistItem(item: BackendWatchlistItem): Property {
   return {
     id: item.id,
+    propertyRef: null,
     slug: item.slug ?? item.id,
     title: item.title,
     type: normalizePropertyType(item.type),
-    price: Number(item.priceValue) || 0,
     priceLabel: item.priceLabel,
-    area: Number(item.sizeValue) || 0,
+    priceValue: item.priceValue ?? '0',
+    expectedPrice: null,
+    sizeLabel: item.sizeValue ?? '',
+    sizeValue: item.sizeValue ?? null,
     areaUnit: (item.areaUnit as Property['areaUnit']) ?? 'sqft',
-    district: item.districtName ?? '',
-    city: item.city ?? '',
-    taluk: item.taluk ?? '',
-    lat: Number(item.lat),
-    lng: Number(item.lng),
-    thumbnailUrl: item.thumbnailUrl ?? '',
-    imageUrls: [],
+    lat: item.lat ?? '0',
+    lng: item.lng ?? '0',
     listingType: (item.listingType as Property['listingType']) ?? 'sale',
+    status: 'active',
     isActive: true,
+    thumbnailUrl: item.thumbnailUrl ?? null,
+    images: [],
+    imageUrls: [],
     description: item.description ?? '',
     features: [],
+    facing: null,
+    siteDimensions: null,
+    landUse: null,
+    documentStatus: null,
+    condition: null,
+    contactNumber: null,
+    roadAccess: false,
+    isFeatured: false,
+    address: null,
+    sellerId: null,
+    city: item.city ?? '',
+    taluk: item.taluk ?? '',
+    districtName: item.districtName ?? '',
+    districtState: '',
+    districtId: '',
     createdAt: item.createdAt ?? '',
     updatedAt: item.updatedAt ?? '',
   };
@@ -152,6 +169,16 @@ export async function getProfile(): Promise<UserProfile> {
   const res = await apiService.get<ApiResponse<BackendUser>>(
     '/api/v1/auth/profile',
   );
+  return mapBackendUser(res.data);
+}
+
+export async function updateProfile(patch: {
+  name?: string;
+  phone?: string;
+  username?: string;
+  avatarUrl?: string;
+}): Promise<UserProfile> {
+  const res = await apiService.patch<ApiResponse<BackendUser>>('/api/v1/auth/profile', patch);
   return mapBackendUser(res.data);
 }
 

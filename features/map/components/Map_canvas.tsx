@@ -52,6 +52,7 @@ export function MapCanvas({ setIsLoaded }: Props) {
   );
 
   const handleMarkerHover = useCallback((prop: Property) => {
+    if (window.innerWidth < 768) return;
     if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
     setHoveredProperty(prop);
   }, []);
@@ -114,7 +115,7 @@ export function MapCanvas({ setIsLoaded }: Props) {
     }
     try {
       const map = mapInstance.current;
-      const pt = map.project([hoveredProperty.lng, hoveredProperty.lat]);
+      const pt = map.project([Number(hoveredProperty.lng), Number(hoveredProperty.lat)]);
       const rect = map.getContainer().getBoundingClientRect();
       setHoverScreenPos({ x: pt.x + rect.left, y: pt.y + rect.top });
     } catch {
@@ -207,7 +208,6 @@ export function MapCanvas({ setIsLoaded }: Props) {
     [mapInstance],
   );
 
-  // Sync store's activeLayer to map on initial load and whenever it changes
   const activeLayer = useStore((s) => s.map.activeLayer);
   useEffect(() => {
     if (isStyleLoaded && mapInstance.current) {
@@ -290,6 +290,7 @@ export function MapCanvas({ setIsLoaded }: Props) {
       {mounted &&
         hoveredProperty &&
         hoverScreenPos &&
+        window.innerWidth >= 768 &&
         createPortal(
           <div
             className="fixed pointer-events-none transition-all duration-200"

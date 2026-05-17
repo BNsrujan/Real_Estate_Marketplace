@@ -30,9 +30,17 @@ const TYPE_CONFIG: Record<Property["type"], { color: string; iconPath: string }>
     color: "#EC4899",
     iconPath: "M3 5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5Z M3 9h18 M3 15h18 M9 3v18 M15 3v18"
   },
-  site: { 
-    color: "#8B5CF6", 
-    iconPath: "M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z M12 10a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z" 
+  site: {
+    color: "#8B5CF6",
+    iconPath: "M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z M12 10a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"
+  },
+  villa: {
+    color: "#A78BFA",
+    iconPath: "m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z M9 22 9 12 15 12 15 22"
+  },
+  plot: {
+    color: "#FB923C",
+    iconPath: "M3 5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5Z M3 9h18 M3 15h18 M9 3v18 M15 3v18"
   },
 };
 
@@ -219,7 +227,7 @@ export class PropertyMarkerService {
           type: "FeatureCollection",
           features: properties.map(p => ({
             type: "Feature",
-            geometry: { type: "Point", coordinates: [p.lng, p.lat] },
+            geometry: { type: "Point", coordinates: [Number(p.lng), Number(p.lat)] },
             properties: { ...p },
           })),
         });

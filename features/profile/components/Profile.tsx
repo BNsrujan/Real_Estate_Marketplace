@@ -3,16 +3,22 @@
 import { useEffect, useRef, useState } from "react";
 import ProfileModal from "./profile_modal";
 import { useStore } from "@/shared/store";
+import { useSidebarStore } from "@/features/sidebar/store/sidebar_store";
 
 const Profile = () => {
   const user = useStore((s) => s.auth.user);
   const openLoginModal = useStore((s) => s.openLoginModal);
+  const closePanel = useSidebarStore((s) => s.closePanel);
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
   const profileRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (profileRef.current && !profileRef.current.contains(event.target as Node)) {
+      const target = event.target as Element;
+      // Clicks inside Radix portals (dialogs, drawers) live in document.body outside
+      // profileRef — don't treat those as "outside" clicks.
+      if (target?.closest?.("[data-radix-portal]")) return;
+      if (profileRef.current && !profileRef.current.contains(target)) {
         setProfileMenuOpen(false);
       }
     };
@@ -25,7 +31,7 @@ const Profile = () => {
       {user ? (
         <>
           <button
-            onClick={() => setProfileMenuOpen((p) => !p)}
+            onClick={() => { closePanel(); setProfileMenuOpen((p) => !p); }}
             className="flex items-center gap-2 rounded-full bg-white/20 px-1 py-1 backdrop-blur-md hover:bg-white/30 transition"
           >
             <div className="w-8 md:w-10 h-8 md:h-10 rounded-full bg-gray-300 flex items-center justify-center">

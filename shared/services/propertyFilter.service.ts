@@ -1,11 +1,3 @@
-/**
- * propertyFilterService — Centralized filter engine (SERVICE-005)
- *
- * ALL filtering MUST go through this service to prevent conflicts
- * between F-006 (district), F-013 (search), and F-014 (type filter).
- * No feature should write `properties.filtered` directly.
- */
-
 import type { Property, FilterState, PropertyType } from '@/shared/types';
 
 function matchesTypes(property: Property, types: PropertyType[]): boolean {
@@ -13,41 +5,29 @@ function matchesTypes(property: Property, types: PropertyType[]): boolean {
   return types.includes(property.type);
 }
 
-function matchesListingType(
-  property: Property,
-  listingType: FilterState['listingType'],
-): boolean {
+function matchesListingType(property: Property, listingType: FilterState['listingType']): boolean {
   if (listingType === 'all') return true;
   return property.listingType === listingType || property.listingType === 'both';
 }
 
-function matchesPriceRange(
-  property: Property,
-  priceMin: number | null,
-  priceMax: number | null,
-): boolean {
-  if (priceMin !== null && property.price < priceMin) return false;
-  if (priceMax !== null && property.price > priceMax) return false;
+function matchesPriceRange(property: Property, priceMin: number | null, priceMax: number | null): boolean {
+  const price = Number(property.priceValue) || 0;
+  if (priceMin !== null && price < priceMin) return false;
+  if (priceMax !== null && price > priceMax) return false;
   return true;
 }
 
-function matchesAreaRange(
-  property: Property,
-  areaMin: number | null,
-  areaMax: number | null,
-): boolean {
-  if (areaMin !== null && property.area < areaMin) return false;
-  if (areaMax !== null && property.area > areaMax) return false;
+function matchesAreaRange(property: Property, areaMin: number | null, areaMax: number | null): boolean {
+  const area = Number(property.sizeValue) || 0;
+  if (areaMin !== null && area < areaMin) return false;
+  if (areaMax !== null && area > areaMax) return false;
   return true;
 }
 
-function matchesDistrict(
-  property: Property,
-  activeDistrict: string | null,
-): boolean {
+function matchesDistrict(property: Property, activeDistrict: string | null): boolean {
   if (!activeDistrict) return true;
   return (
-    property.district?.toLowerCase() === activeDistrict.toLowerCase() ||
+    property.districtName?.toLowerCase() === activeDistrict.toLowerCase() ||
     property.city?.toLowerCase() === activeDistrict.toLowerCase()
   );
 }
@@ -57,7 +37,7 @@ function matchesSearch(property: Property, query: string): boolean {
   const q = query.toLowerCase();
   return (
     property.title.toLowerCase().includes(q) ||
-    property.district.toLowerCase().includes(q) ||
+    property.districtName?.toLowerCase().includes(q) ||
     property.city?.toLowerCase().includes(q) ||
     property.description?.toLowerCase().includes(q) ||
     false
@@ -81,10 +61,7 @@ export const propertyFilterService = {
     return applyAll(properties, filters);
   },
 
-  applyPartial(
-    properties: Property[],
-    partialFilters: Partial<FilterState>,
-  ): Property[] {
+  applyPartial(properties: Property[], partialFilters: Partial<FilterState>): Property[] {
     const merged: FilterState = {
       types: [],
       priceMin: null,

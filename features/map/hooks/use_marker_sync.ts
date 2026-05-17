@@ -87,7 +87,7 @@ export function useMarkerSync({
       } else {
         // Fallback: render filtered markers immediately
         const districtFiltered = all.filter(
-          (p) => p.district?.toLowerCase() === districtName.toLowerCase(),
+          (p) => p.districtName?.toLowerCase() === districtName.toLowerCase(),
         );
         placeMarkers(map, districtFiltered, "filtered");
       }

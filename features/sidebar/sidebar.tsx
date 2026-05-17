@@ -1,7 +1,7 @@
 "use client";
 
-import { useCallback } from "react";
-import { Map, Bookmark, MessageSquare, Search } from "lucide-react";
+import { useCallback, useState } from "react";
+import { Map, Bookmark, MessageSquare, Search, BookOpen, Plus } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -18,6 +18,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/shared/components/ui/tooltip";
+import { SellFormModal } from "@/features/sell/components/sell_form_modal";
 
 type MenuId = SidebarMenuId;
 
@@ -37,9 +38,9 @@ const SIDEBAR_MENUS: SidebarMenu[] = [
   },
   {
     id: "search",
-    title: "Smart Search",
+    title: "Browse Properties",
     Icon: Search,
-    description: "Search by filters and landmarks.",
+    description: "Filter and discover listings.",
   },
   {
     id: "saved",
@@ -49,17 +50,18 @@ const SIDEBAR_MENUS: SidebarMenu[] = [
   },
   {
     id: "messages",
-    title: "Messages",
+    title: "My Enquiries",
     Icon: MessageSquare,
-    description: "Agent chats and updates.",
+    description: "Enquiries you have submitted.",
+  },
+  {
+    id: "blog",
+    title: "Blog",
+    Icon: BookOpen,
+    description: "Real estate insights and news.",
   },
 ];
 
-interface WatchlistItem {
-  id: string;
-  area: string;
-  images: { image: string; alt: string }[];
-}
 
 function SidebarMenuItem({
   item,
@@ -107,9 +109,11 @@ function SidebarMenuItem({
   );
 }
 
-const AUTH_GATED_MENUS: Exclude<MenuId, null>[] = ["saved", "messages"];
+// These menus show a login CTA inside the panel rather than immediately blocking
+const AUTH_GATED_MENUS: Exclude<MenuId, null>[] = [];
 
 export function AppSidebar() {
+  const [showSellModal, setShowSellModal] = useState(false);
   const activeMenu = useSidebarStore((s) => s.activeMenu);
   const setActiveMenu = useSidebarStore((s) => s.setActiveMenu);
   const isPanelOpen = useSidebarStore((s) => s.isPanelOpen);
@@ -119,14 +123,6 @@ export function AppSidebar() {
   const isAuthenticated = useStore((s) => s.auth.isAuthenticated);
   const openLoginModal = useStore((s) => s.openLoginModal);
 
-  const watchlistItems: WatchlistItem[] = savedProperties.map((p) => ({
-    id: p.id,
-    area: p.district || p.title,
-    images:
-      (p.imageUrls ?? []).length > 0
-        ? p.imageUrls.map((img) => ({ image: img, alt: p.title }))
-        : [{ image: p.thumbnailUrl || "/property/image.png", alt: p.title }],
-  }));
 
   const handleMenuActivate = useCallback(
     (id: MenuId) => {
@@ -152,7 +148,9 @@ export function AppSidebar() {
   );
 
   return (
-    <div className="hidden md:flex h-screen overflow-hidden bg-black text-white w-22">
+    <>
+      {showSellModal && <SellFormModal onClose={() => setShowSellModal(false)} />}
+      <div className="hidden md:flex h-screen overflow-hidden bg-black text-white w-22 relative z-[800]">
       <Sidebar className="w-22 border-r border-white/10 bg-black/50 backdrop-blur-3xl flex flex-col items-center py-4">
         <SidebarContent className="px-4 py-4">
           <SidebarGroup>
@@ -167,6 +165,30 @@ export function AppSidebar() {
                     onActivate={handleMenuActivate}
                   />
                 ))}
+
+                {/* List Property button */}
+                <li>
+                  <Tooltip>
+                    <TooltipTrigger
+                      aria-label="List Property"
+                      onClick={() => {
+                        if (!isAuthenticated) { openLoginModal(); return; }
+                        setShowSellModal(true);
+                      }}
+                      className="group relative flex h-14 w-14 items-center justify-center overflow-hidden rounded-2xl border border-emerald-500/40 bg-emerald-500/10 hover:bg-emerald-500/20 transition-all duration-200"
+                    >
+                      <div className="flex h-10 w-10 items-center justify-center rounded-xl text-emerald-400">
+                        <Plus size={20} />
+                      </div>
+                    </TooltipTrigger>
+                    <TooltipContent
+                      side="right"
+                      className="bg-zinc-900/95 border border-white/10 text-white text-xs font-medium px-3 py-1.5 rounded-lg shadow-lg backdrop-blur-sm z-1100"
+                    >
+                      List Property
+                    </TooltipContent>
+                  </Tooltip>
+                </li>
               </ul>
             </nav>
           </SidebarGroup>
@@ -175,7 +197,7 @@ export function AppSidebar() {
 
           <div className="flex-1 overflow-y-auto no-scrollbar">
             <div className="gap-4 flex flex-col py-3">
-              {watchlistItems.map((property) => (
+              {savedProperties.map((property) => (
                 <WatchlistBadge
                   key={property.id}
                   property={property}
@@ -196,6 +218,7 @@ export function AppSidebar() {
         </SidebarContent>
       </Sidebar>
     </div>
+    </>
   );
 }
 

@@ -12,6 +12,10 @@ import type {
   MobilePanel,
   SidebarTab,
   PendingAction,
+  BlogPostCard,
+  BlogPostDetail,
+  DashboardStats,
+  EnquiryWithProperty,
 } from '@/shared/types';
 
 // ─── Geo types (local, avoids maplibre-gl SSR issues) ────────────────────────
@@ -34,6 +38,7 @@ export type SidebarMenuId =
   | 'search'
   | 'saved'
   | 'messages'
+  | 'blog'
   | 'profile'
   | null;
 
@@ -104,6 +109,23 @@ interface NammaDharaniStore {
   filters: FilterState;
   setFilters: (patch: Partial<FilterState>) => void;
   resetFilters: () => void;
+
+  // ─── BLOG ────────────────────────────────────────────────────────────────
+  blog: {
+    posts: BlogPostCard[];
+    selectedPost: BlogPostDetail | null;
+    isLoading: boolean;
+  };
+  setBlog: (patch: Partial<NammaDharaniStore['blog']>) => void;
+
+  // ─── DASHBOARD ───────────────────────────────────────────────────────────
+  dashboard: {
+    properties: Property[];
+    enquiries: EnquiryWithProperty[];
+    stats: DashboardStats | null;
+    isLoading: boolean;
+  };
+  setDashboard: (patch: Partial<NammaDharaniStore['dashboard']>) => void;
 
   // ─── UI ──────────────────────────────────────────────────────────────────
   ui: {
@@ -196,6 +218,7 @@ export const useStore = create<NammaDharaniStore>()(
               isLoginModalOpen: true,
               pendingAction: pendingAction ?? s.auth.pendingAction,
             },
+            ui: { ...s.ui, isPanelOpen: false },
           }),
           false,
           'auth/openLoginModal',
@@ -318,6 +341,16 @@ export const useStore = create<NammaDharaniStore>()(
       resetFilters: () =>
         set({ filters: DEFAULT_FILTERS }, false, 'filters/reset'),
 
+      // ─── BLOG ────────────────────────────────────────────────────────────
+      blog: { posts: [], selectedPost: null, isLoading: false },
+      setBlog: (patch) =>
+        set((s) => ({ blog: { ...s.blog, ...patch } }), false, 'blog/set'),
+
+      // ─── DASHBOARD ───────────────────────────────────────────────────────
+      dashboard: { properties: [], enquiries: [], stats: null, isLoading: false },
+      setDashboard: (patch) =>
+        set((s) => ({ dashboard: { ...s.dashboard, ...patch } }), false, 'dashboard/set'),
+
       // ─── UI ──────────────────────────────────────────────────────────────
       ui: {
         activeSidebarTab: null,
@@ -388,6 +421,8 @@ export const selectProperties = (s: NammaDharaniStore) => s.properties;
 export const selectFilters = (s: NammaDharaniStore) => s.filters;
 export const selectWatchlist = (s: NammaDharaniStore) => s.watchlist;
 export const selectUI = (s: NammaDharaniStore) => s.ui;
+export const selectBlog = (s: NammaDharaniStore) => s.blog;
+export const selectDashboard = (s: NammaDharaniStore) => s.dashboard;
 
 // ─── Token helper (usable outside React) ─────────────────────────────────────
 

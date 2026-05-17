@@ -1,33 +1,37 @@
-"use client";
+'use client';
 
 import {
   Avatar, AvatarImage, AvatarFallback,
   AvatarGroup, AvatarGroupCount,
-} from "@/shared/components/ui/avatar";
+} from '@/shared/components/ui/avatar';
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
-} from "@/shared/components/ui/tooltip";
+} from '@/shared/components/ui/tooltip';
+import type { Property } from '@/shared/types';
 
-export default function WatchlistBadge({ property }: { property: any }) {
+export default function WatchlistBadge({ property }: { property: Property }) {
+  const img0 = property.images?.[0]?.url ?? property.imageUrls?.[0] ?? '';
+  const img1 = property.images?.[1]?.url ?? property.imageUrls?.[1] ?? '';
+
   return (
     <Tooltip>
       <TooltipTrigger asChild>
         <div className="flex flex-col items-center w-full cursor-pointer">
           <AvatarGroup className="ring-2 ring-transparent rounded-xl transition-all duration-200 hover:ring-white/20">
             <Avatar>
-              <AvatarImage src={property.images[0]?.image} alt={property.images[0].alt} />
-              <AvatarFallback>CN</AvatarFallback>
+              <AvatarImage src={img0} alt={property.images?.[0]?.alt ?? property.title} />
+              <AvatarFallback>P</AvatarFallback>
             </Avatar>
             <Avatar>
-              <AvatarImage src={property.images[1]?.image} alt={property.images[1]?.alt || "property"} />
-              <AvatarFallback>CN</AvatarFallback>
+              <AvatarImage src={img1} alt={property.images?.[1]?.alt ?? property.title} />
+              <AvatarFallback>P</AvatarFallback>
             </Avatar>
-            <AvatarGroupCount>+{property.images.length}</AvatarGroupCount>
+            <AvatarGroupCount>+{(property.images?.length ?? property.imageUrls?.length ?? 0)}</AvatarGroupCount>
           </AvatarGroup>
           <div className="text-xs font-medium text-muted-foreground truncate text-ellipsis pt-2 text-start w-full">
-            {property.area}
+            {property.sizeLabel}
           </div>
         </div>
       </TooltipTrigger>
@@ -36,18 +40,19 @@ export default function WatchlistBadge({ property }: { property: any }) {
         sideOffset={12}
         className="bg-black/90 border border-white/10 text-white rounded-2xl shadow-xl backdrop-blur-xl p-4 w-56 z-1100 [--tooltip-bg:var(--color-black)]"
       >
-        <div className="">
-        <p className="text-sm font-semibold mb-3 truncate">{property.area}</p>
+        <p className="text-sm font-semibold mb-3 truncate">{property.sizeLabel}</p>
         <div className="flex gap-2 flex-wrap">
-          {property.images.slice(0, 4).map((img: { image: string; alt: string }, i: number) => (
+          {(property.images?.length
+            ? property.images.slice(0, 4).map((img) => ({ url: img.url, alt: img.alt }))
+            : property.imageUrls?.slice(0, 4).map((url) => ({ url, alt: property.title })) ?? []
+          ).map((img, i) => (
             <img
               key={i}
-              src={img.image}
+              src={img.url}
               alt={img.alt}
               className="h-12 w-12 rounded-lg object-cover border border-white/10"
             />
           ))}
-        </div>
         </div>
       </TooltipContent>
     </Tooltip>

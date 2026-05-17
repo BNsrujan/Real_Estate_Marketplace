@@ -95,7 +95,7 @@ export function usePropertyMarkers({
     const panelLeftPx = isDesktop ? 400 : 0;
 
     map.flyTo({
-      center: [property.lng, property.lat],
+      center: [Number(property.lng), Number(property.lat)],
       zoom: MARKER_ZOOM_LEVEL,
       duration: MARKER_ZOOM_DURATION,
       curve: 1.42,

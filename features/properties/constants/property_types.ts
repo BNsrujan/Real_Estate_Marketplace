@@ -1,82 +1,56 @@
-/**
- * Centralized property type definitions and constants.
- * All property-related enums and type guards live here.
- */
+import type { PropertyType } from '@/shared/types';
 
-export const PROPERTY_TYPES = {
-  HOUSE: "house",
-  SITE: "site",
-  AGRICULTURE_LAND: "agriculture land",
-  COMMERCIAL_SPACE: "commercial space",
-  APARTMENT: "apartment",
-  COMMERCIAL_PLOTS: "commercial plots",
-} as const;
+export { type PropertyType };
 
-export type PropertyType =
-  | typeof PROPERTY_TYPES.HOUSE
-  | typeof PROPERTY_TYPES.SITE
-  | typeof PROPERTY_TYPES.AGRICULTURE_LAND
-  | typeof PROPERTY_TYPES.COMMERCIAL_SPACE
-  | typeof PROPERTY_TYPES.APARTMENT
-  | typeof PROPERTY_TYPES.COMMERCIAL_PLOTS;
-
-/**
- * Icons and colors for property types for consistent visualization.
- */
 export const PROPERTY_TYPE_ICONS: Record<PropertyType, string> = {
-  house: "🏠",
-  site: "🌱",
-  "agriculture land": "🌾",
-  "commercial space": "🏗️",
-  apartment: "🏢",
-  "commercial plots": "📍",
+  house: '🏠',
+  apartment: '🏢',
+  villa: '🏡',
+  site: '🌱',
+  plot: '📍',
+  agriculture: '🌾',
+  commercial_space: '🏗️',
+  commercial_plot: '🏭',
 };
 
 export const PROPERTY_TYPE_COLORS: Record<PropertyType, string> = {
-  house: "#4ade80",
-  site: "#facc15",
-  "agriculture land": "#f97316",
-  "commercial space": "#fb923c",
-  apartment: "#38bdf8",
-  "commercial plots": "#ec4899",
+  house: '#4ade80',
+  apartment: '#38bdf8',
+  villa: '#a78bfa',
+  site: '#facc15',
+  plot: '#fb923c',
+  agriculture: '#f97316',
+  commercial_space: '#ec4899',
+  commercial_plot: '#f43f5e',
 };
 
-/**
- * Display labels for property types.
- */
 export const PROPERTY_TYPE_LABELS: Record<PropertyType, string> = {
-  house: "House",
-  site: "Site",
-  "agriculture land": "Agriculture Land",
-  "commercial space": "Commercial Space",
-  apartment: "Apartment",
-  "commercial plots": "Commercial Plots",
+  house: 'House',
+  apartment: 'Apartment',
+  villa: 'Villa',
+  site: 'Site',
+  plot: 'Plot',
+  agriculture: 'Agriculture Land',
+  commercial_space: 'Commercial Space',
+  commercial_plot: 'Commercial Plot',
 };
 
-/**
- * Type guard to check if a string is a valid PropertyType.
- */
+export const ALL_PROPERTY_TYPES: PropertyType[] = [
+  'house', 'apartment', 'villa', 'site', 'plot', 'agriculture', 'commercial_space', 'commercial_plot',
+];
+
 export function isValidPropertyType(value: unknown): value is PropertyType {
-  return typeof value === "string" && value in PROPERTY_TYPE_ICONS;
+  return typeof value === 'string' && value in PROPERTY_TYPE_ICONS;
 }
 
-/**
- * Get the icon for a property type.
- */
 export function getPropertyTypeIcon(type: PropertyType): string {
-  return PROPERTY_TYPE_ICONS[type];
+  return PROPERTY_TYPE_ICONS[type] ?? '🏠';
 }
 
-/**
- * Get the color for a property type.
- */
 export function getPropertyTypeColor(type: PropertyType): string {
-  return PROPERTY_TYPE_COLORS[type];
+  return PROPERTY_TYPE_COLORS[type] ?? '#4ade80';
 }
 
-/**
- * Get the label for a property type.
- */
 export function getPropertyTypeLabel(type: PropertyType): string {
-  return PROPERTY_TYPE_LABELS[type];
+  return PROPERTY_TYPE_LABELS[type] ?? type;
 }

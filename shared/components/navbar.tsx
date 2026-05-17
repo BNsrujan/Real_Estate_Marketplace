@@ -149,6 +149,7 @@ const NavBar = () => {
             Clear all
           </button>
         )}
+
       </div>
     </div>
   );

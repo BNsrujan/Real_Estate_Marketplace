@@ -1,18 +1,19 @@
 "use client";
 
-import React, { useMemo } from "react";
+import React, { useMemo, useEffect, useState } from "react";
 import Image from "next/image";
 import {
   Map, Search, Bookmark, BookmarkCheck, MessageSquare,
-  Bell, Activity, TrendingUp, Inbox,
-  MapPin, X, Phone, Lock, Send, CheckCircle,
+  Bell, Activity, TrendingUp, Inbox, MapPin, X, Phone, Lock, Send, CheckCircle,
 } from "lucide-react";
 import PropertyCard from "@/features/properties/components/property_card";
 import { submitEnquiry } from "@/features/properties/api/enquiry_api";
+import { getPropertyById } from "@/features/properties/api/property_api";
 import { useSidebarStore } from "../store/sidebar_store";
 import { useStore } from "@/shared/store";
 import { useWatchlistSync } from "@/features/properties/hooks/use_watchlist_sync";
 import { SidebarCard } from "@/shared/ui/sidebar_card";
+import type { PropertyDetail } from "@/shared/types";
 import {
   Drawer,
   DrawerContent,
@@ -48,11 +49,19 @@ export default function MobileBottomDrawer() {
 
   const isSaved = selectedProperty ? saved.some((p) => p.id === selectedProperty.id) : false;
 
-  const [showEnquiry,       setShowEnquiry]       = React.useState(false);
-  const [enquiryMsg,        setEnquiryMsg]        = React.useState("");
-  const [enquiryPhone,      setEnquiryPhone]      = React.useState("");
-  const [enquirySubmitting, setEnquirySubmitting] = React.useState(false);
-  const [enquirySent,       setEnquirySent]       = React.useState(false);
+  const [showEnquiry,       setShowEnquiry]       = useState(false);
+  const [enquiryMsg,        setEnquiryMsg]        = useState("");
+  const [enquiryPhone,      setEnquiryPhone]      = useState("");
+  const [enquirySubmitting, setEnquirySubmitting] = useState(false);
+  const [enquirySent,       setEnquirySent]       = useState(false);
+  const [propertyDetail,    setPropertyDetail]    = useState<PropertyDetail | null>(null);
+
+  useEffect(() => {
+    if (!selectedProperty) { setPropertyDetail(null); return; }
+    getPropertyById(selectedProperty.id)
+      .then(setPropertyDetail)
+      .catch(() => setPropertyDetail(null));
+  }, [selectedProperty?.id]);
 
   const handleClose = () => {
     setSelectedProperty(null);
@@ -112,39 +121,39 @@ export default function MobileBottomDrawer() {
       >
         {selectedProperty ? (
           // ── Property detail ──
-          <div className="overflow-y-auto flex-1">
+          <div className="overflow-y-auto flex-1 p-3 overflow-hidden">
             {/* Hero image */}
-            <div className="relative h-48 w-full shrink-0">
+            <div className="relative h-48 w-full shrink-0 mt-3 px-3 overflow-hidden rounded-t-2xl">
               <Image
                 src={selectedProperty.thumbnailUrl || selectedProperty.imageUrls?.[0] || "/property/image.png"}
                 alt={selectedProperty.title}
                 fill
-                className="object-cover rounded-t-2xl"
+                className="object-cover"
               />
-              <div className="absolute inset-0 bg-gradient-to-b from-black/20 to-black/70 rounded-t-2xl" />
-
-              {/* Close */}
-              <button
-                onClick={handleClose}
-                className="absolute top-3 right-3 flex items-center justify-center w-8 h-8 rounded-full bg-black/60 text-white hover:bg-black/80 transition"
-              >
-                <X size={16} />
-              </button>
-
-              {/* Listing badge */}
-              <span className="absolute bottom-3 left-3 rounded-full bg-emerald-500/90 px-3 py-1 text-xs font-semibold text-white capitalize">
-                For {selectedProperty.listingType}
-              </span>
-
-              {/* Save button */}
-              <button
-                onClick={handleSave}
-                className="absolute bottom-3 right-3 flex items-center justify-center w-8 h-8 rounded-full bg-black/60 hover:bg-black/80 transition"
-              >
-                {isSaved
-                  ? <BookmarkCheck size={16} className="text-emerald-400" />
-                  : <Bookmark size={16} className="text-white" />}
-              </button>
+              {/* Gradient + controls overlay — single absolute layer, flex layout inside */}
+              <div className="absolute inset-0 bg-gradient-to-b from-black/20 to-black/70 flex flex-col justify-between p-3">
+                <div className="flex justify-end">
+                  <button
+                    onClick={handleClose}
+                    className="flex items-center justify-center w-8 h-8 rounded-full bg-black/60 text-white hover:bg-black/80 transition"
+                  >
+                    <X size={16} />
+                  </button>
+                </div>
+                <div className="flex items-end justify-between">
+                  <span className="rounded-full bg-emerald-500/90 px-3 py-1 text-xs font-semibold text-white capitalize">
+                    For {selectedProperty.listingType}
+                  </span>
+                  <button
+                    onClick={handleSave}
+                    className="flex items-center justify-center w-8 h-8 rounded-full bg-black/60 hover:bg-black/80 transition"
+                  >
+                    {isSaved
+                      ? <BookmarkCheck size={16} className="text-emerald-400" />
+                      : <Bookmark size={16} className="text-white" />}
+                  </button>
+                </div>
+              </div>
             </div>
 
             {/* Details */}
@@ -153,7 +162,7 @@ export default function MobileBottomDrawer() {
                 <h2 className="text-lg font-bold text-white leading-tight">{selectedProperty.title}</h2>
                 <p className="mt-1 flex items-center gap-1.5 text-sm text-white/50">
                   <MapPin size={13} />
-                  {[selectedProperty.city, selectedProperty.taluk, selectedProperty.district]
+                  {[selectedProperty.city, selectedProperty.taluk, selectedProperty.districtName]
                     .filter(Boolean)
                     .join(", ") || "Karnataka"}
                 </p>
@@ -168,8 +177,7 @@ export default function MobileBottomDrawer() {
                 <div className="rounded-xl border border-white/10 bg-white/5 p-3">
                   <p className="text-[10px] uppercase tracking-wider text-white/40 mb-0.5">Area</p>
                   <p className="text-base font-bold text-white">
-                    {selectedProperty.area}{" "}
-                    <span className="text-xs font-normal text-white/60">{selectedProperty.areaUnit}</span>
+                    {selectedProperty.sizeLabel}
                   </p>
                 </div>
               </div>
@@ -241,6 +249,50 @@ export default function MobileBottomDrawer() {
                     </>
                   )}
                 </div>
+              )}
+
+              {/* ── Extended details ── */}
+              {propertyDetail?.residentialDetails && (() => {
+                const r = propertyDetail.residentialDetails;
+                const chips = [
+                  r.bhkLabel, r.bedrooms != null && `${r.bedrooms} Bed`,
+                  r.bathrooms != null && `${r.bathrooms} Bath`,
+                  r.furnishedStatus,
+                ].filter(Boolean) as string[];
+                return chips.length > 0 ? (
+                  <div className="rounded-xl border border-white/10 bg-white/5 p-3">
+                    <p className="text-[10px] uppercase tracking-wider text-white/40 mb-2">Details</p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {chips.map((c) => (
+                        <span key={c} className="rounded-full bg-white/10 px-2.5 py-1 text-xs text-white/70">{c}</span>
+                      ))}
+                    </div>
+                  </div>
+                ) : null;
+              })()}
+
+              {propertyDetail?.amenities && propertyDetail.amenities.length > 0 && (
+                <div className="rounded-xl border border-white/10 bg-white/5 p-3">
+                  <p className="text-[10px] uppercase tracking-wider text-white/40 mb-2">Amenities</p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {propertyDetail.amenities.map((a) => (
+                      <span key={a.id} className="rounded-full bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 text-xs text-emerald-300">{a.name}</span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {selectedProperty.contactNumber && (
+                <a
+                  href={`tel:${selectedProperty.contactNumber}`}
+                  className="flex items-center justify-between rounded-xl border border-white/10 bg-white/5 px-3 py-2.5"
+                >
+                  <div>
+                    <p className="text-[10px] uppercase tracking-wider text-white/40">Contact</p>
+                    <p className="text-sm font-semibold text-white">{selectedProperty.contactNumber}</p>
+                  </div>
+                  <Phone size={16} className="text-emerald-400" />
+                </a>
               )}
             </div>
           </div>
