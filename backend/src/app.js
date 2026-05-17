@@ -1,5 +1,6 @@
 import express from 'express';
 import cors from 'cors';
+import cookieParser from 'cookie-parser';
 
 import healthRouter from './routes/health.routes.js';
 import authRouter from './routes/auth.routes.js';
@@ -30,6 +31,8 @@ app.use(
 
 app.use(express.json({ limit: '16kb' }));
 app.use(express.urlencoded({ extended: true, limit: '16kb' }));
+// COOKIE_SECRET must be set in .env — required for tamper-evident signed cookies
+app.use(cookieParser(process.env.COOKIE_SECRET));
 
 app.use('/api/v1/health', healthRouter);
 app.use('/api/v1/auth', authRouter);

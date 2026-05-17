@@ -1,5 +1,14 @@
 import { Router } from 'express';
-import { registerUser, loginUser, googleAuth, getProfile, updateProfile, sendOtp, verifyOtp } from '../controllers/auth.controller.js';
+import {
+    registerUser,
+    loginUser,
+    googleAuth,
+    getProfile,
+    updateProfile,
+    sendOtp,
+    verifyOtp,
+    logout,
+} from '../controllers/auth.controller.js';
 import { verifyToken } from '../middlewares/auth.middleware.js';
 
 const router = Router();
@@ -9,6 +18,7 @@ router.post('/login', loginUser);
 router.post('/google', googleAuth);
 router.post('/otp/send', sendOtp);
 router.post('/otp/verify', verifyOtp);
+router.post('/logout', logout);
 router.get('/profile', verifyToken, getProfile);
 router.patch('/profile', verifyToken, updateProfile);
 

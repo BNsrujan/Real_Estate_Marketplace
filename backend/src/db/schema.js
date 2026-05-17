@@ -23,7 +23,7 @@ export const areaUnitEnum = pgEnum('area_unit', ['sqft', 'acres', 'guntas']);
 export const users = pgTable('users', {
     id: uuid('id').primaryKey().defaultRandom(),
     username: varchar('username', { length: 50 }).unique().notNull(),
-    name: varchar('name', { length: 100 }),
+    name: varchar('name', { length: 201 }),   // full name = firstName + " " + lastName
     email: varchar('email', { length: 255 }).unique().notNull(),
     passwordHash: varchar('password_hash', { length: 255 }),        // nullable — Google users have no password
     phone: varchar('phone', { length: 20 }),
