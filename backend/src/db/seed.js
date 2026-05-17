@@ -2,7 +2,7 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 import { db } from './db.js';
-import { districts, properties, propertyImages } from './schema.js';
+import { districts, properties, propertyImages, amenities, blogCategories, blogTags } from './schema.js';
 
 function slugify(title) {
     return title
@@ -268,9 +268,79 @@ const PROPERTIES_DATA = [
     },
 ];
 
+// ─── Amenities ────────────────────────────────────────────────────────────────
+
+const AMENITIES_DATA = [
+    // infrastructure
+    { name: 'Electricity',    icon: 'zap',          category: 'infrastructure', isCustom: false },
+    { name: 'Water Supply',   icon: 'droplets',      category: 'infrastructure', isCustom: false },
+    { name: 'Bore Well',      icon: 'circle-dot',    category: 'infrastructure', isCustom: false },
+    { name: 'Good Drainage',  icon: 'waves',         category: 'infrastructure', isCustom: false },
+    { name: 'Wide Road',      icon: 'road',          category: 'infrastructure', isCustom: false },
+    { name: 'Power Backup',   icon: 'battery-charging', category: 'infrastructure', isCustom: false },
+    // convenience
+    { name: 'Parking',        icon: 'car',           category: 'convenience',    isCustom: false },
+    { name: 'Lift',           icon: 'arrow-up-down', category: 'convenience',    isCustom: false },
+    { name: 'Gymnasium',      icon: 'dumbbell',      category: 'convenience',    isCustom: false },
+    { name: 'Swimming Pool',  icon: 'waves',         category: 'convenience',    isCustom: false },
+    // safety
+    { name: 'CCTV',           icon: 'camera',        category: 'safety',         isCustom: false },
+    { name: 'Security Guard', icon: 'shield',        category: 'safety',         isCustom: false },
+    { name: 'Gated Community',icon: 'lock',          category: 'safety',         isCustom: false },
+    // nature
+    { name: 'Garden',         icon: 'flower-2',      category: 'nature',         isCustom: false },
+    { name: 'Park Nearby',    icon: 'trees',         category: 'nature',         isCustom: false },
+    // nearby
+    { name: 'School Nearby',  icon: 'school',        category: 'nearby',         isCustom: false },
+    { name: 'Hospital Nearby',icon: 'cross',         category: 'nearby',         isCustom: false },
+    { name: 'Market Nearby',  icon: 'shopping-bag',  category: 'nearby',         isCustom: false },
+];
+
+// ─── Blog Categories ──────────────────────────────────────────────────────────
+
+const BLOG_CATEGORIES_DATA = [
+    { name: 'Market Trends',    slug: 'market-trends' },
+    { name: 'Legal Guide',      slug: 'legal-guide' },
+    { name: 'Investment Tips',  slug: 'investment-tips' },
+    { name: 'Home Buying',      slug: 'home-buying' },
+    { name: 'Agriculture Land', slug: 'agriculture-land' },
+    { name: 'Commercial Real Estate', slug: 'commercial-real-estate' },
+    { name: 'Interior Design',  slug: 'interior-design' },
+    { name: 'NRI Corner',       slug: 'nri-corner' },
+];
+
+// ─── Blog Tags ────────────────────────────────────────────────────────────────
+
+const BLOG_TAGS_DATA = [
+    { name: 'Bangalore',      slug: 'bangalore' },
+    { name: 'Karnataka',      slug: 'karnataka' },
+    { name: 'RERA',           slug: 'rera' },
+    { name: 'Property Tax',   slug: 'property-tax' },
+    { name: 'Home Loan',      slug: 'home-loan' },
+    { name: 'Stamp Duty',     slug: 'stamp-duty' },
+    { name: 'Villa',          slug: 'villa' },
+    { name: 'Apartment',      slug: 'apartment' },
+    { name: 'Plot',           slug: 'plot' },
+    { name: 'Agriculture',    slug: 'agriculture' },
+    { name: 'First Time Buyer', slug: 'first-time-buyer' },
+    { name: 'Resale',         slug: 'resale' },
+];
+
 // ─── Seed ─────────────────────────────────────────────────────────────────────
 
 async function seed() {
+    console.log('Seeding amenities...');
+    await db.insert(amenities).values(AMENITIES_DATA).onConflictDoNothing();
+    console.log(`Amenities ready: ${AMENITIES_DATA.length}`);
+
+    console.log('Seeding blog categories...');
+    await db.insert(blogCategories).values(BLOG_CATEGORIES_DATA).onConflictDoNothing();
+    console.log(`Blog categories ready: ${BLOG_CATEGORIES_DATA.length}`);
+
+    console.log('Seeding blog tags...');
+    await db.insert(blogTags).values(BLOG_TAGS_DATA).onConflictDoNothing();
+    console.log(`Blog tags ready: ${BLOG_TAGS_DATA.length}`);
+
     console.log('Seeding districts...');
     await db.insert(districts).values(DISTRICTS_DATA).onConflictDoNothing();
 
@@ -309,8 +379,8 @@ async function seed() {
 
     console.log('Seeding placeholder images...');
     const imageValues = insertedProperties.flatMap((p) => [
-        { propertyId: p.id, url: '/property/image.png', alt: 'Property image 1', displayOrder: 0 },
-        { propertyId: p.id, url: '/property/image.png', alt: 'Property image 2', displayOrder: 1 },
+        { propertyId: p.id, url: '/property/image.png', alt: 'Property image 1', displayOrder: 0, isCover: true },
+        { propertyId: p.id, url: '/property/image.png', alt: 'Property image 2', displayOrder: 1, isCover: false },
     ]);
     await db.insert(propertyImages).values(imageValues);
 

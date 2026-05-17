@@ -58,4 +58,37 @@ const getMyEnquiries = asyncHandler(async (req, res) => {
     return res.status(200).json(new ApiResponse(200, { data: rows }));
 });
 
-export { submitEnquiry, getMyEnquiries };
+const updateEnquiryStatus = asyncHandler(async (req, res) => {
+    const { id } = req.params;
+    const { status } = req.body;
+
+    if (!status) throw new ApiError(400, 'status is required');
+
+    const existing = await db
+        .select({ id: enquiries.id, propertyId: enquiries.propertyId })
+        .from(enquiries)
+        .where(eq(enquiries.id, id))
+        .limit(1);
+
+    if (!existing.length) throw new ApiError(404, 'Enquiry not found');
+
+    // Only the property seller or admin can update status
+    const prop = await db
+        .select({ sellerId: properties.sellerId })
+        .from(properties)
+        .where(eq(properties.id, existing[0].propertyId))
+        .limit(1);
+
+    const { role, userId } = req.user;
+    if (role !== 'admin' && prop[0]?.sellerId !== userId) {
+        throw new ApiError(403, 'Insufficient permissions');
+    }
+
+    const [updated] = await db.update(enquiries).set({ status })
+        .where(eq(enquiries.id, id))
+        .returning({ id: enquiries.id, status: enquiries.status });
+
+    return res.status(200).json(new ApiResponse(200, { data: updated }));
+});
+
+export { submitEnquiry, getMyEnquiries, updateEnquiryStatus };
