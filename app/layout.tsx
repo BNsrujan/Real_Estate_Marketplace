@@ -8,9 +8,14 @@ import { SidebarProvider } from "@/shared/components/ui/sidebar";
 import ToastContainer from "@/shared/components/common/toast_container";
 import GlobalLoginModal from "@/shared/components/common/global_login_modal";
 import { Metadata } from "next";
+import { TooltipProvider } from "@/shared/components/ui/tooltip";
 
-const geist = Geist({ subsets: ["latin"], variable: "--font-sans" ,  display: "swap",
-  preload: false,});
+const geist = Geist({
+  subsets: ["latin"],
+  variable: "--font-sans",
+  display: "swap",
+  preload: false,
+});
 
 const manrope = Manrope({
   subsets: ["latin"],
@@ -49,13 +54,18 @@ export default function RootLayout({
         geist.variable,
       )}
     >
-      <body className="antialiased">
-        <Script src="https://accounts.google.com/gsi/client" strategy="lazyOnload" />
-        <SidebarProvider>
-          <main>{children}</main>
-        </SidebarProvider>
-        <ToastContainer />
-        <GlobalLoginModal />
+      <body className="antialiased relative w-full h-screen" >
+        <TooltipProvider>
+          <Script
+            src="https://accounts.google.com/gsi/client"
+            strategy="lazyOnload"
+          />
+          <SidebarProvider>
+            <main>{children}</main>
+          </SidebarProvider>
+          <ToastContainer />
+          <GlobalLoginModal />
+        </TooltipProvider>
       </body>
     </html>
   );
