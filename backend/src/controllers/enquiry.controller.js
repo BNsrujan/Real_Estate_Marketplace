@@ -13,7 +13,6 @@ const submitEnquiry = asyncHandler(async (req, res) => {
         throw new ApiError(400, 'Message must be at least 10 characters');
     }
 
-   
     const [property] = await db
         .select({ id: properties.id, status: properties.status })
         .from(properties)
@@ -72,7 +71,6 @@ const updateEnquiryStatus = asyncHandler(async (req, res) => {
 
     if (!existing.length) throw new ApiError(404, 'Enquiry not found');
 
-    // Only the property seller or admin can update status
     const prop = await db
         .select({ sellerId: properties.sellerId })
         .from(properties)

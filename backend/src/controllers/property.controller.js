@@ -9,8 +9,6 @@ import { ApiResponse } from '../utils/apiResponse.js';
 import { ApiError } from '../utils/apiErrors.js';
 import { asyncHandler } from '../utils/asynHandler.js';
 
-// ─── Column selection for list queries ────────────────────────────────────────
-
 const propertyRow = {
     id: properties.id,
     propertyRef: properties.propertyRef,
@@ -48,8 +46,6 @@ const propertyRow = {
     createdAt: properties.createdAt,
     updatedAt: properties.updatedAt,
 };
-
-// ─── Response builder ─────────────────────────────────────────────────────────
 
 function buildProperty(row, images = [], detail = {}) {
     return {
@@ -99,7 +95,6 @@ function buildProperty(row, images = [], detail = {}) {
         districtId: row.districtId,
         createdAt: row.createdAt,
         updatedAt: row.updatedAt,
-        // child-table detail (present on detail views)
         residentialDetails: detail.residential ?? null,
         roadInfo: detail.road ?? null,
         agricultureDetails: detail.agriculture ?? null,
@@ -133,8 +128,6 @@ async function fetchPropertyDetail(propertyId) {
     };
 }
 
-// ─── Slug generator ────────────────────────────────────────────────────────────
-
 function slugify(text) {
     return text.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
 }
@@ -150,8 +143,6 @@ async function generateUniqueSlug(title) {
         slug = `${base}-${n++}`;
     }
 }
-
-// ─── Controllers ──────────────────────────────────────────────────────────────
 
 const getProperties = asyncHandler(async (req, res) => {
     const {
@@ -327,7 +318,6 @@ const createProperty = asyncHandler(async (req, res) => {
         return propId;
     });
 
-    // Fetch and return full detail
     const [rows, images, detail] = await Promise.all([
         db.select(propertyRow).from(properties)
             .leftJoin(districts, eq(properties.districtId, districts.id))
@@ -359,7 +349,6 @@ const updateProperty = asyncHandler(async (req, res) => {
         ...coreFields
     } = req.body;
 
-    // Remove undefined fields so we only update what was sent
     const coreUpdate = Object.fromEntries(
         Object.entries(coreFields).filter(([, v]) => v !== undefined),
     );

@@ -33,7 +33,6 @@ const getPosts = asyncHandler(async (req, res) => {
 
     const conditions = [];
 
-    // Non-admin sees only published posts
     const isAdmin = req.user?.role === 'admin' || req.user?.role === 'agent';
     if (!all || !isAdmin) conditions.push(eq(blogPosts.status, 'published'));
 

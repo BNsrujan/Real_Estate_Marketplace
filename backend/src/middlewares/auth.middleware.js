@@ -15,9 +15,7 @@ const refreshLookupColumns = {
 
 const logger = createLogger('auth.middleware');
 
-
 const verifyToken = async (req, res, next) => {
-    
     const authData = parseAuthCookie(req);
 
     if (!authData) {
@@ -38,7 +36,7 @@ const verifyToken = async (req, res, next) => {
             role: payload.role,
             fullName: authData.fullName,
         };
-        req.userId = payload.userId; 
+        req.userId = payload.userId;
 
         return next();
     } catch {
@@ -47,7 +45,6 @@ const verifyToken = async (req, res, next) => {
         });
     }
 
-    
     if (!refreshToken) {
         clearAuthCookie(res);
         return next(new ApiError(401, 'Session expired. Please login again.'));
@@ -67,7 +64,7 @@ const verifyToken = async (req, res, next) => {
             return next(new ApiError(401, 'User account not found'));
         }
         const storedHash = u.refreshTokenHash;
-         if (!storedHash || storedHash !== incomingHash) {
+        if (!storedHash || storedHash !== incomingHash) {
             await db.update(users).set({ refreshTokenHash: null }).where(eq(users.id, u.id));
             clearAuthCookie(res);
             logger.warn('Refresh token replay detected', { userId: u.id });
@@ -79,7 +76,7 @@ const verifyToken = async (req, res, next) => {
         const newAccessToken = signAccessToken(tokenPayload);
         const newRefreshToken = signRefreshToken(tokenPayload);
         const fullName = u.name ?? u.email;
-        
+
         await db.update(users)
            .set({ refreshTokenHash: hashToken(newRefreshToken) })
            .where(eq(users.id, u.id));
@@ -93,7 +90,7 @@ const verifyToken = async (req, res, next) => {
         });
 
         req.user = { userId: u.id, email: u.email, role: u.role, fullName };
-        req.userId = u.id; 
+        req.userId = u.id;
 
         return next();
     } catch {

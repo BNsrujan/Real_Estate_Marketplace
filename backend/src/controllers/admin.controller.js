@@ -5,8 +5,6 @@ import { ApiResponse } from '../utils/apiResponse.js';
 import { ApiError } from '../utils/apiErrors.js';
 import { asyncHandler } from '../utils/asynHandler.js';
 
-// ─── Users ─────────────────────────────────────────────────────────────────────
-
 const listUsers = asyncHandler(async (req, res) => {
     const { role, page = 1, limit = 30 } = req.query;
     const offset = (Number(page) - 1) * Number(limit);
@@ -50,8 +48,6 @@ const toggleUserVerified = asyncHandler(async (req, res) => {
 
     return res.status(200).json(new ApiResponse(200, { data: updated }));
 });
-
-// ─── Properties ────────────────────────────────────────────────────────────────
 
 const listAllProperties = asyncHandler(async (req, res) => {
     const { status, type, page = 1, limit = 30 } = req.query;
@@ -100,8 +96,6 @@ const toggleFeatured = asyncHandler(async (req, res) => {
 
     return res.status(200).json(new ApiResponse(200, { data: updated }));
 });
-
-// ─── Enquiries ─────────────────────────────────────────────────────────────────
 
 const listAllEnquiries = asyncHandler(async (req, res) => {
     const { status, page = 1, limit = 30 } = req.query;

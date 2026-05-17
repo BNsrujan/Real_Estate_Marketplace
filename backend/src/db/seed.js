@@ -11,8 +11,6 @@ function slugify(title) {
         .replace(/(^-|-$)/g, '');
 }
 
-// ─── Districts (Karnataka only) ───────────────────────────────────────────────
-
 const DISTRICTS_DATA = [
     { name: 'Bangalore',   state: 'Karnataka', lat: '12.9716', lng: '77.5946' },
     { name: 'Dharwad',     state: 'Karnataka', lat: '15.4589', lng: '75.0078' },
@@ -21,11 +19,7 @@ const DISTRICTS_DATA = [
     { name: 'Chitradurga', state: 'Karnataka', lat: '14.2251', lng: '76.3980' },
 ];
 
-// ─── Properties ───────────────────────────────────────────────────────────────
-
 const PROPERTIES_DATA = [
-
-    // ── Bangalore (8 listings) ────────────────────────────────────────────────
     {
         title: 'Luxury Villa in Whitefield', type: 'house',
         priceLabel: '2.4 Cr', priceValue: '24000000',
@@ -90,8 +84,6 @@ const PROPERTIES_DATA = [
         lat: '13.2479', lng: '77.7173', districtName: 'Bangalore',
         description: 'Fertile red-soil agricultural land near BIAL with borewell.',
     },
-
-    // ── Dharwad (6 listings) ──────────────────────────────────────────────────
     {
         title: 'Independent House in Hubli', type: 'house',
         priceLabel: '72 Lakhs', priceValue: '7200000',
@@ -140,8 +132,6 @@ const PROPERTIES_DATA = [
         lat: '15.3800', lng: '75.1430', districtName: 'Dharwad',
         description: 'Large industrial plot on Gokul Road, suitable for warehouse or showroom.',
     },
-
-    // ── Davanagere (5 listings) ───────────────────────────────────────────────
     {
         title: 'House in Davanagere City', type: 'house',
         priceLabel: '58 Lakhs', priceValue: '5800000',
@@ -182,8 +172,6 @@ const PROPERTIES_DATA = [
         lat: '14.4620', lng: '75.9280', districtName: 'Davanagere',
         description: 'CMC-approved east-facing site in Shivaganga Layout with road and drainage.',
     },
-
-    // ── Bellary (5 listings) ──────────────────────────────────────────────────
     {
         title: 'Independent House in Bellary City', type: 'house',
         priceLabel: '62 Lakhs', priceValue: '6200000',
@@ -224,8 +212,6 @@ const PROPERTIES_DATA = [
         lat: '15.2689', lng: '76.3877', districtName: 'Bellary',
         description: 'CMC-approved plot near Hospet town bus stand with clear title.',
     },
-
-    // ── Chitradurga (5 listings) ───────────────────────────────────────────────
     {
         title: 'House in Chitradurga Town', type: 'house',
         priceLabel: '45 Lakhs', priceValue: '4500000',
@@ -268,35 +254,26 @@ const PROPERTIES_DATA = [
     },
 ];
 
-// ─── Amenities ────────────────────────────────────────────────────────────────
-
 const AMENITIES_DATA = [
-    // infrastructure
     { name: 'Electricity',    icon: 'zap',          category: 'infrastructure', isCustom: false },
     { name: 'Water Supply',   icon: 'droplets',      category: 'infrastructure', isCustom: false },
     { name: 'Bore Well',      icon: 'circle-dot',    category: 'infrastructure', isCustom: false },
     { name: 'Good Drainage',  icon: 'waves',         category: 'infrastructure', isCustom: false },
     { name: 'Wide Road',      icon: 'road',          category: 'infrastructure', isCustom: false },
     { name: 'Power Backup',   icon: 'battery-charging', category: 'infrastructure', isCustom: false },
-    // convenience
     { name: 'Parking',        icon: 'car',           category: 'convenience',    isCustom: false },
     { name: 'Lift',           icon: 'arrow-up-down', category: 'convenience',    isCustom: false },
     { name: 'Gymnasium',      icon: 'dumbbell',      category: 'convenience',    isCustom: false },
     { name: 'Swimming Pool',  icon: 'waves',         category: 'convenience',    isCustom: false },
-    // safety
     { name: 'CCTV',           icon: 'camera',        category: 'safety',         isCustom: false },
     { name: 'Security Guard', icon: 'shield',        category: 'safety',         isCustom: false },
     { name: 'Gated Community',icon: 'lock',          category: 'safety',         isCustom: false },
-    // nature
     { name: 'Garden',         icon: 'flower-2',      category: 'nature',         isCustom: false },
     { name: 'Park Nearby',    icon: 'trees',         category: 'nature',         isCustom: false },
-    // nearby
     { name: 'School Nearby',  icon: 'school',        category: 'nearby',         isCustom: false },
     { name: 'Hospital Nearby',icon: 'cross',         category: 'nearby',         isCustom: false },
     { name: 'Market Nearby',  icon: 'shopping-bag',  category: 'nearby',         isCustom: false },
 ];
-
-// ─── Blog Categories ──────────────────────────────────────────────────────────
 
 const BLOG_CATEGORIES_DATA = [
     { name: 'Market Trends',    slug: 'market-trends' },
@@ -308,8 +285,6 @@ const BLOG_CATEGORIES_DATA = [
     { name: 'Interior Design',  slug: 'interior-design' },
     { name: 'NRI Corner',       slug: 'nri-corner' },
 ];
-
-// ─── Blog Tags ────────────────────────────────────────────────────────────────
 
 const BLOG_TAGS_DATA = [
     { name: 'Bangalore',      slug: 'bangalore' },
@@ -325,8 +300,6 @@ const BLOG_TAGS_DATA = [
     { name: 'First Time Buyer', slug: 'first-time-buyer' },
     { name: 'Resale',         slug: 'resale' },
 ];
-
-// ─── Seed ─────────────────────────────────────────────────────────────────────
 
 async function seed() {
     console.log('Seeding amenities...');
