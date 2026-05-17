@@ -9,6 +9,7 @@ import districtRouter from './routes/district.routes.js';
 import watchlistRouter from './routes/watchlist.routes.js';
 import enquiryRouter from './routes/enquiry.routes.js';
 import { ApiError } from './utils/apiErrors.js';
+import { requestLogger, flushLogger } from './utils/logger.js';
 
 const app = express();
 
@@ -27,11 +28,15 @@ app.use(
         credentials: true,
     }),
 );
+app.use(requestLogger);
+process.on('SIGTERM', async () => {
+    await flushLogger();
+    process.exit(0);
+});
 
 app.use(express.json({ limit: '16kb' }));
 app.use(express.urlencoded({ extended: true, limit: '16kb' }));
 app.use(cookieParser(process.env.COOKIE_SECRET));
-
 app.use('/api/v1/health', healthRouter);
 app.use('/api/v1/auth', authRouter);
 app.use('/api/v1/properties', propertyRouter);

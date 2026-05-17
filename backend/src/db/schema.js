@@ -51,7 +51,6 @@ export const properties = pgTable('properties', {
     type: propertyTypeEnum('type').notNull(),
     priceLabel: varchar('price_label', { length: 50 }).notNull(),
     priceValue: numeric('price_value', { precision: 15, scale: 2 }).notNull(),
-    // area (replaces sizeValue) + legacy alias kept for migration safety
     sizeLabel: varchar('size_label', { length: 50 }).notNull(),
     sizeValue: numeric('size_value', { precision: 12, scale: 2 }),
     areaUnit: areaUnitEnum('area_unit').default('sqft'),

@@ -4,7 +4,7 @@ import { users } from '../db/schema.js';
 import { ApiError } from '../utils/apiErrors.js';
 import { verifyAccessToken, verifyRefreshToken, signAccessToken, signRefreshToken } from '../utils/jwt.helpers.js';
 import { parseAuthCookie, setAuthCookie, clearAuthCookie } from '../utils/cookie.helpers.js';
-
+import { createLogger } from '../utils/logger.js';
 
 const refreshLookupColumns = {
     id: users.id,
@@ -12,6 +12,8 @@ const refreshLookupColumns = {
     role: users.role,
     name: users.name,
 };
+
+const logger = createLogger('auth.middleware');
 
 
 const verifyToken = async (req, res, next) => {
@@ -40,7 +42,9 @@ const verifyToken = async (req, res, next) => {
 
         return next();
     } catch {
-        // Access token expired or tampered — fall through to refresh path
+        logger.debug('Access token invalid, attempting refresh', {
+            reason: err.message,
+        });
     }
 
     
@@ -62,12 +66,23 @@ const verifyToken = async (req, res, next) => {
             clearAuthCookie(res);
             return next(new ApiError(401, 'User account not found'));
         }
+        const storedHash = u.refreshTokenHash;
+         if (!storedHash || storedHash !== incomingHash) {
+            await db.update(users).set({ refreshTokenHash: null }).where(eq(users.id, u.id));
+            clearAuthCookie(res);
+            logger.warn('Refresh token replay detected', { userId: u.id });
+            return next(new ApiError(401, 'Session invalidated. Please log in again.'));
+        }
 
         const u = rows[0];
         const tokenPayload = { userId: u.id, email: u.email, role: u.role };
         const newAccessToken = signAccessToken(tokenPayload);
         const newRefreshToken = signRefreshToken(tokenPayload);
         const fullName = u.name ?? u.email;
+        
+        await db.update(users)
+           .set({ refreshTokenHash: hashToken(newRefreshToken) })
+           .where(eq(users.id, u.id));
 
         setAuthCookie(res, {
             fullName,
@@ -82,7 +97,7 @@ const verifyToken = async (req, res, next) => {
 
         return next();
     } catch {
-
+        logger.warn('Refresh token verification failed', { reason: err.message });
         clearAuthCookie(res);
         return next(new ApiError(401, 'Session expired. Please login again.'));
     }
@@ -91,6 +106,11 @@ const verifyToken = async (req, res, next) => {
 const requireRole = (...allowedRoles) => (req, _res, next) => {
     if (!req.user) return next(new ApiError(401, 'Authentication required'));
     if (!allowedRoles.includes(req.user.role)) {
+        logger.warn('Insufficient permissions', {
+            userId: req.user.userId,
+            role: req.user.role,
+            required: allowedRoles,
+        });
         return next(new ApiError(403, 'Insufficient permissions'));
     }
     return next();
