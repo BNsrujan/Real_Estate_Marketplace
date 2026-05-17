@@ -4,7 +4,7 @@ import {
 } from 'drizzle-orm/pg-core';
 import { sql } from 'drizzle-orm';
 
-// ─── Enums ────────────────────────────────────────────────────────────────────
+
 
 export const userRoleEnum = pgEnum('user_role', ['buyer', 'seller', 'agent', 'admin']);
 
@@ -18,14 +18,12 @@ export const propertyStatusEnum = pgEnum('property_status', ['active', 'sold', '
 
 export const areaUnitEnum = pgEnum('area_unit', ['sqft', 'acres', 'guntas']);
 
-// ─── Users ────────────────────────────────────────────────────────────────────
-
 export const users = pgTable('users', {
     id: uuid('id').primaryKey().defaultRandom(),
     username: varchar('username', { length: 50 }).unique().notNull(),
     name: varchar('name', { length: 201 }),   // full name = firstName + " " + lastName
     email: varchar('email', { length: 255 }).unique().notNull(),
-    passwordHash: varchar('password_hash', { length: 255 }),        // nullable — Google users have no password
+    passwordHash: varchar('password_hash', { length: 255 }),  
     phone: varchar('phone', { length: 20 }),
     avatarUrl: varchar('avatar_url', { length: 500 }),
     role: userRoleEnum('role').default('buyer'),
@@ -37,7 +35,6 @@ export const users = pgTable('users', {
     updatedAt: timestamp('updated_at', { withTimezone: true }).default(sql`now()`),
 });
 
-// ─── Districts ────────────────────────────────────────────────────────────────
 
 export const districts = pgTable('districts', {
     id: uuid('id').primaryKey().defaultRandom(),
@@ -46,8 +43,6 @@ export const districts = pgTable('districts', {
     lat: numeric('lat', { precision: 10, scale: 7 }).notNull(),
     lng: numeric('lng', { precision: 10, scale: 7 }).notNull(),
 });
-
-// ─── Properties ───────────────────────────────────────────────────────────────
 
 export const properties = pgTable('properties', {
     id: uuid('id').primaryKey().defaultRandom(),
@@ -75,7 +70,6 @@ export const properties = pgTable('properties', {
     updatedAt: timestamp('updated_at', { withTimezone: true }).default(sql`now()`),
 });
 
-// ─── Property Images ──────────────────────────────────────────────────────────
 
 export const propertyImages = pgTable('property_images', {
     id: uuid('id').primaryKey().defaultRandom(),
@@ -87,7 +81,6 @@ export const propertyImages = pgTable('property_images', {
     displayOrder: integer('display_order').default(0),
 });
 
-// ─── Saved Properties (Watchlist) ─────────────────────────────────────────────
 
 export const savedProperties = pgTable('saved_properties', {
     id: uuid('id').primaryKey().defaultRandom(),
@@ -100,7 +93,6 @@ export const savedProperties = pgTable('saved_properties', {
     savedAt: timestamp('saved_at', { withTimezone: true }).default(sql`now()`),
 }, (t) => [unique().on(t.userId, t.propertyId)]);
 
-// ─── Enquiries ────────────────────────────────────────────────────────────────
 
 export const enquiries = pgTable('enquiries', {
     id: uuid('id').primaryKey().defaultRandom(),

@@ -8,14 +8,14 @@ import { asyncHandler } from '../utils/asynHandler.js';
 import { signAccessToken, signRefreshToken } from '../utils/jwt.helpers.js';
 import { setAuthCookie, clearAuthCookie } from '../utils/cookie.helpers.js';
 
-// ─── Constants ────────────────────────────────────────────────────────────────
+
 
 const SALT_ROUNDS = 10;
 
 const otpStore = new Map();
 const OTP_TTL_MS = 10 * 60 * 1000;
 
-// ─── Column selection ─────────────────────────────────────────────────────────
+
 
 const safeUserColumns = {
     id: users.id,
@@ -31,7 +31,7 @@ const safeUserColumns = {
     createdAt: users.createdAt,
 };
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
+
 
 function buildUserProfile(u) {
     return {
@@ -70,7 +70,6 @@ function issueAuthCookie(res, user) {
     });
 }
 
-// ─── Register ─────────────────────────────────────────────────────────────────
 
 const registerUser = asyncHandler(async (req, res) => {
     const { firstName, lastName, email, password, phone, username: rawUsername } = req.body;
@@ -103,7 +102,7 @@ const registerUser = asyncHandler(async (req, res) => {
     );
 });
 
-// ─── Login ────────────────────────────────────────────────────────────────────
+
 
 const loginUser = asyncHandler(async (req, res) => {
     const { email, password } = req.body;
@@ -129,7 +128,7 @@ const loginUser = asyncHandler(async (req, res) => {
     );
 });
 
-// ─── Google OAuth ─────────────────────────────────────────────────────────────
+
 
 const googleAuth = asyncHandler(async (req, res) => {
     const { credential } = req.body;
@@ -196,7 +195,7 @@ const googleAuth = asyncHandler(async (req, res) => {
     );
 });
 
-// ─── Profile ──────────────────────────────────────────────────────────────────
+
 
 const getProfile = asyncHandler(async (req, res) => {
     const rows = await db
@@ -230,7 +229,7 @@ const updateProfile = asyncHandler(async (req, res) => {
     );
 });
 
-// ─── OTP: Send ────────────────────────────────────────────────────────────────
+
 
 const sendOtp = asyncHandler(async (req, res) => {
     const { contact, type } = req.body;
@@ -267,7 +266,7 @@ const sendOtp = asyncHandler(async (req, res) => {
     return res.status(200).json(new ApiResponse(200, null, 'OTP sent successfully'));
 });
 
-// ─── OTP: Verify ──────────────────────────────────────────────────────────────
+
 
 const verifyOtp = asyncHandler(async (req, res) => {
     const { contact, type, otp } = req.body;
@@ -316,7 +315,7 @@ const verifyOtp = asyncHandler(async (req, res) => {
     );
 });
 
-// ─── Logout ───────────────────────────────────────────────────────────────────
+
 
 const logout = asyncHandler(async (_req, res) => {
     clearAuthCookie(res);

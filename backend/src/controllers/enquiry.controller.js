@@ -13,7 +13,7 @@ const submitEnquiry = asyncHandler(async (req, res) => {
         throw new ApiError(400, 'Message must be at least 10 characters');
     }
 
-    // Verify property exists and is active
+   
     const [property] = await db
         .select({ id: properties.id, status: properties.status })
         .from(properties)

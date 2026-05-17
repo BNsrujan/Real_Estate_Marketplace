@@ -4,8 +4,6 @@ dotenv.config();
 import { db } from './db.js';
 import { districts, properties, propertyImages } from './schema.js';
 
-// ─── Slug helper ──────────────────────────────────────────────────────────────
-
 function slugify(title) {
     return title
         .toLowerCase()
@@ -13,78 +11,264 @@ function slugify(title) {
         .replace(/(^-|-$)/g, '');
 }
 
-// ─── Districts ────────────────────────────────────────────────────────────────
+// ─── Districts (Karnataka only) ───────────────────────────────────────────────
 
 const DISTRICTS_DATA = [
-    { name: 'Bangalore', state: 'Karnataka', lat: '12.9716', lng: '77.5946' },
-    { name: 'Mysore', state: 'Karnataka', lat: '12.2958', lng: '76.6394' },
-    { name: 'Mangalore', state: 'Karnataka', lat: '12.8652', lng: '74.8664' },
-    { name: 'Belgaum', state: 'Karnataka', lat: '15.8497', lng: '75.6499' },
-    { name: 'Shimoga', state: 'Karnataka', lat: '13.7307', lng: '75.5678' },
-    { name: 'Chennai', state: 'Tamil Nadu', lat: '13.0827', lng: '80.2707' },
-    { name: 'Coimbatore', state: 'Tamil Nadu', lat: '11.0081', lng: '76.9877' },
-    { name: 'Salem', state: 'Tamil Nadu', lat: '11.6643', lng: '78.1460' },
-    { name: 'Hyderabad', state: 'Telangana', lat: '17.3850', lng: '78.4867' },
-    { name: 'Warangal', state: 'Telangana', lat: '17.9689', lng: '79.5941' },
-    { name: 'Visakhapatnam', state: 'Andhra Pradesh', lat: '17.6869', lng: '83.2185' },
-    { name: 'Vijayawada', state: 'Andhra Pradesh', lat: '16.5062', lng: '80.6480' },
-    { name: 'Mumbai', state: 'Maharashtra', lat: '19.0760', lng: '72.8777' },
-    { name: 'Pune', state: 'Maharashtra', lat: '18.5204', lng: '73.8567' },
-    { name: 'Nagpur', state: 'Maharashtra', lat: '21.1458', lng: '79.0882' },
-    { name: 'Delhi', state: 'Delhi', lat: '28.7041', lng: '77.1025' },
-    { name: 'Gurgaon', state: 'Haryana', lat: '28.4595', lng: '77.0266' },
-    { name: 'Lucknow', state: 'Uttar Pradesh', lat: '26.8467', lng: '80.9462' },
-    { name: 'Kanpur', state: 'Uttar Pradesh', lat: '26.4499', lng: '80.3319' },
-    { name: 'Ahmedabad', state: 'Gujarat', lat: '23.0225', lng: '72.5714' },
-    { name: 'Surat', state: 'Gujarat', lat: '21.1702', lng: '72.8311' },
-    { name: 'Jaipur', state: 'Rajasthan', lat: '26.9124', lng: '75.7873' },
-    { name: 'Jodhpur', state: 'Rajasthan', lat: '26.2389', lng: '73.0243' },
-    { name: 'Kolkata', state: 'West Bengal', lat: '22.5726', lng: '88.3639' },
-    { name: 'Darjeeling', state: 'West Bengal', lat: '27.0410', lng: '88.2663' },
-    { name: 'Kochi', state: 'Kerala', lat: '9.9312', lng: '76.2673' },
-    { name: 'Thiruvananthapuram', state: 'Kerala', lat: '8.5241', lng: '76.9366' },
-    { name: 'Chandigarh', state: 'Punjab', lat: '30.7333', lng: '76.7794' },
-    { name: 'Ludhiana', state: 'Punjab', lat: '30.9010', lng: '75.8573' },
-    { name: 'Faridabad', state: 'Haryana', lat: '28.4089', lng: '77.3178' },
+    { name: 'Bangalore',   state: 'Karnataka', lat: '12.9716', lng: '77.5946' },
+    { name: 'Dharwad',     state: 'Karnataka', lat: '15.4589', lng: '75.0078' },
+    { name: 'Davanagere',  state: 'Karnataka', lat: '14.4663', lng: '75.9238' },
+    { name: 'Bellary',     state: 'Karnataka', lat: '15.1394', lng: '76.9214' },
+    { name: 'Chitradurga', state: 'Karnataka', lat: '14.2251', lng: '76.3980' },
 ];
 
-// ─── Properties (updated to new schema) ──────────────────────────────────────
+// ─── Properties ───────────────────────────────────────────────────────────────
 
 const PROPERTIES_DATA = [
-    { title: 'Luxury Villa in Bangalore', type: 'house', priceLabel: '1.2 Cr', priceValue: '12000000', sizeLabel: '2400 sqft', sizeValue: '2400', areaUnit: 'sqft', listingType: 'sale', city: 'Bangalore', taluk: 'Bangalore North', lat: '12.9716', lng: '77.5946', districtName: 'Bangalore', description: 'Stunning luxury villa with modern amenities and garden.' },
-    { title: 'Apartment in Mysore', type: 'apartment', priceLabel: '95 Lakhs', priceValue: '9500000', sizeLabel: '1800 sqft', sizeValue: '1800', areaUnit: 'sqft', listingType: 'sale', city: 'Mysore', taluk: 'Mysore', lat: '12.2958', lng: '76.6394', districtName: 'Mysore', description: 'Spacious 3BHK apartment in the heart of Mysore.' },
-    { title: 'Commercial Space in Mangalore', type: 'commercial_space', priceLabel: '2.5 Cr', priceValue: '25000000', sizeLabel: '3500 sqft', sizeValue: '3500', areaUnit: 'sqft', listingType: 'rent', city: 'Mangalore', taluk: 'Mangalore', lat: '12.8652', lng: '74.8664', districtName: 'Mangalore', description: 'Prime commercial space in Mangalore CBD.' },
-    { title: 'Agricultural Land in Belgaum', type: 'agriculture', priceLabel: '45 Lakhs', priceValue: '4500000', sizeLabel: '5 Acres', sizeValue: '217800', areaUnit: 'acres', listingType: 'sale', city: 'Belgaum', taluk: 'Belgaum', lat: '15.8497', lng: '75.6499', districtName: 'Belgaum', description: 'Fertile agricultural land with irrigation access.' },
-    { title: 'Commercial Plot in Shimoga', type: 'commercial_plot', priceLabel: '1.5 Cr', priceValue: '15000000', sizeLabel: '2000 sqft', sizeValue: '2000', areaUnit: 'sqft', listingType: 'sale', city: 'Shimoga', taluk: 'Shimoga', lat: '13.7307', lng: '75.5678', districtName: 'Shimoga', description: 'Well-located commercial plot near the main market.' },
-    { title: 'House in Chennai', type: 'house', priceLabel: '2.0 Cr', priceValue: '20000000', sizeLabel: '2800 sqft', sizeValue: '2800', areaUnit: 'sqft', listingType: 'sale', city: 'Chennai', taluk: 'Chennai Central', lat: '13.0827', lng: '80.2707', districtName: 'Chennai', description: 'Independent house in a prime Chennai locality.' },
-    { title: 'Apartment in Coimbatore', type: 'apartment', priceLabel: '1.1 Cr', priceValue: '11000000', sizeLabel: '1600 sqft', sizeValue: '1600', areaUnit: 'sqft', listingType: 'sale', city: 'Coimbatore', taluk: 'Coimbatore North', lat: '11.0081', lng: '76.9877', districtName: 'Coimbatore', description: 'Modern 2BHK apartment with all amenities.' },
-    { title: 'Commercial Space in Salem', type: 'commercial_space', priceLabel: '85 Lakhs', priceValue: '8500000', sizeLabel: '2200 sqft', sizeValue: '2200', areaUnit: 'sqft', listingType: 'rent', city: 'Salem', taluk: 'Salem', lat: '11.6643', lng: '78.1460', districtName: 'Salem', description: 'Commercial office space in Salem business district.' },
-    { title: 'Luxury Villa in Hyderabad', type: 'house', priceLabel: '3.0 Cr', priceValue: '30000000', sizeLabel: '3200 sqft', sizeValue: '3200', areaUnit: 'sqft', listingType: 'sale', city: 'Hyderabad', taluk: 'Hyderabad', lat: '17.3850', lng: '78.4867', districtName: 'Hyderabad', description: 'Premium villa in a gated community in Hyderabad.' },
-    { title: 'Agricultural Land in Warangal', type: 'agriculture', priceLabel: '35 Lakhs', priceValue: '3500000', sizeLabel: '4 Acres', sizeValue: '174240', areaUnit: 'acres', listingType: 'sale', city: 'Warangal', taluk: 'Warangal', lat: '17.9689', lng: '79.5941', districtName: 'Warangal', description: 'Agricultural land with well water and power supply.' },
-    { title: 'Apartment in Visakhapatnam', type: 'apartment', priceLabel: '1.3 Cr', priceValue: '13000000', sizeLabel: '1900 sqft', sizeValue: '1900', areaUnit: 'sqft', listingType: 'sale', city: 'Visakhapatnam', taluk: 'Visakhapatnam', lat: '17.6869', lng: '83.2185', districtName: 'Visakhapatnam', description: 'Sea-view apartment in Visakhapatnam.' },
-    { title: 'Commercial Plot in Vijayawada', type: 'commercial_plot', priceLabel: '95 Lakhs', priceValue: '9500000', sizeLabel: '1800 sqft', sizeValue: '1800', areaUnit: 'sqft', listingType: 'sale', city: 'Vijayawada', taluk: 'Vijayawada', lat: '16.5062', lng: '80.6480', districtName: 'Vijayawada', description: 'Corner plot suitable for commercial development.' },
-    { title: 'House in Mumbai', type: 'house', priceLabel: '4.5 Cr', priceValue: '45000000', sizeLabel: '2600 sqft', sizeValue: '2600', areaUnit: 'sqft', listingType: 'sale', city: 'Mumbai', taluk: 'Mumbai', lat: '19.0760', lng: '72.8777', districtName: 'Mumbai', description: 'Bungalow in a prime Mumbai locality.' },
-    { title: 'Commercial Space in Pune', type: 'commercial_space', priceLabel: '2.8 Cr', priceValue: '28000000', sizeLabel: '3100 sqft', sizeValue: '3100', areaUnit: 'sqft', listingType: 'rent', city: 'Pune', taluk: 'Pune City', lat: '18.5204', lng: '73.8567', districtName: 'Pune', description: 'Grade A commercial office space in Pune IT hub.' },
-    { title: 'Apartment in Nagpur', type: 'apartment', priceLabel: '75 Lakhs', priceValue: '7500000', sizeLabel: '1400 sqft', sizeValue: '1400', areaUnit: 'sqft', listingType: 'sale', city: 'Nagpur', taluk: 'Nagpur', lat: '21.1458', lng: '79.0882', districtName: 'Nagpur', description: 'Well-designed apartment in central Nagpur.' },
-    { title: 'Luxury Villa in Delhi', type: 'house', priceLabel: '5.0 Cr', priceValue: '50000000', sizeLabel: '3500 sqft', sizeValue: '3500', areaUnit: 'sqft', listingType: 'sale', city: 'Delhi', taluk: 'South Delhi', lat: '28.7041', lng: '77.1025', districtName: 'Delhi', description: 'Ultra-luxury villa in South Delhi.' },
-    { title: 'Commercial Space in Gurgaon', type: 'commercial_space', priceLabel: '3.2 Cr', priceValue: '32000000', sizeLabel: '3800 sqft', sizeValue: '3800', areaUnit: 'sqft', listingType: 'both', city: 'Gurgaon', taluk: 'Gurgaon', lat: '28.4595', lng: '77.0266', districtName: 'Gurgaon', description: 'Modern office space in Cyber City Gurgaon.' },
-    { title: 'Apartment in Lucknow', type: 'apartment', priceLabel: '85 Lakhs', priceValue: '8500000', sizeLabel: '1700 sqft', sizeValue: '1700', areaUnit: 'sqft', listingType: 'sale', city: 'Lucknow', taluk: 'Lucknow', lat: '26.8467', lng: '80.9462', districtName: 'Lucknow', description: 'Spacious apartment in the city of Nawabs.' },
-    { title: 'Agricultural Land in Kanpur', type: 'agriculture', priceLabel: '40 Lakhs', priceValue: '4000000', sizeLabel: '3 Acres', sizeValue: '130680', areaUnit: 'acres', listingType: 'sale', city: 'Kanpur', taluk: 'Kanpur', lat: '26.4499', lng: '80.3319', districtName: 'Kanpur', description: 'Agricultural land near the Ganga river belt.' },
-    { title: 'House in Ahmedabad', type: 'house', priceLabel: '1.8 Cr', priceValue: '18000000', sizeLabel: '2200 sqft', sizeValue: '2200', areaUnit: 'sqft', listingType: 'sale', city: 'Ahmedabad', taluk: 'Ahmedabad', lat: '23.0225', lng: '72.5714', districtName: 'Ahmedabad', description: 'Traditional style bungalow in Ahmedabad.' },
-    { title: 'Commercial Plot in Surat', type: 'commercial_plot', priceLabel: '1.2 Cr', priceValue: '12000000', sizeLabel: '2100 sqft', sizeValue: '2100', areaUnit: 'sqft', listingType: 'sale', city: 'Surat', taluk: 'Surat City', lat: '21.1702', lng: '72.8311', districtName: 'Surat', description: 'Plot in Surat textile market zone.' },
-    { title: 'Luxury Villa in Jaipur', type: 'house', priceLabel: '2.2 Cr', priceValue: '22000000', sizeLabel: '2800 sqft', sizeValue: '2800', areaUnit: 'sqft', listingType: 'sale', city: 'Jaipur', taluk: 'Jaipur', lat: '26.9124', lng: '75.7873', districtName: 'Jaipur', description: 'Heritage-inspired villa in the Pink City.' },
-    { title: 'Apartment in Jodhpur', type: 'apartment', priceLabel: '65 Lakhs', priceValue: '6500000', sizeLabel: '1500 sqft', sizeValue: '1500', areaUnit: 'sqft', listingType: 'sale', city: 'Jodhpur', taluk: 'Jodhpur', lat: '26.2389', lng: '73.0243', districtName: 'Jodhpur', description: 'Affordable apartment in the Blue City.' },
-    { title: 'House in Kolkata', type: 'house', priceLabel: '1.5 Cr', priceValue: '15000000', sizeLabel: '2100 sqft', sizeValue: '2100', areaUnit: 'sqft', listingType: 'sale', city: 'Kolkata', taluk: 'South Kolkata', lat: '22.5726', lng: '88.3639', districtName: 'Kolkata', description: 'Colonial-era house in a tree-lined street.' },
-    { title: 'Agricultural Land in Darjeeling', type: 'agriculture', priceLabel: '25 Lakhs', priceValue: '2500000', sizeLabel: '2 Acres', sizeValue: '87120', areaUnit: 'acres', listingType: 'sale', city: 'Darjeeling', taluk: 'Darjeeling', lat: '27.0410', lng: '88.2663', districtName: 'Darjeeling', description: 'Tea garden adjacent land with hill view.' },
-    { title: 'House in Kochi', type: 'house', priceLabel: '1.9 Cr', priceValue: '19000000', sizeLabel: '2300 sqft', sizeValue: '2300', areaUnit: 'sqft', listingType: 'sale', city: 'Kochi', taluk: 'Fort Kochi', lat: '9.9312', lng: '76.2673', districtName: 'Kochi', description: 'Waterfront house in Fort Kochi with backwater access.' },
-    { title: 'Apartment in Thiruvananthapuram', type: 'apartment', priceLabel: '1.1 Cr', priceValue: '11000000', sizeLabel: '1800 sqft', sizeValue: '1800', areaUnit: 'sqft', listingType: 'sale', city: 'Thiruvananthapuram', taluk: 'Thiruvananthapuram', lat: '8.5241', lng: '76.9366', districtName: 'Thiruvananthapuram', description: 'Serene apartment near the beach in Kerala capital.' },
-    { title: 'House in Chandigarh', type: 'house', priceLabel: '1.6 Cr', priceValue: '16000000', sizeLabel: '2000 sqft', sizeValue: '2000', areaUnit: 'sqft', listingType: 'sale', city: 'Chandigarh', taluk: 'Chandigarh', lat: '30.7333', lng: '76.7794', districtName: 'Chandigarh', description: 'Well-maintained house in the planned city of Chandigarh.' },
-    { title: 'Agricultural Land in Ludhiana', type: 'agriculture', priceLabel: '30 Lakhs', priceValue: '3000000', sizeLabel: '3 Acres', sizeValue: '130680', areaUnit: 'acres', listingType: 'sale', city: 'Ludhiana', taluk: 'Ludhiana', lat: '30.9010', lng: '75.8573', districtName: 'Ludhiana', description: 'Fertile land in Punjab\'s agricultural heartland.' },
-    { title: 'Commercial Space in Faridabad', type: 'commercial_space', priceLabel: '1.3 Cr', priceValue: '13000000', sizeLabel: '2400 sqft', sizeValue: '2400', areaUnit: 'sqft', listingType: 'rent', city: 'Faridabad', taluk: 'Faridabad', lat: '28.4089', lng: '77.3178', districtName: 'Faridabad', description: 'Industrial commercial space in Faridabad.' },
-    { title: 'Site for Sale in Bangalore East', type: 'site', priceLabel: '80 Lakhs', priceValue: '8000000', sizeLabel: '1200 sqft', sizeValue: '1200', areaUnit: 'sqft', listingType: 'sale', city: 'Bangalore', taluk: 'Bangalore East', lat: '12.9850', lng: '77.6400', districtName: 'Bangalore', description: 'Residential site in a fast-developing Bangalore East layout.' },
+
+    // ── Bangalore (8 listings) ────────────────────────────────────────────────
+    {
+        title: 'Luxury Villa in Whitefield', type: 'house',
+        priceLabel: '2.4 Cr', priceValue: '24000000',
+        sizeLabel: '3200 sqft', sizeValue: '3200', areaUnit: 'sqft',
+        listingType: 'sale', city: 'Bangalore', taluk: 'Bangalore East',
+        lat: '12.9698', lng: '77.7500', districtName: 'Bangalore',
+        description: 'Spacious 4BHK villa in a gated community with pool and landscaped garden.',
+    },
+    {
+        title: '3BHK Apartment in Koramangala', type: 'apartment',
+        priceLabel: '1.1 Cr', priceValue: '11000000',
+        sizeLabel: '1750 sqft', sizeValue: '1750', areaUnit: 'sqft',
+        listingType: 'sale', city: 'Bangalore', taluk: 'Bangalore South',
+        lat: '12.9352', lng: '77.6245', districtName: 'Bangalore',
+        description: 'Modern 3BHK in the heart of Koramangala with premium finishes.',
+    },
+    {
+        title: 'Commercial Office Space in MG Road', type: 'commercial_space',
+        priceLabel: '2.8 Cr', priceValue: '28000000',
+        sizeLabel: '4000 sqft', sizeValue: '4000', areaUnit: 'sqft',
+        listingType: 'rent', city: 'Bangalore', taluk: 'Bangalore Central',
+        lat: '12.9757', lng: '77.6011', districtName: 'Bangalore',
+        description: 'Grade-A office space with glass façade and 24x7 security on MG Road.',
+    },
+    {
+        title: 'Residential Site in Sarjapur', type: 'site',
+        priceLabel: '85 Lakhs', priceValue: '8500000',
+        sizeLabel: '1200 sqft', sizeValue: '1200', areaUnit: 'sqft',
+        listingType: 'sale', city: 'Bangalore', taluk: 'Anekal',
+        lat: '12.8598', lng: '77.7878', districtName: 'Bangalore',
+        description: 'North-facing BDA-approved site in a fast-developing Sarjapur layout.',
+    },
+    {
+        title: 'Independent House in Jayanagar', type: 'house',
+        priceLabel: '3.5 Cr', priceValue: '35000000',
+        sizeLabel: '2800 sqft', sizeValue: '2800', areaUnit: 'sqft',
+        listingType: 'sale', city: 'Bangalore', taluk: 'Bangalore South',
+        lat: '12.9258', lng: '77.5830', districtName: 'Bangalore',
+        description: 'Well-maintained G+1 independent house on a 30×40 site in Jayanagar 4th Block.',
+    },
+    {
+        title: 'Studio Apartment in Electronic City', type: 'apartment',
+        priceLabel: '38 Lakhs', priceValue: '3800000',
+        sizeLabel: '580 sqft', sizeValue: '580', areaUnit: 'sqft',
+        listingType: 'sale', city: 'Bangalore', taluk: 'Anekal',
+        lat: '12.8458', lng: '77.6603', districtName: 'Bangalore',
+        description: 'Compact studio close to IT parks in Electronic City Phase 1.',
+    },
+    {
+        title: 'Commercial Plot in Hebbal', type: 'commercial_plot',
+        priceLabel: '1.9 Cr', priceValue: '19000000',
+        sizeLabel: '2400 sqft', sizeValue: '2400', areaUnit: 'sqft',
+        listingType: 'sale', city: 'Bangalore', taluk: 'Bangalore North',
+        lat: '13.0358', lng: '77.5970', districtName: 'Bangalore',
+        description: 'Corner commercial plot on Outer Ring Road near Hebbal flyover.',
+    },
+    {
+        title: 'Agriculture Land in Devanahalli', type: 'agriculture',
+        priceLabel: '65 Lakhs', priceValue: '6500000',
+        sizeLabel: '2 Acres', sizeValue: '2', areaUnit: 'acres',
+        listingType: 'sale', city: 'Devanahalli', taluk: 'Devanahalli',
+        lat: '13.2479', lng: '77.7173', districtName: 'Bangalore',
+        description: 'Fertile red-soil agricultural land near BIAL with borewell.',
+    },
+
+    // ── Dharwad (6 listings) ──────────────────────────────────────────────────
+    {
+        title: 'Independent House in Hubli', type: 'house',
+        priceLabel: '72 Lakhs', priceValue: '7200000',
+        sizeLabel: '1800 sqft', sizeValue: '1800', areaUnit: 'sqft',
+        listingType: 'sale', city: 'Hubli', taluk: 'Hubli',
+        lat: '15.3647', lng: '75.1240', districtName: 'Dharwad',
+        description: 'G+1 house with car parking and terrace in a prime Hubli locality.',
+    },
+    {
+        title: '2BHK Apartment in Dharwad City', type: 'apartment',
+        priceLabel: '48 Lakhs', priceValue: '4800000',
+        sizeLabel: '1100 sqft', sizeValue: '1100', areaUnit: 'sqft',
+        listingType: 'sale', city: 'Dharwad', taluk: 'Dharwad',
+        lat: '15.4546', lng: '75.0135', districtName: 'Dharwad',
+        description: 'Ready-to-move 2BHK near Karnataka University campus.',
+    },
+    {
+        title: 'Commercial Space in Hubli CBD', type: 'commercial_space',
+        priceLabel: '55 Lakhs', priceValue: '5500000',
+        sizeLabel: '1400 sqft', sizeValue: '1400', areaUnit: 'sqft',
+        listingType: 'rent', city: 'Hubli', taluk: 'Hubli',
+        lat: '15.3600', lng: '75.1200', districtName: 'Dharwad',
+        description: 'Ground-floor commercial space on the main Hubli CBD road.',
+    },
+    {
+        title: 'Agriculture Land in Kundgol', type: 'agriculture',
+        priceLabel: '28 Lakhs', priceValue: '2800000',
+        sizeLabel: '3 Acres', sizeValue: '3', areaUnit: 'acres',
+        listingType: 'sale', city: 'Kundgol', taluk: 'Kundgol',
+        lat: '15.2564', lng: '75.2440', districtName: 'Dharwad',
+        description: 'Black-soil farmland with canal irrigation and kutcha road access.',
+    },
+    {
+        title: 'Residential Site near NTTF Hubli', type: 'site',
+        priceLabel: '32 Lakhs', priceValue: '3200000',
+        sizeLabel: '1000 sqft', sizeValue: '1000', areaUnit: 'sqft',
+        listingType: 'sale', city: 'Hubli', taluk: 'Hubli',
+        lat: '15.3720', lng: '75.1350', districtName: 'Dharwad',
+        description: 'HDMC-approved residential plot in a new layout near NTTF.',
+    },
+    {
+        title: 'Warehouse Plot on Gokul Road', type: 'commercial_plot',
+        priceLabel: '90 Lakhs', priceValue: '9000000',
+        sizeLabel: '5000 sqft', sizeValue: '5000', areaUnit: 'sqft',
+        listingType: 'sale', city: 'Hubli', taluk: 'Hubli',
+        lat: '15.3800', lng: '75.1430', districtName: 'Dharwad',
+        description: 'Large industrial plot on Gokul Road, suitable for warehouse or showroom.',
+    },
+
+    // ── Davanagere (5 listings) ───────────────────────────────────────────────
+    {
+        title: 'House in Davanagere City', type: 'house',
+        priceLabel: '58 Lakhs', priceValue: '5800000',
+        sizeLabel: '1600 sqft', sizeValue: '1600', areaUnit: 'sqft',
+        listingType: 'sale', city: 'Davanagere', taluk: 'Davanagere',
+        lat: '14.4671', lng: '75.9227', districtName: 'Davanagere',
+        description: 'Neat 3BHK house with open yard in a well-connected Davanagere locality.',
+    },
+    {
+        title: '2BHK Apartment near P.J. Extension', type: 'apartment',
+        priceLabel: '42 Lakhs', priceValue: '4200000',
+        sizeLabel: '980 sqft', sizeValue: '980', areaUnit: 'sqft',
+        listingType: 'sale', city: 'Davanagere', taluk: 'Davanagere',
+        lat: '14.4700', lng: '75.9195', districtName: 'Davanagere',
+        description: 'Affordable 2BHK in a gated complex close to P.J. Extension market.',
+    },
+    {
+        title: 'Agriculture Land in Harihar', type: 'agriculture',
+        priceLabel: '20 Lakhs', priceValue: '2000000',
+        sizeLabel: '2.5 Acres', sizeValue: '2.5', areaUnit: 'acres',
+        listingType: 'sale', city: 'Harihar', taluk: 'Harihar',
+        lat: '14.5173', lng: '75.8007', districtName: 'Davanagere',
+        description: 'Productive farmland near Tungabhadra river with drip-irrigation setup.',
+    },
+    {
+        title: 'Commercial Space on NH-48', type: 'commercial_space',
+        priceLabel: '68 Lakhs', priceValue: '6800000',
+        sizeLabel: '2000 sqft', sizeValue: '2000', areaUnit: 'sqft',
+        listingType: 'both', city: 'Davanagere', taluk: 'Davanagere',
+        lat: '14.4750', lng: '75.9350', districtName: 'Davanagere',
+        description: 'Prominent roadside commercial space on NH-48 with high footfall.',
+    },
+    {
+        title: 'Residential Site in Shivaganga Layout', type: 'site',
+        priceLabel: '18 Lakhs', priceValue: '1800000',
+        sizeLabel: '800 sqft', sizeValue: '800', areaUnit: 'sqft',
+        listingType: 'sale', city: 'Davanagere', taluk: 'Davanagere',
+        lat: '14.4620', lng: '75.9280', districtName: 'Davanagere',
+        description: 'CMC-approved east-facing site in Shivaganga Layout with road and drainage.',
+    },
+
+    // ── Bellary (5 listings) ──────────────────────────────────────────────────
+    {
+        title: 'Independent House in Bellary City', type: 'house',
+        priceLabel: '62 Lakhs', priceValue: '6200000',
+        sizeLabel: '1700 sqft', sizeValue: '1700', areaUnit: 'sqft',
+        listingType: 'sale', city: 'Bellary', taluk: 'Bellary',
+        lat: '15.1492', lng: '76.9218', districtName: 'Bellary',
+        description: 'Well-maintained house with tiled roof and large compound near city centre.',
+    },
+    {
+        title: 'Iron Ore Belt Commercial Plot', type: 'commercial_plot',
+        priceLabel: '1.2 Cr', priceValue: '12000000',
+        sizeLabel: '6000 sqft', sizeValue: '6000', areaUnit: 'sqft',
+        listingType: 'sale', city: 'Bellary', taluk: 'Bellary',
+        lat: '15.1600', lng: '76.9300', districtName: 'Bellary',
+        description: 'Strategic commercial plot near the mining belt; ideal for logistics or trade.',
+    },
+    {
+        title: 'Agriculture Land in Sandur', type: 'agriculture',
+        priceLabel: '35 Lakhs', priceValue: '3500000',
+        sizeLabel: '4 Acres', sizeValue: '4', areaUnit: 'acres',
+        listingType: 'sale', city: 'Sandur', taluk: 'Sandur',
+        lat: '15.0814', lng: '76.5574', districtName: 'Bellary',
+        description: 'Red loamy soil land close to Sandur town with borewell and fencing.',
+    },
+    {
+        title: '3BHK Apartment in Bellary', type: 'apartment',
+        priceLabel: '55 Lakhs', priceValue: '5500000',
+        sizeLabel: '1400 sqft', sizeValue: '1400', areaUnit: 'sqft',
+        listingType: 'sale', city: 'Bellary', taluk: 'Bellary',
+        lat: '15.1380', lng: '76.9180', districtName: 'Bellary',
+        description: 'Newly constructed 3BHK apartment with modular kitchen and balcony.',
+    },
+    {
+        title: 'Residential Site in Hospet', type: 'site',
+        priceLabel: '22 Lakhs', priceValue: '2200000',
+        sizeLabel: '1200 sqft', sizeValue: '1200', areaUnit: 'sqft',
+        listingType: 'sale', city: 'Hospet', taluk: 'Hospet',
+        lat: '15.2689', lng: '76.3877', districtName: 'Bellary',
+        description: 'CMC-approved plot near Hospet town bus stand with clear title.',
+    },
+
+    // ── Chitradurga (5 listings) ───────────────────────────────────────────────
+    {
+        title: 'House in Chitradurga Town', type: 'house',
+        priceLabel: '45 Lakhs', priceValue: '4500000',
+        sizeLabel: '1500 sqft', sizeValue: '1500', areaUnit: 'sqft',
+        listingType: 'sale', city: 'Chitradurga', taluk: 'Chitradurga',
+        lat: '14.2299', lng: '76.3973', districtName: 'Chitradurga',
+        description: 'Comfortable 3BHK house with bore water and UDS document near fort road.',
+    },
+    {
+        title: 'Agriculture Land in Hiriyur', type: 'agriculture',
+        priceLabel: '25 Lakhs', priceValue: '2500000',
+        sizeLabel: '3 Acres', sizeValue: '3', areaUnit: 'acres',
+        listingType: 'sale', city: 'Hiriyur', taluk: 'Hiriyur',
+        lat: '13.9441', lng: '76.6173', districtName: 'Chitradurga',
+        description: 'Dry-land converted to irrigation with drip-farming setup for groundnut.',
+    },
+    {
+        title: '2BHK Apartment in Chitradurga', type: 'apartment',
+        priceLabel: '32 Lakhs', priceValue: '3200000',
+        sizeLabel: '950 sqft', sizeValue: '950', areaUnit: 'sqft',
+        listingType: 'sale', city: 'Chitradurga', taluk: 'Chitradurga',
+        lat: '14.2250', lng: '76.3950', districtName: 'Chitradurga',
+        description: 'Affordable 2BHK in a newly developed apartment complex off NH-150.',
+    },
+    {
+        title: 'Commercial Plot on NH-150', type: 'commercial_plot',
+        priceLabel: '75 Lakhs', priceValue: '7500000',
+        sizeLabel: '3600 sqft', sizeValue: '3600', areaUnit: 'sqft',
+        listingType: 'sale', city: 'Chitradurga', taluk: 'Chitradurga',
+        lat: '14.2350', lng: '76.4050', districtName: 'Chitradurga',
+        description: 'Highway-facing commercial plot with high visibility on NH-150.',
+    },
+    {
+        title: 'Residential Site in Holalkere', type: 'site',
+        priceLabel: '12 Lakhs', priceValue: '1200000',
+        sizeLabel: '900 sqft', sizeValue: '900', areaUnit: 'sqft',
+        listingType: 'sale', city: 'Holalkere', taluk: 'Holalkere',
+        lat: '14.0468', lng: '76.1843', districtName: 'Chitradurga',
+        description: 'Town-panchayat approved site with water connection in Holalkere town.',
+    },
 ];
 
-// ─── Seed function ────────────────────────────────────────────────────────────
+// ─── Seed ─────────────────────────────────────────────────────────────────────
 
 async function seed() {
     console.log('Seeding districts...');
@@ -94,6 +278,10 @@ async function seed() {
     const districtMap = Object.fromEntries(allDistricts.map((d) => [d.name, d.id]));
     console.log(`Districts ready: ${allDistricts.length}`);
 
+    console.log('Clearing existing properties and images...');
+    await db.delete(propertyImages);
+    await db.delete(properties);
+
     console.log('Seeding properties...');
 
     const usedSlugs = new Set();
@@ -101,9 +289,7 @@ async function seed() {
         let base = slugify(p.title);
         let slug = base;
         let n = 1;
-        while (usedSlugs.has(slug)) {
-            slug = `${base}-${n++}`;
-        }
+        while (usedSlugs.has(slug)) slug = `${base}-${n++}`;
         usedSlugs.add(slug);
 
         return {
@@ -117,19 +303,16 @@ async function seed() {
     const insertedProperties = await db
         .insert(properties)
         .values(propertyValues)
-        .onConflictDoNothing()
         .returning({ id: properties.id });
 
     console.log(`Properties inserted: ${insertedProperties.length}`);
 
-    if (insertedProperties.length > 0) {
-        console.log('Seeding placeholder images...');
-        const imageValues = insertedProperties.flatMap((p) => [
-            { propertyId: p.id, url: '/property/image.png', alt: 'Property image 1', displayOrder: 0 },
-            { propertyId: p.id, url: '/property/image.png', alt: 'Property image 2', displayOrder: 1 },
-        ]);
-        await db.insert(propertyImages).values(imageValues).onConflictDoNothing();
-    }
+    console.log('Seeding placeholder images...');
+    const imageValues = insertedProperties.flatMap((p) => [
+        { propertyId: p.id, url: '/property/image.png', alt: 'Property image 1', displayOrder: 0 },
+        { propertyId: p.id, url: '/property/image.png', alt: 'Property image 2', displayOrder: 1 },
+    ]);
+    await db.insert(propertyImages).values(imageValues);
 
     console.log('Seed complete.');
     process.exit(0);

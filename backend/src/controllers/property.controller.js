@@ -5,7 +5,6 @@ import { ApiResponse } from '../utils/apiResponse.js';
 import { ApiError } from '../utils/apiErrors.js';
 import { asyncHandler } from '../utils/asynHandler.js';
 
-// Full property row projection — aligned with the architecture's Property interface
 const propertyRow = {
     id: properties.id,
     slug: properties.slug,

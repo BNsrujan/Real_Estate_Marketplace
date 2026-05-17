@@ -18,7 +18,6 @@ const allowedOrigins = rawOrigins.split(',').map((o) => o.trim());
 app.use(
     cors({
         origin: (origin, callback) => {
-            // Allow requests with no origin (curl, mobile apps, same-origin SSR)
             if (!origin) return callback(null, true);
             if (allowedOrigins.includes('*') || allowedOrigins.includes(origin)) {
                 return callback(null, true);
@@ -31,7 +30,6 @@ app.use(
 
 app.use(express.json({ limit: '16kb' }));
 app.use(express.urlencoded({ extended: true, limit: '16kb' }));
-// COOKIE_SECRET must be set in .env — required for tamper-evident signed cookies
 app.use(cookieParser(process.env.COOKIE_SECRET));
 
 app.use('/api/v1/health', healthRouter);

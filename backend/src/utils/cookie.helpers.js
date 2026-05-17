@@ -1,6 +1,5 @@
 export const AUTH_COOKIE = 'auth_session';
 
-// Refresh-token lifetime drives cookie expiry; access token will be silently renewed inside the cookie
 const REFRESH_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
 
 const getCookieOptions = () => ({
