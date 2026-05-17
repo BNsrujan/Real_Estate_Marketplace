@@ -71,13 +71,13 @@ const NavBar = () => {
       {/* Search */}
 
       
-      <div className="relative w-full min-w-68 md:w-auto">
+      <div className="relative w-full min-w-60 md:w-auto">
         <input
           type="text"
           value={inputValue}
           onChange={(e) => handleSearchChange(e.target.value)}
           placeholder="Search properties..."
-          className="w-full min-w-68 md:w-60 lg:w-72 pl-10 pr-8 py-2 rounded-full bg-white/20 backdrop-blur-md text-white placeholder:text-white/60 focus:outline-none focus:ring-2 focus:ring-emerald-500/60 text-sm"
+          className="w-full min-w-60 md:w-60 pl-10 pr-8 py-2 rounded-full bg-white/20 backdrop-blur-md text-white placeholder:text-white/60 focus:outline-none focus:ring-2 focus:ring-emerald-500/60 text-sm"
         />
         <Search
           className="absolute left-3 top-1/2 -translate-y-1/2 text-white/70"

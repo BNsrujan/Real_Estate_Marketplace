@@ -25,8 +25,8 @@ type SidebarMenu = {
 };
 
 const SIDEBAR_MENUS: SidebarMenu[] = [
-  { id: "map", title: "Map Explorer", Icon: Map, description: "Explore Karnataka properties." },
-  { id: "search", title: "Smart Search", Icon: Search, description: "Search by filters and landmarks." },
+  { id: "map", title: "Map", Icon: Map, description: "Explore Karnataka properties." },
+  { id: "search", title: "Search", Icon: Search, description: "Search by filters and landmarks." },
   { id: "saved", title: "Saved Properties", Icon: Bookmark, description: "Your bookmarks and recent views." },
   { id: "messages", title: "Messages", Icon: MessageSquare, description: "Agent chats and updates." },
 ];
@@ -93,7 +93,7 @@ function SidebarMenuItem({
   const pressed = active && isPanelOpen;
 
   return (
-    <li>
+    <li >
       <button
         aria-label={item.title}
         title={item.title}
@@ -111,7 +111,9 @@ function SidebarMenuItem({
         >
           <Icon size={18} />
         </div>
+       
       </button>
+      <p className="text-white text-xs w-full text-center pt-0.5 ">{item.id}</p>
     </li>
   );
 }
@@ -196,6 +198,7 @@ export function AppSidebar() {
                     onActivate={handleMenuActivate}
                   />
                 ))}
+                 
               </ul>
             </nav>
           </SidebarGroup>

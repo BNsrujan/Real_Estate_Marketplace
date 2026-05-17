@@ -29,19 +29,27 @@ export function MapCanvas({ setIsLoaded }: Props) {
 
   const [showButton, setShowButton] = useState(true);
   const [hoveredProperty, setHoveredProperty] = useState<Property | null>(null);
-  const [hoverScreenPos, setHoverScreenPos] = useState<{ x: number; y: number } | null>(null);
+  const [hoverScreenPos, setHoverScreenPos] = useState<{
+    x: number;
+    y: number;
+  } | null>(null);
   const hoverTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const [mounted, setMounted] = useState(false);
 
   const setSelectedProperty = useStore((s) => s.setSelectedProperty);
   const setUI = useStore((s) => s.setUI);
 
-  useEffect(() => { setMounted(true); }, []);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
-  const handleMarkerClick = useCallback((prop: Property) => {
-    setSelectedProperty(prop);
-    setUI({ isPanelOpen: true, activeSidebarTab: 'map' });
-  }, [setSelectedProperty, setUI]);
+  const handleMarkerClick = useCallback(
+    (prop: Property) => {
+      setSelectedProperty(prop);
+      setUI({ isPanelOpen: true, activeSidebarTab: "map" });
+    },
+    [setSelectedProperty, setUI],
+  );
 
   const handleMarkerHover = useCallback((prop: Property) => {
     if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
@@ -112,8 +120,8 @@ export function MapCanvas({ setIsLoaded }: Props) {
     } catch {
       setHoverScreenPos(null);
     }
-  // mapInstance is a stable ref — omitting it is intentional
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // mapInstance is a stable ref — omitting it is intentional
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [hoveredProperty]);
 
   // Expose district reset to Navbar (store-driven via resetFilters) and map controls
@@ -126,48 +134,78 @@ export function MapCanvas({ setIsLoaded }: Props) {
     mapRef: mapInstance,
   });
 
-  const handleLayerChange = useCallback((layer: LayerType) => {
-    const map = mapInstance.current;
-    if (!map) return;
+  const handleLayerChange = useCallback(
+    (layer: LayerType) => {
+      const map = mapInstance.current;
+      if (!map) return;
 
-    try {
-      
-      const satSource = map.getSource("satellite") as any;
+      try {
+        const satSource = map.getSource("satellite") as any;
 
-      if (layer === "osm") {
-        satSource?.setTiles(TILE_SOURCES.osm.tiles);
-        map.setPaintProperty("satellite", "raster-opacity", 1);
-        map.setPaintProperty("roads", "raster-opacity", 0);
-        map.setPaintProperty("labels", "raster-opacity", 0);
-      } else if (layer === "standard") {
-        satSource?.setTiles(TILE_SOURCES.topo.tiles);
-        map.setPaintProperty("satellite", "raster-opacity", 1);
-        map.setPaintProperty("roads", "raster-opacity", 0);
-        map.setPaintProperty("labels", "raster-opacity", 0);
-      } else if (layer === "traffic") {
-        satSource?.setTiles(TILE_SOURCES.satellite.tiles);
-        map.setPaintProperty("satellite", "raster-opacity", 0.7);
-        map.setPaintProperty("roads", "raster-opacity", [
-          "interpolate", ["linear"], ["zoom"], 8, 0, 11, 1, 18, 1,
-        ]);
-        map.setPaintProperty("labels", "raster-opacity", [
-          "interpolate", ["linear"], ["zoom"], 9, 0, 12, 1,
-        ]);
-      } else {
-        // satellite (default)
-        satSource?.setTiles(TILE_SOURCES.satellite.tiles);
-        map.setPaintProperty("satellite", "raster-opacity", 1);
-        map.setPaintProperty("roads", "raster-opacity", [
-          "interpolate", ["linear"], ["zoom"], 8, 0, 11, 0.9, 18, 1,
-        ]);
-        map.setPaintProperty("labels", "raster-opacity", [
-          "interpolate", ["linear"], ["zoom"], 9, 0, 12, 0.95,
-        ]);
+        if (layer === "osm") {
+          satSource?.setTiles(TILE_SOURCES.osm.tiles);
+          map.setPaintProperty("satellite", "raster-opacity", 1);
+          map.setPaintProperty("roads", "raster-opacity", 0);
+          map.setPaintProperty("labels", "raster-opacity", 0);
+        } else if (layer === "standard") {
+          satSource?.setTiles(TILE_SOURCES.topo.tiles);
+          map.setPaintProperty("satellite", "raster-opacity", 1);
+          map.setPaintProperty("roads", "raster-opacity", 0);
+          map.setPaintProperty("labels", "raster-opacity", 0);
+        } else if (layer === "traffic") {
+          satSource?.setTiles(TILE_SOURCES.satellite.tiles);
+          map.setPaintProperty("satellite", "raster-opacity", 0.7);
+          map.setPaintProperty("roads", "raster-opacity", [
+            "interpolate",
+            ["linear"],
+            ["zoom"],
+            8,
+            0,
+            11,
+            1,
+            18,
+            1,
+          ]);
+          map.setPaintProperty("labels", "raster-opacity", [
+            "interpolate",
+            ["linear"],
+            ["zoom"],
+            9,
+            0,
+            12,
+            1,
+          ]);
+        } else {
+          // satellite (default)
+          satSource?.setTiles(TILE_SOURCES.satellite.tiles);
+          map.setPaintProperty("satellite", "raster-opacity", 1);
+          map.setPaintProperty("roads", "raster-opacity", [
+            "interpolate",
+            ["linear"],
+            ["zoom"],
+            8,
+            0,
+            11,
+            0.9,
+            18,
+            1,
+          ]);
+          map.setPaintProperty("labels", "raster-opacity", [
+            "interpolate",
+            ["linear"],
+            ["zoom"],
+            9,
+            0,
+            12,
+            0.95,
+          ]);
+        }
+      } catch (e) {
+        console.warn("Layer switch failed:", e);
       }
-    } catch (e) {
-      console.warn("Layer switch failed:", e);
-    }
-  }, [mapInstance]);
+    },
+    [mapInstance],
+  );
 
   // Sync store's activeLayer to map on initial load and whenever it changes
   const activeLayer = useStore((s) => s.map.activeLayer);
@@ -178,9 +216,18 @@ export function MapCanvas({ setIsLoaded }: Props) {
   }, [isStyleLoaded, activeLayer, handleLayerChange]);
 
   return (
-    <div className="relative w-full h-full overflow-hidden">
+    <div className="relative w-full h-screen overflow-hidden">
       {/* Map */}
-      <div ref={mapContainerRef} style={{ position: "absolute", inset: 0, width: "100%", height: "100%" , zIndex: "2" }} />
+      <div
+        ref={mapContainerRef}
+        style={{
+          position: "absolute",
+          inset: 0,
+          width: "100%",
+          height: "100%",
+          zIndex: "2",
+        }}
+      />
 
       {/* Stars */}
       <div
@@ -190,16 +237,18 @@ export function MapCanvas({ setIsLoaded }: Props) {
         <StarField />
       </div>
 
-      <div className="absolute md:bottom-0 bottom-14 inset-0 z-2 pointer-events-none">
+      <div className="absolute md:bottom-0 bottom-26 inset-0 z-2 pointer-events-none">
         {showButton && (
           <div className="pointer-events-auto">
             <StartExploreButton onClick={zoomToKarnataka} />
           </div>
         )}
 
+         {!showButton && (
         <div className="pointer-events-auto">
           <MapControls map={mapInstance.current} />
         </div>
+        )}
       </div>
 
       {/* Title */}
@@ -222,15 +271,14 @@ export function MapCanvas({ setIsLoaded }: Props) {
       {/* UI Panels */}
       {!showButton && (
         <div className="absolute inset-0 z-4 pointer-events-none flex ">
-          <div className="relative">
-          <div className="absolute top-0 left-0 right-0 pointer-events-auto p-3 md:px-4 lg:px-6 ">
-            <NavBar />
-          </div>
+          <div className="relative ">
+            <div className="absolute md:-top-3 left-0 right-0 pointer-events-auto p-3 md:px-4 md:py-0 ">
+              <NavBar />
+            </div>
 
-          <div className="absolute bottom-18 md:bottom-0 left-0 right-0 pointer-events-auto p-3 md:p-4 lg:p-6">
-            <MapLayerSelector onLayerChange={handleLayerChange} />
-          </div>
-
+            <div className="absolute bottom-30 md:bottom-0 left-0 right-0 pointer-events-auto p-3 md:p-4 lg:p-4">
+              <MapLayerSelector onLayerChange={handleLayerChange} />
+            </div>
           </div>
           <div className="absolute top-3 right-3 pointer-events-auto ">
             <Profile />
@@ -239,11 +287,17 @@ export function MapCanvas({ setIsLoaded }: Props) {
       )}
 
       {/* Hover card — floating near marker, desktop only */}
-      {mounted && hoveredProperty && hoverScreenPos &&
+      {mounted &&
+        hoveredProperty &&
+        hoverScreenPos &&
         createPortal(
           <div
             className="fixed pointer-events-none transition-all duration-200"
-            style={{ left: hoverScreenPos.x + 24, top: hoverScreenPos.y - 120, zIndex: 99999 }}
+            style={{
+              left: hoverScreenPos.x + 24,
+              top: hoverScreenPos.y - 120,
+              zIndex: 99999,
+            }}
           >
             <PropertyHoverCard property={hoveredProperty} onOpen={() => {}} />
           </div>,
