@@ -441,6 +441,7 @@ function RegisterView({
       <GoogleButton onClick={handleGoogle} loading={googleLoading || loading} />
 
       <Separator label="or register with email" />
+     
 
       <div className="grid grid-cols-2 gap-3">
         <FormFieldWrapper label="First Name" required error={errors.firstName}>
@@ -482,7 +483,7 @@ function RegisterView({
         ) : "Create Account"}
       </Button>
 
-      <p className="text-center text-xs text-zinc-500 pt-1">
+      <p className="text-center text-xs text-zinc-500">
         Already have an account?{" "}
         <button type="button" onClick={onSwitchToLogin} className="text-emerald-400 hover:text-emerald-300 font-semibold transition-colors">
           Sign in

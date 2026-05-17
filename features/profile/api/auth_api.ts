@@ -7,7 +7,7 @@ import type { UserProfile, ApiResponse, Property } from '@/shared/types';
 interface BackendUser {
   id: string;
   username: string;
-  name?: string;
+  name?: string | null;
   email: string;
   phone?: string;
   role: UserProfile['role'];
@@ -17,8 +17,9 @@ interface BackendUser {
   createdAt?: string;
 }
 
+// Tokens are now in the httpOnly auth_session cookie — response body carries user only
 interface AuthResponse {
-  data: { user: BackendUser; token: string };
+  data: { user: BackendUser };
 }
 
 interface BackendWatchlistItem {
@@ -101,18 +102,15 @@ function normalizePropertyType(type: string): Property['type'] {
 }
 
 // ─── Token helpers ────────────────────────────────────────────────────────────
+// Tokens now live in the httpOnly auth_session cookie managed by the backend.
+// These helpers are kept as no-ops so existing callers don't need immediate changes.
 
-export function saveAuthToken(token: string): void {
-  if (typeof window !== 'undefined') localStorage.setItem('auth_token', token);
-}
+export function saveAuthToken(_token: string): void { /* no-op: tokens are in cookie */ }
+export function clearAuthToken(): void { /* no-op: backend clears cookie on logout */ }
+export function hasAuthToken(): boolean { return false; /* cookie is httpOnly — not readable from JS */ }
 
-export function clearAuthToken(): void {
-  if (typeof window !== 'undefined') localStorage.removeItem('auth_token');
-}
-
-export function hasAuthToken(): boolean {
-  if (typeof window === 'undefined') return false;
-  return !!localStorage.getItem('auth_token');
+export async function logout(): Promise<void> {
+  await apiService.post('/api/v1/auth/logout', {});
 }
 
 // ─── Auth API calls ───────────────────────────────────────────────────────────
@@ -124,45 +122,30 @@ export async function register(opts: {
   email: string;
   password: string;
 }): Promise<{ user: UserProfile; token: string }> {
-  const name = `${opts.firstName.trim()} ${opts.lastName.trim()}`.trim();
-  const username = opts.email.split('@')[0].toLowerCase().replace(/[^a-z0-9_]/g, '_');
-
   const res = await apiService.post<AuthResponse>('/api/v1/auth/register', {
-    username,
-    name,
+    firstName: opts.firstName.trim(),
+    lastName: opts.lastName.trim(),
     email: opts.email,
     password: opts.password,
     phone: opts.mobile,
   });
-  const user = mapBackendUser(res.data.user);
-  saveAuthToken(res.data.token);
-  return { user, token: res.data.token };
+  return { user: mapBackendUser(res.data.user), token: '' };
 }
 
 export async function googleAuth(
   credential: string,
 ): Promise<{ user: UserProfile; token: string }> {
   const res = await apiService.post<AuthResponse>('/api/v1/auth/google', { credential });
-  const user = mapBackendUser(res.data.user);
-  saveAuthToken(res.data.token);
-  return { user, token: res.data.token };
+  return { user: mapBackendUser(res.data.user), token: '' };
 }
 
 export async function login(
   email: string,
   password: string,
 ): Promise<{ user: UserProfile; token: string }> {
-  const res = await apiService.post<AuthResponse>('/api/v1/auth/login', {
-    email,
-    password,
-  });
-  const user = mapBackendUser(res.data.user);
-  saveAuthToken(res.data.token);
-
-  // Notify apiService retry queue that auth is restored
+  const res = await apiService.post<AuthResponse>('/api/v1/auth/login', { email, password });
   notifyAuthRestored();
-
-  return { user, token: res.data.token };
+  return { user: mapBackendUser(res.data.user), token: '' };
 }
 
 export async function getProfile(): Promise<UserProfile> {
@@ -201,7 +184,5 @@ export async function verifyOtp(
   otp: string,
 ): Promise<{ user: UserProfile; token: string }> {
   const res = await apiService.post<AuthResponse>('/api/v1/auth/otp/verify', { contact, type, otp });
-  const user = mapBackendUser(res.data.user);
-  saveAuthToken(res.data.token);
-  return { user, token: res.data.token };
+  return { user: mapBackendUser(res.data.user), token: '' };
 }

@@ -1,15 +1,5 @@
-/**
- * apiService — Authenticated fetch wrapper (SERVICE-001)
- *
- * Features:
- *  - Auto-injects Bearer token from localStorage
- *  - On 401: queues the request, opens login modal, replays after re-login
- *  - All features should import from here, not from shared/api/client
- */
-
 import { env } from '@/lib/env';
 
-// Lazy-import the store to avoid circular-dependency / SSR issues
 function getStore() {
   // eslint-disable-next-line @typescript-eslint/no-require-imports
   return require('@/shared/store').useStore;
@@ -20,6 +10,7 @@ type Method = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
 interface RequestOptions {
   headers?: Record<string, string>;
   signal?: AbortSignal;
+  _isRetry?: boolean; // internal: prevents infinite retry loop
 }
 
 interface QueuedRequest {
@@ -28,7 +19,6 @@ interface QueuedRequest {
   execute: () => Promise<unknown>;
 }
 
-// Requests that failed with 401 and are waiting for re-login
 const retryQueue: QueuedRequest[] = [];
 let isRefreshing = false;
 
@@ -44,19 +34,12 @@ function flushQueue(success: boolean) {
   });
 }
 
-// Called by the auth store after a successful re-login
 export function notifyAuthRestored() {
   flushQueue(true);
 }
 
-// Called when the user dismisses the login modal without logging in
 export function notifyAuthAborted() {
   flushQueue(false);
-}
-
-function getToken(): string | null {
-  if (typeof window === 'undefined') return null;
-  return localStorage.getItem('auth_token');
 }
 
 async function request<T>(
@@ -65,17 +48,18 @@ async function request<T>(
   body?: unknown,
   options: RequestOptions = {},
 ): Promise<T> {
-  const token = getToken();
-
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
     ...options.headers,
   };
-  if (token) headers['Authorization'] = `Bearer ${token}`;
 
   const init: RequestInit = {
     method,
     headers,
+    // Browser sends the httpOnly auth_session cookie automatically.
+    // The backend middleware silently refreshes the access token inside the same request
+    // if it's expired but the refresh token is still valid.
+    credentials: 'include',
     signal: options.signal,
     body: body !== undefined ? JSON.stringify(body) : undefined,
   };
@@ -83,16 +67,17 @@ async function request<T>(
   const url = `${env.apiUrl}${endpoint}`;
   const response = await fetch(url, init);
 
-  if (response.status === 401) {
+  // 401 means the backend has already attempted the silent refresh and both tokens are expired.
+  // Queue the request and open the login modal — no separate /refresh call needed.
+  if (response.status === 401 && !options._isRetry) {
     const store = getStore();
     const { openLoginModal } = store.getState();
 
-    // Gate: if we're already showing the login modal, queue this request
     return new Promise<T>((resolve, reject) => {
       retryQueue.push({
         resolve: resolve as (v: unknown) => void,
         reject,
-        execute: () => request<T>(method, endpoint, body, options),
+        execute: () => request<T>(method, endpoint, body, { ...options, _isRetry: true }),
       });
 
       if (!isRefreshing) {
@@ -105,8 +90,7 @@ async function request<T>(
   if (!response.ok) {
     const errorBody = await response.json().catch(() => ({}));
     const message =
-      (errorBody as { message?: string }).message ??
-      `API error ${response.status}`;
+      (errorBody as { message?: string }).message ?? `API error ${response.status}`;
     const err = Object.assign(new Error(message), {
       code: response.status,
       retryable: response.status >= 500,
@@ -114,7 +98,6 @@ async function request<T>(
     throw err;
   }
 
-  // 204 No Content
   if (response.status === 204) return undefined as T;
 
   return response.json() as Promise<T>;
