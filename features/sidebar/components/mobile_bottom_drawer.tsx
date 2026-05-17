@@ -45,6 +45,17 @@ export default function MobileBottomDrawer() {
   const openLoginModal  = useStore((s) => s.openLoginModal);
   const { saveProperty, unsaveProperty } = useWatchlistSync();
 
+  // Only open the Radix Drawer on mobile — on desktop the fixed DetailPanel handles this.
+  // Without this guard the Drawer's overlay fires onOpenChange(false) when clicking inside
+  // DetailPanel, which closes the panel for desktop users.
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 768);
+    check();
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
+  }, []);
+
   const menuData = useMemo(() => (activeMenu ? MENU_CONTENT[activeMenu] ?? null : null), [activeMenu]);
 
   const isSaved = selectedProperty ? saved.some((p) => p.id === selectedProperty.id) : false;
@@ -114,7 +125,7 @@ export default function MobileBottomDrawer() {
   };
 
   return (
-    <Drawer open={isPanelOpen} onOpenChange={(open) => { if (!open) closePanel(); }} direction="bottom">
+    <Drawer open={isMobile && isPanelOpen} onOpenChange={(open) => { if (!open) closePanel(); }} direction="bottom">
       <DrawerContent
         className="bg-black/95 border-t border-white/10 backdrop-blur-3xl rounded-t-2xl md:hidden max-h-[75vh] pb-20"
         style={{ bottom: "4rem" }}
