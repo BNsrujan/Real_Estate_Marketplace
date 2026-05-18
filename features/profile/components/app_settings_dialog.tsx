@@ -69,7 +69,7 @@ export default function AppSettingsDialog({ children }: Props) {
         {children}
       </div>
 
-      <DialogContent className="relative sm:max-w-md overflow-hidden rounded-3xl border-border bg-background p-6 shadow-xl">
+      <DialogContent className="sm:max-w-md overflow-hidden rounded-3xl border-border bg-background p-6 shadow-xl">
         {/* Atmospheric blurs */}
         <div aria-hidden="true" className="pointer-events-none absolute -top-20 -right-20 h-56 w-56 rounded-full bg-primary/10 blur-3xl" />
         <div aria-hidden="true" className="pointer-events-none absolute -bottom-16 -left-16 h-44 w-44 rounded-full bg-secondary/60 blur-3xl" />

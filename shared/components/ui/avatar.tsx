@@ -33,7 +33,7 @@ function AvatarImage({
     <AvatarPrimitive.Image
       data-slot="avatar-image"
       className={cn(
-        "aspect-square size-full rounded-lg object-cover",
+        "aspect-square size-full rounded-md object-cover",
         className
       )}
       {...props}
