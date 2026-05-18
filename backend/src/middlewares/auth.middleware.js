@@ -39,7 +39,7 @@ const verifyToken = async (req, res, next) => {
         req.userId = payload.userId;
 
         return next();
-    } catch {
+    } catch (err) {
         logger.debug('Access token invalid, attempting refresh', {
             reason: err.message,
         });
@@ -63,23 +63,12 @@ const verifyToken = async (req, res, next) => {
             clearAuthCookie(res);
             return next(new ApiError(401, 'User account not found'));
         }
-        const storedHash = u.refreshTokenHash;
-        if (!storedHash || storedHash !== incomingHash) {
-            await db.update(users).set({ refreshTokenHash: null }).where(eq(users.id, u.id));
-            clearAuthCookie(res);
-            logger.warn('Refresh token replay detected', { userId: u.id });
-            return next(new ApiError(401, 'Session invalidated. Please log in again.'));
-        }
 
         const u = rows[0];
         const tokenPayload = { userId: u.id, email: u.email, role: u.role };
         const newAccessToken = signAccessToken(tokenPayload);
         const newRefreshToken = signRefreshToken(tokenPayload);
         const fullName = u.name ?? u.email;
-
-        await db.update(users)
-           .set({ refreshTokenHash: hashToken(newRefreshToken) })
-           .where(eq(users.id, u.id));
 
         setAuthCookie(res, {
             fullName,
@@ -93,7 +82,7 @@ const verifyToken = async (req, res, next) => {
         req.userId = u.id;
 
         return next();
-    } catch {
+    } catch (err) {
         logger.warn('Refresh token verification failed', { reason: err.message });
         clearAuthCookie(res);
         return next(new ApiError(401, 'Session expired. Please login again.'));
