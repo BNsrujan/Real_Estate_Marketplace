@@ -20,10 +20,10 @@ type ProfileModalProps = {
 };
 
 const ROLE_META: Record<string, { label: string; color: string }> = {
-  admin:  { label: "Admin",  color: "text-red-400 bg-red-500/10 border-red-500/20" },
-  agent:  { label: "Agent",  color: "text-blue-400 bg-blue-500/10 border-blue-500/20" },
-  seller: { label: "Seller", color: "text-yellow-400 bg-yellow-500/10 border-yellow-500/20" },
-  buyer:  { label: "Buyer",  color: "text-emerald-400 bg-emerald-500/10 border-emerald-500/20" },
+  admin:  { label: "Admin",  color: "text-destructive bg-destructive/10 border-destructive/20" },
+  agent:  { label: "Agent",  color: "text-primary bg-primary/10 border-primary/20" },
+  seller: { label: "Seller", color: "text-primary bg-secondary border-primary/20" },
+  buyer:  { label: "Buyer",  color: "text-primary bg-secondary border-primary/20" },
 };
 
 export default function ProfileModal({ user, onLogout }: ProfileModalProps) {
@@ -55,28 +55,28 @@ export default function ProfileModal({ user, onLogout }: ProfileModalProps) {
   };
 
   return (
-    <div className="absolute right-0 top-14 z-50 w-72 overflow-hidden rounded-2xl border border-white/10 bg-zinc-950 shadow-2xl shadow-black/60 animate-in fade-in zoom-in-95 duration-200">
+    <div className="absolute right-0 top-14 z-50 w-72 overflow-hidden rounded-2xl border border-border bg-card shadow-lg shadow-black/10 animate-in fade-in zoom-in-95 duration-200 ease-[cubic-bezier(0.2,0,0,1)]">
 
-      {/* ── Header ── */}
+      {/* Header */}
       <div className="px-5 pt-5 pb-4">
         <div className="flex items-center gap-3.5">
           {/* Avatar */}
           <div className="relative shrink-0">
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500/30 to-cyan-500/20 border border-white/10 text-base font-bold text-white">
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-secondary text-primary text-base font-bold overflow-hidden ring-2 ring-primary/20">
               {user?.avatar
-                ? <img src={user.avatar} alt="" className="h-full w-full rounded-xl object-cover" />
+                ? <img src={user.avatar} alt="" className="h-full w-full object-cover" />
                 : initials}
             </div>
             {isVerified && (
-              <div className="absolute -bottom-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-emerald-500 border-2 border-zinc-950">
-                <Shield size={8} className="text-white" />
+              <div className="absolute -bottom-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary border-2 border-card">
+                <Shield size={8} className="text-primary-foreground" />
               </div>
             )}
           </div>
 
           {/* Name + badges */}
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-semibold text-white truncate leading-snug">
+            <p className="text-sm font-semibold text-foreground truncate leading-snug">
               {user?.name ?? "User"}
             </p>
             <div className="mt-1 flex items-center gap-1.5 flex-wrap">
@@ -84,7 +84,7 @@ export default function ProfileModal({ user, onLogout }: ProfileModalProps) {
                 {roleMeta.label}
               </span>
               {isPro && (
-                <span className="inline-flex items-center gap-0.5 rounded-full border border-yellow-500/30 bg-yellow-500/10 px-2 py-0.5 text-[10px] font-semibold text-yellow-400">
+                <span className="inline-flex items-center gap-0.5 rounded-full border border-primary/30 bg-primary/10 px-2 py-0.5 text-[10px] font-semibold text-primary">
                   <Star size={8} fill="currentColor" /> Pro
                 </span>
               )}
@@ -93,22 +93,22 @@ export default function ProfileModal({ user, onLogout }: ProfileModalProps) {
         </div>
 
         {/* Email */}
-        <div className="mt-3.5 flex items-center gap-2 rounded-xl border border-white/6 bg-white/4 px-3 py-2">
-          <Mail size={12} className="text-zinc-500 shrink-0" />
-          <span className="text-xs text-zinc-400 truncate">{user?.email ?? "—"}</span>
+        <div className="mt-3.5 flex items-center gap-2 rounded-xl border border-border bg-muted px-3 py-2">
+          <Mail size={12} className="text-muted-foreground shrink-0" />
+          <span className="text-xs text-muted-foreground truncate">{user?.email ?? "—"}</span>
         </div>
 
-        {/* Phone (if available) */}
+        {/* Phone */}
         {fullUser?.phone && (
-          <div className="mt-1.5 flex items-center gap-2 rounded-xl border border-white/6 bg-white/4 px-3 py-2">
-            <Phone size={12} className="text-zinc-500 shrink-0" />
-            <span className="text-xs text-zinc-400">{fullUser.phone}</span>
+          <div className="mt-1.5 flex items-center gap-2 rounded-xl border border-border bg-muted px-3 py-2">
+            <Phone size={12} className="text-muted-foreground shrink-0" />
+            <span className="text-xs text-muted-foreground">{fullUser.phone}</span>
           </div>
         )}
       </div>
 
-      {/* ── Menu items ── */}
-      <div className="border-t border-white/8 px-2 py-2 space-y-0.5">
+      {/* Menu items */}
+      <div className="border-t border-border px-2 py-2 space-y-0.5">
         <ProfileDetailsDialog user={user} fullUser={fullUser}>
           <MenuItem icon={User} label="Profile Details" />
         </ProfileDetailsDialog>
@@ -118,17 +118,17 @@ export default function ProfileModal({ user, onLogout }: ProfileModalProps) {
         </AppSettingsDialog>
       </div>
 
-      {/* ── Sign out ── */}
-      <div className="border-t border-white/8 px-2 py-2">
+      {/* Sign out */}
+      <div className="border-t border-border px-2 py-2">
         <button
           onClick={handleLogout}
           disabled={isLoggingOut}
-          className="group flex w-full items-center gap-3 rounded-xl px-3 py-2.5 transition-colors hover:bg-red-500/10 disabled:opacity-50"
+          className="group flex w-full items-center gap-3 rounded-xl px-3 py-2.5 transition-all duration-200 ease-[cubic-bezier(0.2,0,0,1)] hover:bg-destructive/8 active:scale-[0.98] disabled:opacity-50"
         >
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-red-500/10 text-red-400 group-hover:bg-red-500/20 transition-colors">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-destructive/10 text-destructive group-hover:bg-destructive/20 transition-colors duration-200">
             <LogOut size={15} />
           </div>
-          <span className="text-sm font-medium text-red-400">
+          <span className="text-sm font-medium text-destructive">
             {isLoggingOut ? "Signing out…" : "Sign Out"}
           </span>
         </button>
@@ -145,14 +145,14 @@ function MenuItem({
   label: string;
 }) {
   return (
-    <div className="group flex w-full items-center gap-3 rounded-xl px-3 py-2.5 cursor-pointer transition-colors hover:bg-white/6">
-      <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/6 text-zinc-400 group-hover:text-white transition-colors">
+    <div className="group flex w-full items-center gap-3 rounded-xl px-3 py-2.5 cursor-pointer transition-all duration-200 ease-[cubic-bezier(0.2,0,0,1)] hover:bg-primary/8 active:scale-[0.98]">
+      <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 text-primary group-hover:bg-primary/15 transition-colors duration-200">
         <Icon size={15} />
       </div>
-      <span className="flex-1 text-sm font-medium text-zinc-300 group-hover:text-white transition-colors">
+      <span className="flex-1 text-sm font-medium text-foreground">
         {label}
       </span>
-      <ChevronRight size={14} className="text-zinc-600 group-hover:text-zinc-400 transition-colors" />
+      <ChevronRight size={14} className="text-muted-foreground group-hover:text-foreground transition-colors duration-200" />
     </div>
   );
 }

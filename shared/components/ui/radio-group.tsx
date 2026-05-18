@@ -26,16 +26,28 @@ function RadioGroupItem({
     <RadioGroupPrimitive.Item
       data-slot="radio-group-item"
       className={cn(
-        "group/radio-group-item peer relative flex aspect-square size-4 shrink-0 rounded-full border border-input outline-none after:absolute after:-inset-x-3 after:-inset-y-2 focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 aria-invalid:aria-checked:border-primary dark:bg-input/30 dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40 data-checked:border-primary data-checked:bg-primary data-checked:text-primary-foreground dark:data-checked:bg-primary",
+        // MD3 radio: 20px outer circle
+        "peer relative flex aspect-square size-5 shrink-0 rounded-full outline-none",
+        "border-2 border-border bg-transparent",
+        "transition-all duration-200 ease-[cubic-bezier(0.2,0,0,1)]",
+        "after:absolute after:-inset-x-3 after:-inset-y-2",
+        // checked: border turns primary
+        "data-[state=checked]:border-primary",
+        // focus ring
+        "focus-visible:ring-3 focus-visible:ring-primary/40",
+        // invalid
+        "aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20",
+        // disabled
+        "disabled:cursor-not-allowed disabled:opacity-50",
         className
       )}
       {...props}
     >
       <RadioGroupPrimitive.Indicator
         data-slot="radio-group-indicator"
-        className="flex size-4 items-center justify-center"
-      >
-        <span className="absolute top-1/2 left-1/2 size-2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary-foreground" />
+        className="flex size-full items-center justify-center"
+      >  
+        <span className="block size-2.5 rounded-full bg-primary animate-in zoom-in-50 duration-150" />
       </RadioGroupPrimitive.Indicator>
     </RadioGroupPrimitive.Item>
   )

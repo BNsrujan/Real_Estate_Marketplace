@@ -16,7 +16,7 @@ export const SidebarCard: React.FC<SidebarCardProps> = ({
   return (
     <GlassCard className={className} {...rest}>
       {title && (
-        <h4 className="mb-3 text-sm font-semibold text-white/90">{title}</h4>
+        <h4 className="mb-3 text-sm font-semibold text-foreground">{title}</h4>
       )}
       {children}
     </GlassCard>

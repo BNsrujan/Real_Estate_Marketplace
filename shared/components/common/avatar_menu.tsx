@@ -1,108 +1,100 @@
-'use client';
+"use client";
 
-import { User, Settings, LogOut, LayoutDashboard, ChevronDown } from 'lucide-react';
-import { Button } from '@/shared/components/ui/button';
-import { Separator } from '@/shared/components/ui/separator';
-import { useStore } from '@/shared/store';
-import { useState, useRef, useEffect } from 'react';
-import { cn } from '@/lib/utils';
-import type { UserProfile } from '@/shared/types';
+import { DropdownMenu } from "radix-ui";
+import { User, Settings, LogOut, ChevronDown } from "lucide-react";
+import { useStore } from "@/shared/store";
+import type { UserProfile } from "@/shared/types";
+
+const MD3_EASE = "ease-[cubic-bezier(0.2,0,0,1)]";
+
+function getInitials(name: string): string {
+  return name
+    .split(" ")
+    .slice(0, 2)
+    .map((w) => w[0])
+    .join("")
+    .toUpperCase();
+}
 
 interface AvatarMenuProps {
-  user: UserProfile;
-  onLogout: () => void;
-  onEditProfile?: () => void;
-  className?: string;
+  onProfileClick?: () => void;
+  onSettingsClick?: () => void;
 }
 
-export function AvatarMenu({ user, onLogout, onEditProfile, className }: AvatarMenuProps) {
-  const [open, setOpen] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    function handleOutside(e: MouseEvent) {
-      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
-    }
-    if (open) document.addEventListener('mousedown', handleOutside);
-    return () => document.removeEventListener('mousedown', handleOutside);
-  }, [open]);
-
-  const initials = user.name
-    ? user.name.split(' ').map((n) => n[0]).join('').toUpperCase().slice(0, 2)
-    : user.email[0].toUpperCase();
+export function AvatarMenu({ onProfileClick, onSettingsClick }: AvatarMenuProps) {
+  const user = useStore((s) => s.auth.user) as UserProfile;
+  const logout = useStore((s) => s.logout);
 
   return (
-    <div ref={ref} className={cn('relative', className)}>
-      <button
-        type="button"
-        onClick={() => setOpen((o) => !o)}
-        className="flex items-center gap-2 rounded-lg px-2 py-1.5 text-sm text-zinc-300 hover:bg-white/10 transition-colors"
-      >
-        <span className="flex h-7 w-7 items-center justify-center rounded-full bg-white/20 text-xs font-semibold text-white">
-          {initials}
-        </span>
-        <span className="hidden sm:block max-w-[100px] truncate">{user.name ?? user.email}</span>
-        <ChevronDown className={cn('h-3 w-3 transition-transform', open && 'rotate-180')} />
-      </button>
+    <DropdownMenu.Root>
+      <DropdownMenu.Trigger asChild>
+        <button
+          className={`flex items-center gap-2 rounded-full px-2 py-1.5 hover:bg-primary/8 active:bg-primary/12 active:scale-95 transition-all duration-200 ${MD3_EASE} focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50`}
+          aria-label="Open user menu"
+        >
+          {user?.avatarUrl ? (
+            <img
+              src={user.avatarUrl}
+              alt={user.name}
+              className="h-8 w-8 rounded-full object-cover ring-2 ring-primary/20"
+            />
+          ) : (
+            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-secondary text-primary text-xs font-semibold ring-2 ring-primary/20">
+              {user?.name ? getInitials(user.name) : <User size={14} />}
+            </div>
+          )}
+          <ChevronDown
+            size={14}
+            className="text-muted-foreground transition-transform duration-200 [[data-state=open]_&]:rotate-180"
+          />
+        </button>
+      </DropdownMenu.Trigger>
 
-      {open && (
-        <div className="absolute right-0 top-full mt-1 z-50 w-52 rounded-xl border border-white/10 bg-zinc-900/95 py-1.5 shadow-xl backdrop-blur-xl">
-          <div className="px-3 py-2">
-            <p className="text-xs font-medium text-white truncate">{user.name ?? '—'}</p>
-            <p className="text-xs text-zinc-500 truncate">{user.email}</p>
-            <p className="mt-0.5 text-[10px] text-zinc-600 capitalize">{user.role}</p>
+      <DropdownMenu.Portal>
+        <DropdownMenu.Content
+          align="end"
+          sideOffset={8}
+          className={`z-50 min-w-52 overflow-hidden rounded-2xl bg-card border border-border shadow-lg p-1.5 animate-in fade-in-0 zoom-in-95 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[side=bottom]:slide-in-from-top-2 transition-all duration-200 ${MD3_EASE}`}
+        >
+          {/* User info header */}
+          <div className="px-3 py-2.5 mb-1">
+            <p className="text-sm font-semibold text-foreground leading-none">
+              {user?.name}
+            </p>
+            <p className="mt-1 text-xs text-muted-foreground truncate">
+              {user?.email}
+            </p>
           </div>
-          <Separator className="my-1 bg-white/10" />
 
-          {['seller', 'agent', 'admin'].includes(user.role) && (
-            <MenuItem icon={LayoutDashboard} label="Dashboard" href="/dashboard" onClick={() => setOpen(false)} />
-          )}
-          {user.role === 'admin' && (
-            <MenuItem icon={Settings} label="Admin Panel" href="/admin" onClick={() => setOpen(false)} />
-          )}
-          {onEditProfile && (
-            <MenuItem icon={User} label="Edit Profile" onClick={() => { setOpen(false); onEditProfile(); }} />
-          )}
+          <DropdownMenu.Separator className="h-px bg-border mx-1 mb-1" />
 
-          <Separator className="my-1 bg-white/10" />
-          <button
-            type="button"
-            onClick={() => { setOpen(false); onLogout(); }}
-            className="flex w-full items-center gap-2 px-3 py-1.5 text-sm text-red-400 hover:bg-red-500/10 transition-colors"
+          <DropdownMenu.Item
+            onSelect={onProfileClick}
+            className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-foreground cursor-pointer select-none outline-none hover:bg-primary/8 active:bg-primary/12 transition-colors duration-150 ${MD3_EASE}`}
           >
-            <LogOut className="h-4 w-4" />
+            <User size={16} className="text-muted-foreground" />
+            Profile
+          </DropdownMenu.Item>
+
+          <DropdownMenu.Item
+            onSelect={onSettingsClick}
+            className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-foreground cursor-pointer select-none outline-none hover:bg-primary/8 active:bg-primary/12 transition-colors duration-150 ${MD3_EASE}`}
+          >
+            <Settings size={16} className="text-muted-foreground" />
+            Settings
+          </DropdownMenu.Item>
+
+          <DropdownMenu.Separator className="h-px bg-border mx-1 my-1" />
+
+          <DropdownMenu.Item
+            onSelect={logout}
+            className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-destructive cursor-pointer select-none outline-none hover:bg-destructive/8 active:bg-destructive/12 transition-colors duration-150 ${MD3_EASE}`}
+          >
+            <LogOut size={16} />
             Sign out
-          </button>
-        </div>
-      )}
-    </div>
-  );
-}
-
-function MenuItem({
-  icon: Icon,
-  label,
-  href,
-  onClick,
-}: { icon: React.ComponentType<{ className?: string }>; label: string; href?: string; onClick: () => void }) {
-  const content = (
-    <span className="flex items-center gap-2 px-3 py-1.5 text-sm text-zinc-300 hover:bg-white/10 hover:text-white transition-colors w-full">
-      <Icon className="h-4 w-4" />
-      {label}
-    </span>
-  );
-
-  if (href) {
-    return (
-      <a href={href} onClick={onClick} className="block w-full">
-        {content}
-      </a>
-    );
-  }
-
-  return (
-    <button type="button" onClick={onClick} className="block w-full text-left">
-      {content}
-    </button>
+          </DropdownMenu.Item>
+        </DropdownMenu.Content>
+      </DropdownMenu.Portal>
+    </DropdownMenu.Root>
   );
 }

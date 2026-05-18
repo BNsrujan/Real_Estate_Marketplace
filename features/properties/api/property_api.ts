@@ -13,7 +13,6 @@ function normalizePropertyType(type: string): Property['type'] {
     agriculture: 'agriculture',
     commercial_space: 'commercial_space',
     commercial_plot: 'commercial_plot',
-    // legacy labels
     'agriculture land': 'agriculture',
     'commercial space': 'commercial_space',
     'commercial plots': 'commercial_plot',
@@ -21,7 +20,6 @@ function normalizePropertyType(type: string): Property['type'] {
   return map[type] ?? 'house';
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function mapProperty(p: any): Property {
   return {
     id: p.id,

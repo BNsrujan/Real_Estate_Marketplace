@@ -6,6 +6,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { X, ChevronRight, ChevronLeft, Home, Landmark, Wheat, Building2, MapPinned, Factory, Check, Upload, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useStore } from '@/shared/store';
+import { Switch } from '@/shared/components/ui/switch';
 import { createPortal } from 'react-dom';
 import type { District, Amenity, PropertyType } from '@/shared/types';
 import {
@@ -23,32 +24,34 @@ type AllValues = Step1Values & Step2Values & Step3Values & Step4Values & Step5Va
 const STEPS = ['Basics', 'Location', 'Pricing', 'Details', 'Road & Docs', 'Amenities', 'Images'];
 
 const TYPE_OPTIONS: { value: PropertyType; label: string; icon: React.ComponentType<{ size?: number; className?: string }> }[] = [
-  { value: 'house',           label: 'House',            icon: Home },
-  { value: 'apartment',       label: 'Apartment',        icon: Landmark },
-  { value: 'villa',           label: 'Villa',            icon: Home },
-  { value: 'site',            label: 'Site',             icon: MapPinned },
-  { value: 'plot',            label: 'Plot',             icon: MapPinned },
-  { value: 'agriculture',     label: 'Agriculture',      icon: Wheat },
+  { value: 'house',            label: 'House',            icon: Home },
+  { value: 'apartment',        label: 'Apartment',        icon: Landmark },
+  { value: 'villa',            label: 'Villa',            icon: Home },
+  { value: 'site',             label: 'Site',             icon: MapPinned },
+  { value: 'plot',             label: 'Plot',             icon: MapPinned },
+  { value: 'agriculture',      label: 'Agriculture',      icon: Wheat },
   { value: 'commercial_space', label: 'Commercial Space', icon: Building2 },
-  { value: 'commercial_plot', label: 'Commercial Plot',  icon: Factory },
+  { value: 'commercial_plot',  label: 'Commercial Plot',  icon: Factory },
 ];
 
-// ─── Field helpers ────────────────────────────────────────────────────────────
+// ─── Field helpers ─────────────────────────────────────────────────────────────
 
 function Field({ label, error, children }: { label: string; error?: string; children: React.ReactNode }) {
   return (
     <div className="space-y-1.5">
-      <label className="block text-xs font-medium text-zinc-300 uppercase tracking-wider">{label}</label>
+      <label className="block text-[10px] font-semibold text-muted-foreground uppercase tracking-widest">
+        {label}
+      </label>
       {children}
-      {error && <p className="text-xs text-red-400">{error}</p>}
+      {error && <p className="text-[11px] text-destructive">{error}</p>}
     </div>
   );
 }
 
-const inputCls = 'w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white placeholder:text-white/30 focus:outline-none focus:ring-1 focus:ring-emerald-500';
-const selectCls = inputCls + ' appearance-none';
+const inputCls = 'w-full rounded-t-md rounded-b-none border-0 border-b-2 border-border bg-input px-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary transition-colors duration-200';
+const selectCls = 'w-full rounded-t-md rounded-b-none border-0 border-b-2 border-border bg-input px-3 py-2.5 text-sm text-foreground focus:outline-none focus:border-primary transition-colors duration-200 appearance-none';
 
-// ─── Step 1: Basics ──────────────────────────────────────────────────────────
+// ─── Step 1: Basics ───────────────────────────────────────────────────────────
 
 function Step1({ form }: { form: ReturnType<typeof useForm<AllValues>> }) {
   const { register, formState: { errors }, setValue, watch } = form;
@@ -57,7 +60,7 @@ function Step1({ form }: { form: ReturnType<typeof useForm<AllValues>> }) {
   return (
     <div className="space-y-6">
       <div>
-        <p className="text-xs font-medium text-zinc-300 uppercase tracking-wider mb-3">Property Type</p>
+        <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest mb-3">Property Type</p>
         <div className="grid grid-cols-4 gap-2">
           {TYPE_OPTIONS.map(({ value, label, icon: Icon }) => (
             <button
@@ -65,10 +68,10 @@ function Step1({ form }: { form: ReturnType<typeof useForm<AllValues>> }) {
               type="button"
               onClick={() => setValue('type', value, { shouldValidate: true })}
               className={cn(
-                'flex flex-col items-center gap-2 rounded-xl border p-3 text-xs transition-colors',
+                'flex flex-col items-center gap-2 rounded-2xl border p-3 text-xs transition-all duration-200 ease-[cubic-bezier(0.2,0,0,1)] active:scale-95',
                 type === value
-                  ? 'border-emerald-500/60 bg-emerald-500/15 text-white'
-                  : 'border-white/10 bg-white/5 text-zinc-400 hover:border-white/20 hover:text-white',
+                  ? 'border-primary/40 bg-secondary text-primary'
+                  : 'border-border bg-card text-muted-foreground hover:bg-muted hover:text-foreground',
               )}
             >
               <Icon size={20} />
@@ -76,7 +79,7 @@ function Step1({ form }: { form: ReturnType<typeof useForm<AllValues>> }) {
             </button>
           ))}
         </div>
-        {errors.type && <p className="mt-1.5 text-xs text-red-400">{errors.type.message as string}</p>}
+        {errors.type && <p className="mt-1.5 text-[11px] text-destructive">{errors.type.message as string}</p>}
       </div>
 
       <Field label="Title" error={errors.title?.message as string}>
@@ -91,13 +94,13 @@ function Step1({ form }: { form: ReturnType<typeof useForm<AllValues>> }) {
               type="button"
               onClick={() => setValue('listingType', lt, { shouldValidate: true })}
               className={cn(
-                'flex-1 rounded-xl border py-2.5 text-sm capitalize transition-colors',
+                'flex-1 rounded-full border py-2.5 text-sm capitalize transition-all duration-200 ease-[cubic-bezier(0.2,0,0,1)] active:scale-95',
                 form.watch('listingType') === lt
-                  ? 'border-emerald-500/60 bg-emerald-500/15 text-white'
-                  : 'border-white/10 bg-white/5 text-zinc-400 hover:text-white',
+                  ? 'border-primary/40 bg-secondary text-primary font-semibold'
+                  : 'border-border bg-card text-muted-foreground hover:bg-muted',
               )}
             >
-              {`${lt}`}
+              {lt}
             </button>
           ))}
         </div>
@@ -115,7 +118,7 @@ function Step1({ form }: { form: ReturnType<typeof useForm<AllValues>> }) {
   );
 }
 
-// ─── Step 2: Location ────────────────────────────────────────────────────────
+// ─── Step 2: Location ─────────────────────────────────────────────────────────
 
 function Step2({ form, districts }: { form: ReturnType<typeof useForm<AllValues>>; districts: District[] }) {
   const { register, formState: { errors }, setValue, watch } = form;
@@ -143,12 +146,17 @@ function Step2({ form, districts }: { form: ReturnType<typeof useForm<AllValues>
       </div>
 
       <Field label="Full Address (optional)">
-        <textarea {...register('address')} placeholder="Door no, Street, Landmark…" rows={2} className={inputCls + ' resize-none'} />
+        <textarea
+          {...register('address')}
+          placeholder="Door no, Street, Landmark…"
+          rows={2}
+          className={inputCls + ' resize-none'}
+        />
       </Field>
 
       <div>
-        <p className="text-xs font-medium text-zinc-300 uppercase tracking-wider mb-2">Pin Location on Map</p>
-        <p className="text-xs text-zinc-500 mb-3">Enter latitude and longitude manually, or click on a map to get coordinates.</p>
+        <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest mb-1">Pin Location on Map</p>
+        <p className="text-xs text-muted-foreground mb-3">Enter latitude and longitude, or click a map to get coordinates.</p>
         <div className="grid grid-cols-2 gap-4">
           <Field label="Latitude" error={errors.lat?.message as string}>
             <input
@@ -168,14 +176,16 @@ function Step2({ form, districts }: { form: ReturnType<typeof useForm<AllValues>
           </Field>
         </div>
         {lat && lng && (
-          <p className="mt-2 text-xs text-emerald-400">Location set: {lat}, {lng}</p>
+          <p className="mt-2 text-xs font-medium text-primary flex items-center gap-1.5">
+            <Check size={12} /> Location set: {lat}, {lng}
+          </p>
         )}
       </div>
     </div>
   );
 }
 
-// ─── Step 3: Pricing ─────────────────────────────────────────────────────────
+// ─── Step 3: Pricing ──────────────────────────────────────────────────────────
 
 function Step3({ form }: { form: ReturnType<typeof useForm<AllValues>> }) {
   const { register, formState: { errors } } = form;
@@ -215,7 +225,7 @@ function Step3({ form }: { form: ReturnType<typeof useForm<AllValues>> }) {
   );
 }
 
-// ─── Step 4: Details ─────────────────────────────────────────────────────────
+// ─── Step 4: Details ──────────────────────────────────────────────────────────
 
 function Step4({ form }: { form: ReturnType<typeof useForm<AllValues>> }) {
   const { register } = form;
@@ -317,7 +327,7 @@ function Step4({ form }: { form: ReturnType<typeof useForm<AllValues>> }) {
       )}
 
       {!isResidential && !isSitePlot && !isAgriculture && (
-        <div className="flex items-center justify-center py-12 text-zinc-500 text-sm">
+        <div className="flex items-center justify-center py-12 text-muted-foreground text-sm">
           No additional details required for this property type.
         </div>
       )}
@@ -325,32 +335,25 @@ function Step4({ form }: { form: ReturnType<typeof useForm<AllValues>> }) {
   );
 }
 
-// ─── Step 5: Road & Docs ─────────────────────────────────────────────────────
+// ─── Step 5: Road & Docs ──────────────────────────────────────────────────────
 
 function Step5({ form }: { form: ReturnType<typeof useForm<AllValues>> }) {
   const { register, setValue, watch } = form;
   const roadAccess = watch('roadAccess');
+  const roadFacing = watch('roadFacing');
 
   return (
     <div className="space-y-5">
-      <div className="flex items-center justify-between rounded-2xl border border-white/10 bg-white/5 p-4">
+      <div className="flex items-center justify-between rounded-2xl border border-border bg-card px-4 py-3.5 gap-4">
         <div>
-          <p className="text-sm font-medium text-white">Road Access</p>
-          <p className="text-xs text-zinc-500">Does the property have road access?</p>
+          <p className="text-sm font-medium text-foreground">Road Access</p>
+          <p className="text-xs text-muted-foreground mt-0.5">Does the property have road access?</p>
         </div>
-        <button
-          type="button"
-          onClick={() => setValue('roadAccess', !roadAccess, { shouldValidate: true })}
-          className={cn(
-            'relative h-6 w-11 rounded-full transition-colors',
-            roadAccess ? 'bg-emerald-500' : 'bg-white/20',
-          )}
-        >
-          <span className={cn(
-            'absolute top-1 h-4 w-4 rounded-full bg-white transition-transform',
-            roadAccess ? 'left-6' : 'left-1',
-          )} />
-        </button>
+        <Switch
+          checked={!!roadAccess}
+          onCheckedChange={(v) => setValue('roadAccess', v, { shouldValidate: true })}
+          aria-label="Road access"
+        />
       </div>
 
       {roadAccess && (
@@ -366,21 +369,13 @@ function Step5({ form }: { form: ReturnType<typeof useForm<AllValues>> }) {
               ))}
             </select>
           </Field>
-          <div className="flex items-center justify-between rounded-2xl border border-white/10 bg-white/5 p-4">
-            <p className="text-sm text-white">Road Facing</p>
-            <button
-              type="button"
-              onClick={() => setValue('roadFacing', !form.watch('roadFacing'))}
-              className={cn(
-                'relative h-6 w-11 rounded-full transition-colors',
-                form.watch('roadFacing') ? 'bg-emerald-500' : 'bg-white/20',
-              )}
-            >
-              <span className={cn(
-                'absolute top-1 h-4 w-4 rounded-full bg-white transition-transform',
-                form.watch('roadFacing') ? 'left-6' : 'left-1',
-              )} />
-            </button>
+          <div className="flex items-center justify-between rounded-2xl border border-border bg-card px-4 py-3.5 gap-4">
+            <p className="text-sm font-medium text-foreground">Road Facing</p>
+            <Switch
+              checked={!!roadFacing}
+              onCheckedChange={(v) => setValue('roadFacing', v)}
+              aria-label="Road facing"
+            />
           </div>
         </>
       )}
@@ -392,7 +387,7 @@ function Step5({ form }: { form: ReturnType<typeof useForm<AllValues>> }) {
   );
 }
 
-// ─── Step 6: Amenities ───────────────────────────────────────────────────────
+// ─── Step 6: Amenities ────────────────────────────────────────────────────────
 
 function Step6({ form, amenities }: { form: ReturnType<typeof useForm<AllValues>>; amenities: Amenity[] }) {
   const { register, setValue, watch } = form;
@@ -416,7 +411,9 @@ function Step6({ form, amenities }: { form: ReturnType<typeof useForm<AllValues>
     <div className="space-y-6">
       {Object.entries(grouped).map(([cat, items]) => (
         <div key={cat}>
-          <p className="text-xs font-medium text-zinc-400 uppercase tracking-wider mb-2 capitalize">{cat}</p>
+          <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest mb-2.5">
+            {cat}
+          </p>
           <div className="flex flex-wrap gap-2">
             {items.map((a) => (
               <button
@@ -424,10 +421,10 @@ function Step6({ form, amenities }: { form: ReturnType<typeof useForm<AllValues>
                 type="button"
                 onClick={() => toggleAmenity(a.id)}
                 className={cn(
-                  'rounded-full border px-3 py-1.5 text-xs transition-colors',
+                  'rounded-full border px-3 py-1.5 text-xs transition-all duration-200 ease-[cubic-bezier(0.2,0,0,1)] active:scale-95',
                   selectedIds.includes(a.id)
-                    ? 'border-emerald-500/60 bg-emerald-500/15 text-white'
-                    : 'border-white/10 bg-white/5 text-zinc-400 hover:text-white',
+                    ? 'border-primary/30 bg-primary/10 text-primary font-medium'
+                    : 'border-border bg-card text-muted-foreground hover:bg-muted hover:text-foreground',
                 )}
               >
                 {a.icon && <span className="mr-1">{a.icon}</span>}
@@ -439,11 +436,16 @@ function Step6({ form, amenities }: { form: ReturnType<typeof useForm<AllValues>
       ))}
 
       {amenities.length === 0 && (
-        <p className="text-sm text-zinc-500 py-4">No amenities available.</p>
+        <p className="text-sm text-muted-foreground py-4">No amenities available.</p>
       )}
 
       <Field label="Description (optional)">
-        <textarea {...register('description')} placeholder="Describe the property…" rows={4} className={inputCls + ' resize-none'} />
+        <textarea
+          {...register('description')}
+          placeholder="Describe the property…"
+          rows={4}
+          className={inputCls + ' resize-none'}
+        />
       </Field>
 
       <Field label="Contact Number" error={form.formState.errors.contactNumber?.message as string}>
@@ -453,7 +455,7 @@ function Step6({ form, amenities }: { form: ReturnType<typeof useForm<AllValues>
   );
 }
 
-// ─── Step 7: Images ──────────────────────────────────────────────────────────
+// ─── Step 7: Images ───────────────────────────────────────────────────────────
 
 function Step7({ form }: { form: ReturnType<typeof useForm<AllValues>> }) {
   const { setValue, watch, formState: { errors } } = form;
@@ -491,8 +493,10 @@ function Step7({ form }: { form: ReturnType<typeof useForm<AllValues>> }) {
       {/* Drop zone */}
       <label
         className={cn(
-          'flex flex-col items-center justify-center rounded-2xl border-2 border-dashed p-8 cursor-pointer transition-colors',
-          uploading ? 'border-emerald-500/40 bg-emerald-500/5' : 'border-white/15 bg-white/3 hover:border-white/25',
+          'flex flex-col items-center justify-center rounded-3xl border-2 border-dashed p-8 cursor-pointer transition-all duration-200 ease-[cubic-bezier(0.2,0,0,1)]',
+          uploading
+            ? 'border-primary/50 bg-primary/5'
+            : 'border-border bg-muted/30 hover:border-primary/30 hover:bg-primary/5',
         )}
       >
         <input
@@ -504,16 +508,18 @@ function Step7({ form }: { form: ReturnType<typeof useForm<AllValues>> }) {
           disabled={uploading || imageUrls.length >= 10}
         />
         {uploading ? (
-          <Loader2 size={28} className="text-emerald-400 animate-spin mb-2" />
+          <Loader2 size={28} className="text-primary animate-spin mb-2" />
         ) : (
-          <Upload size={28} className="text-zinc-400 mb-2" />
+          <Upload size={28} className="text-muted-foreground mb-2" />
         )}
-        <p className="text-sm text-zinc-400">{uploading ? 'Uploading…' : 'Click or drag images'}</p>
-        <p className="text-xs text-zinc-600 mt-1">{imageUrls.length}/10 images • tap one to set as cover</p>
+        <p className="text-sm text-muted-foreground font-medium">
+          {uploading ? 'Uploading…' : 'Click or drag images here'}
+        </p>
+        <p className="text-xs text-muted-foreground mt-1">{imageUrls.length}/10 images · tap one to set as cover</p>
       </label>
 
-      {uploadError && <p className="text-xs text-red-400">{uploadError}</p>}
-      {errors.imageUrls && <p className="text-xs text-red-400">{errors.imageUrls.message as string}</p>}
+      {uploadError && <p className="text-[11px] text-destructive">{uploadError}</p>}
+      {errors.imageUrls && <p className="text-[11px] text-destructive">{errors.imageUrls.message as string}</p>}
 
       {/* Image grid */}
       {imageUrls.length > 0 && (
@@ -521,20 +527,22 @@ function Step7({ form }: { form: ReturnType<typeof useForm<AllValues>> }) {
           {imageUrls.map((url, i) => (
             <div
               key={i}
-              className="relative aspect-square rounded-xl overflow-hidden border border-white/10 cursor-pointer"
+              className="relative aspect-square rounded-2xl overflow-hidden border border-border cursor-pointer transition-all duration-200 hover:ring-2 hover:ring-primary/30"
               onClick={() => setValue('coverIndex', i)}
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={url} alt="" className="w-full h-full object-cover" />
               {coverIndex === i && (
-                <div className="absolute inset-0 bg-emerald-500/30 flex items-center justify-center">
-                  <span className="rounded-full bg-emerald-500 px-2 py-0.5 text-[10px] font-semibold text-white">Cover</span>
+                <div className="absolute inset-0 bg-primary/20 flex items-center justify-center">
+                  <span className="rounded-full bg-primary px-2.5 py-0.5 text-[10px] font-semibold text-primary-foreground">
+                    Cover
+                  </span>
                 </div>
               )}
               <button
                 type="button"
                 onClick={(e) => { e.stopPropagation(); removeImage(i); }}
-                className="absolute top-1 right-1 flex h-5 w-5 items-center justify-center rounded-full bg-black/70 text-white hover:bg-black"
+                className="absolute top-1.5 right-1.5 flex h-6 w-6 items-center justify-center rounded-full bg-background/90 text-foreground hover:bg-destructive hover:text-destructive-foreground transition-colors duration-200"
               >
                 <X size={10} />
               </button>
@@ -628,50 +636,62 @@ export function SellFormModal({ onClose }: SellFormModalProps) {
   const stepProps = { form };
 
   const modal = (
-    <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
-      <div className="relative w-full max-w-xl bg-zinc-950 rounded-3xl border border-white/10 shadow-2xl flex flex-col max-h-[90vh]">
+    <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+      <div className="relative w-full max-w-xl bg-background rounded-3xl border border-border shadow-2xl flex flex-col max-h-[90vh] overflow-hidden">
+
+        {/* Atmospheric blurs */}
+        <div aria-hidden="true" className="pointer-events-none absolute -top-24 -right-24 h-64 w-64 rounded-full bg-primary/8 blur-3xl" />
+        <div aria-hidden="true" className="pointer-events-none absolute -bottom-20 -left-20 h-52 w-52 rounded-full bg-secondary/50 blur-3xl" />
 
         {/* Header */}
-        <div className="shrink-0 flex items-center justify-between px-6 pt-6 pb-4 border-b border-white/10">
+        <div className="relative shrink-0 flex items-center justify-between px-6 pt-6 pb-4 border-b border-border">
           <div>
-            <h2 className="text-lg font-bold text-white">List Your Property</h2>
-            <p className="text-xs text-zinc-500 mt-0.5">Step {step + 1} of {STEPS.length} — {STEPS[step]}</p>
+            <h2 className="text-lg font-bold text-foreground">List Your Property</h2>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              Step {step + 1} of {STEPS.length} — {STEPS[step]}
+            </p>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="flex h-8 w-8 items-center justify-center rounded-full bg-white/10 text-white hover:bg-white/20 transition"
+            className="flex h-9 w-9 items-center justify-center rounded-full bg-muted text-muted-foreground hover:bg-primary/10 hover:text-primary active:scale-95 transition-all duration-200 ease-[cubic-bezier(0.2,0,0,1)]"
           >
             <X size={16} />
           </button>
         </div>
 
-        {/* Step indicator */}
-        <div className="shrink-0 flex gap-1 px-6 py-3">
-          {STEPS.map((s, i) => (
+        {/* Step progress bar */}
+        <div className="relative shrink-0 flex gap-1 px-6 py-3">
+          {STEPS.map((_, i) => (
             <div
               key={i}
               className={cn(
-                'h-1 rounded-full flex-1 transition-colors',
-                i < step ? 'bg-emerald-500' : i === step ? 'bg-emerald-400' : 'bg-white/10',
+                'h-1 rounded-full flex-1 transition-all duration-300 ease-[cubic-bezier(0.2,0,0,1)]',
+                i < step
+                  ? 'bg-primary'
+                  : i === step
+                    ? 'bg-primary/60'
+                    : 'bg-muted',
               )}
             />
           ))}
         </div>
 
         {/* Step content */}
-        <div className="flex-1 min-h-0 overflow-y-auto px-6 py-4">
+        <div className="relative flex-1 min-h-0 overflow-y-auto no-scrollbar px-6 py-4">
           {submitted ? (
             <div className="flex flex-col items-center justify-center py-16 gap-4">
-              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-emerald-500/20 border border-emerald-500/40">
-                <Check size={32} className="text-emerald-400" />
+              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 border border-primary/20">
+                <Check size={32} className="text-primary" />
               </div>
-              <h3 className="text-xl font-bold text-white">Property Listed!</h3>
-              <p className="text-sm text-zinc-400 text-center">Your property has been submitted and is pending review.</p>
+              <h3 className="text-xl font-bold text-foreground">Property Listed!</h3>
+              <p className="text-sm text-muted-foreground text-center">
+                Your property has been submitted and is pending review.
+              </p>
               <button
                 type="button"
                 onClick={onClose}
-                className="mt-2 rounded-xl bg-emerald-500 px-6 py-2.5 text-sm font-semibold text-white hover:bg-emerald-600 transition"
+                className="mt-2 rounded-full bg-primary px-8 py-2.5 text-sm font-semibold text-primary-foreground hover:bg-primary/90 active:scale-95 transition-all duration-200 ease-[cubic-bezier(0.2,0,0,1)]"
               >
                 Done
               </button>
@@ -691,12 +711,12 @@ export function SellFormModal({ onClose }: SellFormModalProps) {
 
         {/* Footer */}
         {!submitted && (
-          <div className="shrink-0 flex gap-3 px-6 py-4 border-t border-white/10">
+          <div className="relative shrink-0 flex gap-3 px-6 py-4 border-t border-border">
             <button
               type="button"
               onClick={() => setStep((s) => Math.max(s - 1, 0))}
               disabled={step === 0}
-              className="flex items-center gap-1.5 rounded-xl border border-white/20 px-4 py-2.5 text-sm text-white/70 hover:text-white hover:bg-white/5 disabled:opacity-30 disabled:cursor-not-allowed transition"
+              className="flex items-center gap-1.5 rounded-full border border-border px-4 py-2.5 text-sm text-muted-foreground hover:text-foreground hover:bg-muted active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed transition-all duration-200 ease-[cubic-bezier(0.2,0,0,1)]"
             >
               <ChevronLeft size={16} />
               Back
@@ -706,7 +726,7 @@ export function SellFormModal({ onClose }: SellFormModalProps) {
               <button
                 type="button"
                 onClick={handleNext}
-                className="flex items-center gap-1.5 rounded-xl bg-emerald-500 px-5 py-2.5 text-sm font-semibold text-white hover:bg-emerald-600 transition"
+                className="flex items-center gap-1.5 rounded-full bg-primary px-6 py-2.5 text-sm font-semibold text-primary-foreground hover:bg-primary/90 active:scale-95 transition-all duration-200 ease-[cubic-bezier(0.2,0,0,1)]"
               >
                 Next
                 <ChevronRight size={16} />
@@ -716,7 +736,7 @@ export function SellFormModal({ onClose }: SellFormModalProps) {
                 type="button"
                 onClick={handleSubmit}
                 disabled={submitting}
-                className="flex items-center gap-2 rounded-xl bg-emerald-500 px-5 py-2.5 text-sm font-semibold text-white hover:bg-emerald-600 disabled:opacity-60 transition"
+                className="flex items-center gap-2 rounded-full bg-primary px-6 py-2.5 text-sm font-semibold text-primary-foreground hover:bg-primary/90 active:scale-95 disabled:opacity-60 transition-all duration-200 ease-[cubic-bezier(0.2,0,0,1)]"
               >
                 {submitting && <Loader2 size={14} className="animate-spin" />}
                 {isAuthenticated ? 'Submit Listing' : 'Login to Submit'}

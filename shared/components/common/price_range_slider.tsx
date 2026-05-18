@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useCallback } from 'react';
 
 interface PriceRangeSliderProps {
   min: number;
@@ -46,19 +46,32 @@ export function PriceRangeSlider({
   const pct = (v: number) => ((v - min) / (max - min)) * 100;
 
   return (
-    <div className="space-y-3">
-      <div className="flex items-center justify-between text-sm text-zinc-300">
-        <span>{formatLabel(minVal)}</span>
-        <span>{formatLabel(maxVal)}</span>
+    <div className="space-y-4">
+    
+      <div className="flex items-center justify-between">
+        <span className="rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary">
+          {formatLabel(minVal)}
+        </span>
+        <span className="rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary">
+          {formatLabel(maxVal)}
+        </span>
       </div>
-      <div className="relative h-5">
-        {/* track */}
-        <div className="absolute top-1/2 h-1 w-full -translate-y-1/2 rounded-full bg-zinc-700" />
-        {/* filled range */}
+
+  
+      <div className="relative h-6 flex items-center">
+       
+        <div className="absolute h-1 w-full rounded-full bg-muted" />
+
+   
         <div
-          className="absolute top-1/2 h-1 -translate-y-1/2 rounded-full bg-white/70"
-          style={{ left: `${pct(minVal)}%`, width: `${pct(maxVal) - pct(minVal)}%` }}
+          className="absolute h-1 rounded-full bg-primary transition-all duration-150 ease-[cubic-bezier(0.2,0,0,1)]"
+          style={{
+            left: `${pct(minVal)}%`,
+            width: `${pct(maxVal) - pct(minVal)}%`,
+          }}
         />
+
+  
         <input
           type="range"
           min={min}
@@ -69,6 +82,8 @@ export function PriceRangeSlider({
           className="pointer-events-none absolute inset-0 h-full w-full cursor-pointer opacity-0"
           style={{ zIndex: minVal > max - step ? 5 : 3 }}
         />
+
+    
         <input
           type="range"
           min={min}
@@ -79,13 +94,15 @@ export function PriceRangeSlider({
           className="pointer-events-none absolute inset-0 h-full w-full cursor-pointer opacity-0"
           style={{ zIndex: 4 }}
         />
-        {/* thumbs */}
+
+      
         <div
-          className="pointer-events-none absolute top-1/2 h-4 w-4 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white bg-zinc-900"
+          className="pointer-events-none absolute top-1/2 h-5 w-5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary shadow-md ring-2 ring-primary/30 transition-transform duration-150 ease-[cubic-bezier(0.2,0,0,1)]"
           style={{ left: `${pct(minVal)}%` }}
         />
+
         <div
-          className="pointer-events-none absolute top-1/2 h-4 w-4 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white bg-zinc-900"
+          className="pointer-events-none absolute top-1/2 h-5 w-5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary shadow-md ring-2 ring-primary/30 transition-transform duration-150 ease-[cubic-bezier(0.2,0,0,1)]"
           style={{ left: `${pct(maxVal)}%` }}
         />
       </div>

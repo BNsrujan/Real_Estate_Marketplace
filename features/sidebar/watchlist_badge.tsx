@@ -38,9 +38,9 @@ export default function WatchlistBadge({ property }: { property: Property }) {
       <TooltipContent
         side="right"
         sideOffset={12}
-        className="bg-black/90 border border-white/10 text-white rounded-2xl shadow-xl backdrop-blur-xl p-4 w-56 z-1100 [--tooltip-bg:var(--color-black)]"
+        className="bg-popover border border-border text-foreground rounded-2xl shadow-lg p-4 w-56 z-1100"
       >
-        <p className="text-sm font-semibold mb-3 truncate">{property.sizeLabel}</p>
+        <p className="text-sm font-semibold mb-3 truncate text-foreground">{property.sizeLabel}</p>
         <div className="flex gap-2 flex-wrap">
           {(property.images?.length
             ? property.images.slice(0, 4).map((img) => ({ url: img.url, alt: img.alt }))
@@ -50,7 +50,7 @@ export default function WatchlistBadge({ property }: { property: Property }) {
               key={i}
               src={img.url}
               alt={img.alt}
-              className="h-12 w-12 rounded-lg object-cover border border-white/10"
+              className="h-12 w-12 rounded-xl object-cover border border-border"
             />
           ))}
         </div>

@@ -1,7 +1,7 @@
 'use client';
 
 import { ReactNode, useState } from 'react';
-import { AlertTriangle } from 'lucide-react';
+import { AlertTriangle, Info } from 'lucide-react';
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter,
 } from '@/shared/components/ui/dialog';
@@ -37,25 +37,55 @@ export function ConfirmDialog({
     }
   }
 
-
   return (
     <>
       <span onClick={() => setOpen(true)}>{trigger}</span>
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <AlertTriangle className={`h-5 w-5 ${destructive ? 'text-red-400' : 'text-yellow-400'}`} />
+        <DialogContent className="relative max-w-sm overflow-hidden rounded-3xl border-border bg-background p-6 shadow-xl">
+          {/* Atmospheric blur shapes */}
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute -top-16 -right-16 h-48 w-48 rounded-full bg-primary/10 blur-3xl"
+          />
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute -bottom-12 -left-12 h-36 w-36 rounded-full bg-secondary/60 blur-3xl"
+          />
+
+          <DialogHeader className="relative">
+            <DialogTitle className="flex items-center gap-2.5 text-base font-semibold text-foreground">
+              <span
+                className={`flex h-8 w-8 items-center justify-center rounded-full ${
+                  destructive
+                    ? 'bg-destructive/10 text-destructive'
+                    : 'bg-primary/10 text-primary'
+                }`}
+              >
+                {destructive ? (
+                  <AlertTriangle size={16} />
+                ) : (
+                  <Info size={16} />
+                )}
+              </span>
               {title}
             </DialogTitle>
-            <DialogDescription>{description}</DialogDescription>
+            <DialogDescription className="mt-1.5 text-sm text-muted-foreground">
+              {description}
+            </DialogDescription>
           </DialogHeader>
-          <DialogFooter>
-            <Button variant="ghost" onClick={() => setOpen(false)} disabled={loading}>
+
+          <DialogFooter className="relative mt-6 flex gap-2 sm:justify-end">
+            <Button
+              variant="outline"
+              className="rounded-full border-border"
+              onClick={() => setOpen(false)}
+              disabled={loading}
+            >
               Cancel
             </Button>
             <Button
               variant={destructive ? 'destructive' : 'default'}
+              className="rounded-full"
               onClick={handleConfirm}
               disabled={loading}
             >

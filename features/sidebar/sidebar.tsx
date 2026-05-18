@@ -30,38 +30,16 @@ type SidebarMenu = {
 };
 
 const SIDEBAR_MENUS: SidebarMenu[] = [
-  {
-    id: "map",
-    title: "Map Explorer",
-    Icon: Map,
-    description: "Explore Karnataka properties.",
-  },
-  {
-    id: "search",
-    title: "Browse Properties",
-    Icon: Search,
-    description: "Filter and discover listings.",
-  },
-  {
-    id: "saved",
-    title: "Saved Properties",
-    Icon: Bookmark,
-    description: "Your bookmarks and recent views.",
-  },
-  {
-    id: "messages",
-    title: "My Enquiries",
-    Icon: MessageSquare,
-    description: "Enquiries you have submitted.",
-  },
-  {
-    id: "blog",
-    title: "Blog",
-    Icon: BookOpen,
-    description: "Real estate insights and news.",
-  },
+  { id: "map",      title: "Map Explorer",      Icon: Map,            description: "Explore Karnataka properties." },
+  { id: "search",   title: "Browse Properties", Icon: Search,         description: "Filter and discover listings." },
+  { id: "saved",    title: "Saved Properties",  Icon: Bookmark,       description: "Your bookmarks and recent views." },
+  { id: "messages", title: "My Enquiries",       Icon: MessageSquare,  description: "Enquiries you have submitted." },
+  { id: "blog",     title: "Blog",              Icon: BookOpen,       description: "Real estate insights and news." },
 ];
 
+const AUTH_GATED_MENUS: Exclude<MenuId, null>[] = [];
+
+// ─── MD3 Navigation Rail item ─────────────────────────────────────────────────
 
 function SidebarMenuItem({
   item,
@@ -81,26 +59,39 @@ function SidebarMenuItem({
     <li>
       <Tooltip>
         <TooltipTrigger
-            aria-label={item.title}
-            title={item.title}
-            onClick={() => onActivate(item.id)}
-            className={`group relative flex h-14 w-14 items-center justify-center overflow-hidden rounded-2xl transition-all duration-200   ${
-              pressed
-                ? "border border-white/20 bg-white/6"
-                : "border border-white/10 hover:bg-white/6"
-            }`}
+          aria-label={item.title}
+          title={item.title}
+          onClick={() => onActivate(item.id)}
+          className="group flex flex-col items-center gap-1 w-full py-1 focus-visible:outline-none"
+        >
+          {/* MD3 Nav Rail indicator pill */}
+          <div
+            className={`
+              relative flex h-8 w-14 items-center justify-center rounded-full
+              transition-all duration-300 ease-[cubic-bezier(0.2,0,0,1)]
+              active:scale-95
+              ${pressed
+                ? "bg-secondary shadow-sm"
+                : "bg-transparent hover:bg-muted"
+              }
+            `}
           >
-            <div
-              className={`flex h-10 w-10 items-center justify-center rounded-xl text-white ${
-                pressed ? "bg-white/6" : "bg-transparent"
+            <Icon
+              size={20}
+              className={`transition-colors duration-200 ${
+                pressed ? "text-primary" : "text-muted-foreground group-hover:text-foreground"
               }`}
-            >
-              <Icon size={18} />
-            </div>
-          </TooltipTrigger>
+            />
+          </div>
+          <span className={`text-[10px] font-medium transition-colors duration-200 leading-none ${
+            pressed ? "text-primary" : "text-muted-foreground"
+          }`}>
+            {item.title.split(" ")[0]}
+          </span>
+        </TooltipTrigger>
         <TooltipContent
           side="right"
-          className="bg-zinc-900/95 border border-white/10 text-white text-xs font-medium px-3 py-1.5 rounded-lg shadow-lg backdrop-blur-sm z-1100 [--tooltip-bg:var(--color-zinc-900)]"
+          className="bg-popover border border-border text-foreground text-xs font-medium px-3 py-1.5 rounded-xl shadow-md z-[1100]"
         >
           {item.title}
         </TooltipContent>
@@ -109,20 +100,18 @@ function SidebarMenuItem({
   );
 }
 
-// These menus show a login CTA inside the panel rather than immediately blocking
-const AUTH_GATED_MENUS: Exclude<MenuId, null>[] = [];
+// ─── AppSidebar ───────────────────────────────────────────────────────────────
 
 export function AppSidebar() {
   const [showSellModal, setShowSellModal] = useState(false);
-  const activeMenu = useSidebarStore((s) => s.activeMenu);
-  const setActiveMenu = useSidebarStore((s) => s.setActiveMenu);
-  const isPanelOpen = useSidebarStore((s) => s.isPanelOpen);
-  const openPanel = useSidebarStore((s) => s.openPanel);
-  const togglePanel = useSidebarStore((s) => s.togglePanel);
+  const activeMenu      = useSidebarStore((s) => s.activeMenu);
+  const setActiveMenu   = useSidebarStore((s) => s.setActiveMenu);
+  const isPanelOpen     = useSidebarStore((s) => s.isPanelOpen);
+  const openPanel       = useSidebarStore((s) => s.openPanel);
+  const togglePanel     = useSidebarStore((s) => s.togglePanel);
   const savedProperties = useSidebarStore((s) => s.savedProperties);
   const isAuthenticated = useStore((s) => s.auth.isAuthenticated);
-  const openLoginModal = useStore((s) => s.openLoginModal);
-
+  const openLoginModal  = useStore((s) => s.openLoginModal);
 
   const handleMenuActivate = useCallback(
     (id: MenuId) => {
@@ -137,87 +126,81 @@ export function AppSidebar() {
         openPanel();
       }
     },
-    [
-      activeMenu,
-      setActiveMenu,
-      openPanel,
-      togglePanel,
-      isAuthenticated,
-      openLoginModal,
-    ],
+    [activeMenu, setActiveMenu, openPanel, togglePanel, isAuthenticated, openLoginModal],
   );
 
   return (
     <>
       {showSellModal && <SellFormModal onClose={() => setShowSellModal(false)} />}
-      <div className="hidden md:flex h-screen overflow-hidden bg-black text-white w-22 relative z-[800]">
-      <Sidebar className="w-22 border-r border-white/10 bg-black/50 backdrop-blur-3xl flex flex-col items-center py-4">
-        <SidebarContent className="px-4 py-4">
-          <SidebarGroup>
-            <nav aria-label="Primary navigation">
-              <ul className="space-y-3">
-                {SIDEBAR_MENUS.map((menu) => (
-                  <SidebarMenuItem
-                    key={menu.id}
-                    item={menu}
-                    active={activeMenu === menu.id}
-                    isPanelOpen={isPanelOpen}
-                    onActivate={handleMenuActivate}
-                  />
+
+      <div className="hidden md:flex h-screen overflow-hidden w-22 relative z-[800]">
+        <Sidebar className="w-22 border-r border-border bg-sidebar flex flex-col items-center py-4">
+          <SidebarContent className="px-3 py-4 flex flex-col h-full">
+            <SidebarGroup className="flex-1">
+              <nav aria-label="Primary navigation">
+                <ul className="space-y-1">
+                  {SIDEBAR_MENUS.map((menu) => (
+                    <SidebarMenuItem
+                      key={menu.id}
+                      item={menu}
+                      active={activeMenu === menu.id}
+                      isPanelOpen={isPanelOpen}
+                      onActivate={handleMenuActivate}
+                    />
+                  ))}
+
+                  {/* List Property — MD3 FAB style */}
+                  <li className="pt-1">
+                    <Tooltip>
+                      <TooltipTrigger
+                        aria-label="List Property"
+                        onClick={() => {
+                          if (!isAuthenticated) { openLoginModal(); return; }
+                          setShowSellModal(true);
+                        }}
+                        className="group flex flex-col items-center gap-1 w-full py-1 focus-visible:outline-none"
+                      >
+                        <div className="relative flex h-8 w-14 items-center justify-center rounded-full bg-primary/10 hover:bg-primary/20 transition-all duration-300 active:scale-95">
+                          <Plus size={20} className="text-primary" />
+                        </div>
+                        <span className="text-[10px] font-medium text-primary leading-none">List</span>
+                      </TooltipTrigger>
+                      <TooltipContent
+                        side="right"
+                        className="bg-popover border border-border text-foreground text-xs font-medium px-3 py-1.5 rounded-xl shadow-md z-1100"
+                      >
+                        List Property
+                      </TooltipContent>
+                    </Tooltip>
+                  </li>
+                </ul>
+              </nav>
+            </SidebarGroup>
+
+            <Separator className="my-3 bg-border" />
+
+            {/* Watchlist thumbnails */}
+            <div className="flex-1 overflow-y-auto no-scrollbar">
+              <div className="gap-3 flex flex-col py-2">
+                {savedProperties.map((property) => (
+                  <WatchlistBadge key={property.id} property={property} />
                 ))}
-
-                {/* List Property button */}
-                <li>
-                  <Tooltip>
-                    <TooltipTrigger
-                      aria-label="List Property"
-                      onClick={() => {
-                        if (!isAuthenticated) { openLoginModal(); return; }
-                        setShowSellModal(true);
-                      }}
-                      className="group relative flex h-14 w-14 items-center justify-center overflow-hidden rounded-2xl border border-emerald-500/40 bg-emerald-500/10 hover:bg-emerald-500/20 transition-all duration-200"
-                    >
-                      <div className="flex h-10 w-10 items-center justify-center rounded-xl text-emerald-400">
-                        <Plus size={20} />
-                      </div>
-                    </TooltipTrigger>
-                    <TooltipContent
-                      side="right"
-                      className="bg-zinc-900/95 border border-white/10 text-white text-xs font-medium px-3 py-1.5 rounded-lg shadow-lg backdrop-blur-sm z-1100"
-                    >
-                      List Property
-                    </TooltipContent>
-                  </Tooltip>
-                </li>
-              </ul>
-            </nav>
-          </SidebarGroup>
-
-          <Separator className="my-4" />
-
-          <div className="flex-1 overflow-y-auto no-scrollbar">
-            <div className="gap-4 flex flex-col py-3">
-              {savedProperties.map((property) => (
-                <WatchlistBadge
-                  key={property.id}
-                  property={property}
-                />
-              ))}
+              </div>
             </div>
-          </div>
 
-          <div className="bg-white flex items-end rounded-lg justify-center mt-auto">
-            <Image
-              src="/pics/image.png"
-              alt="Logo"
-              width={80}
-              height={80}
-              className="object-contain"
-            />
-          </div>
-        </SidebarContent>
-      </Sidebar>
-    </div>
+            {/* Logo */}
+            <div className="mt-auto rounded-xl overflow-hidden border border-border bg-background flex items-center justify-center">
+              <Image
+                src="/pics/image.png"
+                alt="Logo"
+                width={72}
+                height={72}
+                className="object-contain"
+              />
+            </div>
+          </SidebarContent>
+        </Sidebar>
+      </div>
     </>
   );
 }

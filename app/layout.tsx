@@ -1,6 +1,6 @@
 export const dynamic = "force-static";
 
-import { Manrope, Plus_Jakarta_Sans, Geist } from "next/font/google";
+import { Roboto } from "next/font/google";
 import Script from "next/script";
 import "./globals.css";
 import { cn } from "@/lib/utils";
@@ -11,23 +11,12 @@ import AuthInitializer from "@/shared/components/common/auth_initializer";
 import { Metadata } from "next";
 import { TooltipProvider } from "@/shared/components/ui/tooltip";
 
-const geist = Geist({
+const roboto = Roboto({
   subsets: ["latin"],
-  variable: "--font-sans",
+  weight: ["400", "500", "700"],
+  variable: "--font-roboto",
   display: "swap",
   preload: false,
-});
-
-const manrope = Manrope({
-  subsets: ["latin"],
-  variable: "--font-manrope",
-  display: "swap",
-});
-
-const jakarta = Plus_Jakarta_Sans({
-  subsets: ["latin"],
-  variable: "--font-jakarta",
-  display: "swap",
 });
 
 export const viewport = {
@@ -46,16 +35,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html
-      lang="en"
-      className={cn(
-        manrope.variable,
-        jakarta.variable,
-        "font-sans",
-        geist.variable,
-      )}
-    >
-      <body className="antialiased relative w-full h-screen" >
+    <html lang="en" className={cn(roboto.variable)}>
+      <body className="antialiased relative w-full h-screen">
         <TooltipProvider>
           <Script
             src="https://accounts.google.com/gsi/client"

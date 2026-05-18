@@ -13,7 +13,6 @@ export const GlassCard: React.FC<GlassCardProps> = ({
   size = "md",
   ...rest
 }) => {
-  const base = "rounded-2xl border border-white/10 backdrop-blur-md";
   const sizes: Record<string, string> = {
     sm: "p-3",
     md: "p-5",
@@ -21,7 +20,14 @@ export const GlassCard: React.FC<GlassCardProps> = ({
   };
 
   return (
-    <div {...rest} className={cn(base, sizes[size], className)}>
+    <div
+      {...rest}
+      className={cn(
+        "rounded-2xl bg-card border border-border shadow-sm transition-shadow duration-300 hover:shadow-md",
+        sizes[size],
+        className,
+      )}
+    >
       {children}
     </div>
   );

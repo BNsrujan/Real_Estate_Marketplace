@@ -217,125 +217,46 @@ export default function MapControls({ map }: MapControlsProps) {
   }, []);
 
   return (
-    <div
-      className="
-        absolute
-        bottom-6
-        right-6
-        z-50
-        flex
-        flex-col
-        items-center
-        gap-3
-      "
-    >
+    <div className="absolute bottom-6 right-6 z-50 flex flex-col items-center gap-3">
       {/* Current Location */}
       <button
         onClick={handleLocation}
         aria-label="Current location"
-        className={`
-          group
-          relative
-          flex
-          h-10 w-10 md:h-14 md:w-14
-          items-center
-          justify-center
-          rounded-lg md:rounded-3xl
-          p-1
-          border
-          backdrop-blur-2xl
-          shadow-[0_10px_50px_rgba(0,0,0,0.45)]
-          transition-all duration-300
-          active:scale-95
-          ${
-            locationState === "active"
-              ? "border-cyan-400/40 bg-cyan-400/10 text-cyan-300"
-              : "border-white/10 bg-black/35 text-white/80 hover:bg-white/10 hover:text-white"
-          }
-        `}
+        className={`group relative flex h-10 w-10 md:h-14 md:w-14 items-center justify-center rounded-2xl md:rounded-3xl border backdrop-blur-2xl shadow-[0_10px_50px_rgba(0,0,0,0.45)] transition-all duration-300 ease-[cubic-bezier(0.2,0,0,1)] active:scale-95 ${
+          locationState === "active"
+            ? "border-primary/50 bg-primary/20 text-primary"
+            : "border-white/10 bg-black/40 text-white/80 hover:bg-white/12 hover:text-white"
+        }`}
       >
         {locationState === "locating" ? (
-          <Loader2  className="animate-spin " />
+          <Loader2 className="animate-spin" />
         ) : (
-          <LocateFixed
-            
-            className="
-              transition-transform duration-300
-              group-hover:scale-110
-
-            "
-          />
+          <LocateFixed className="transition-transform duration-300 group-hover:scale-110" />
         )}
 
-        {/* Active Pulse */}
         {locationState === "active" && (
-          <div
-            className="
-              absolute inset-0
-              rounded-3xl
-              border border-cyan-400/30
-              animate-pulse
-            "
-          />
+          <div className="absolute inset-0 rounded-3xl border border-primary/40 animate-pulse" />
         )}
       </button>
+
       {/* Zoom Controls */}
-      <div
-        className="
-          overflow-hidden
-          rounded-lg md:rounded-3xl
-          border border-white/10
-          bg-black/35
-          backdrop-blur-2xl
-          shadow-[0_10px_50px_rgba(0,0,0,0.45)]
-        "
-      >
-        {/* Zoom In */}
+      <div className="overflow-hidden rounded-2xl md:rounded-3xl border border-white/10 bg-black/40 backdrop-blur-2xl shadow-[0_10px_50px_rgba(0,0,0,0.45)]">
         <button
           onClick={handleZoomIn}
           aria-label="Zoom in"
-          className="
-            group
-            flex
-            h-10 w-10 md:h-14 md:w-14 p-1
-            items-center
-            justify-center
-            text-white/80
-            transition-all duration-300
-            hover:bg-white/10
-            hover:text-white
-            active:scale-95
-          "
+          className="group flex h-10 w-10 md:h-14 md:w-14 items-center justify-center text-white/80 transition-all duration-300 ease-[cubic-bezier(0.2,0,0,1)] hover:bg-white/10 hover:text-white active:scale-95"
         >
-          <Plus
-            
-            className="transition-transform group-hover:scale-110"
-          />
+          <Plus className="transition-transform duration-300 group-hover:scale-110" />
         </button>
 
-        {/* Divider */}
         <div className="mx-3 h-px bg-white/10" />
 
-        {/* Zoom Out */}
         <button
           onClick={handleZoomOut}
           aria-label="Zoom out"
-          className="
-            group
-            flex
-            h-10 w-10 md:h-14 md:w-14 p-1
-            items-center
-            justify-center
-            text-white/80
-            transition-all duration-300
-            hover:bg-white/10
-            hover:text-white
-            active:scale-95
-          "
+          className="group flex h-10 w-10 md:h-14 md:w-14 items-center justify-center text-white/80 transition-all duration-300 ease-[cubic-bezier(0.2,0,0,1)] hover:bg-white/10 hover:text-white active:scale-95"
         >
-          <Minus
-            className="transition-transform group-hover:scale-110"
-          />
+          <Minus className="transition-transform duration-300 group-hover:scale-110" />
         </button>
       </div>
     </div>

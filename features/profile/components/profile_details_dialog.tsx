@@ -1,12 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { AlertCircle, Camera, Check } from "lucide-react";
+import { AlertCircle, Camera, Check, Mail } from "lucide-react";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription,
 } from "@/shared/components/ui/dialog";
 import { Input } from "@/shared/components/ui/input";
-import { Label } from "@/shared/components/ui/label";
 import { cn } from "@/lib/utils";
 import type { UserProfile } from "@/shared/types";
 import { updateProfile } from "@/features/profile/api/auth_api";
@@ -16,29 +15,6 @@ interface Props {
   user?: { name?: string; email?: string; avatar?: string };
   fullUser?: UserProfile | null;
   children: React.ReactNode;
-}
-
-function FormFieldWrapper({
-  label,
-  required,
-  error,
-  children,
-}: {
-  label: string;
-  required?: boolean;
-  error?: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <div className="space-y-1.5">
-      <Label className="text-zinc-300 text-xs font-semibold tracking-wide uppercase">
-        {label}
-        {required && <span className="text-emerald-500 ml-1">*</span>}
-      </Label>
-      {children}
-      {error && <p className="text-[11px] text-red-400 ml-0.5 mt-1">{error}</p>}
-    </div>
-  );
 }
 
 export default function ProfileDetailsDialog({ user, fullUser, children }: Props) {
@@ -99,26 +75,30 @@ export default function ProfileDetailsDialog({ user, fullUser, children }: Props
       <div onClick={() => setOpen(true)} className="cursor-pointer">
         {children}
       </div>
-      <DialogContent
-        className={cn(
-          "sm:max-w-md bg-[#0a0a0a]/90 border-white/10 text-white backdrop-blur-2xl",
-          "rounded-[2rem] p-6 shadow-2xl overflow-hidden transition-all duration-300",
-        )}
-      >
-        
-        <DialogHeader className="mb-1">
-          <DialogTitle className="text-2xl font-bold tracking-tight">Profile Details</DialogTitle>
-          <DialogDescription className="text-zinc-500 text-sm">
+
+      <DialogContent className={cn(
+        "relative sm:max-w-md overflow-hidden rounded-3xl border-border bg-background p-6 shadow-xl",
+      )}>
+        {/* Atmospheric blurs */}
+        <div aria-hidden="true" className="pointer-events-none absolute -top-20 -right-20 h-56 w-56 rounded-full bg-primary/10 blur-3xl" />
+        <div aria-hidden="true" className="pointer-events-none absolute -bottom-16 -left-16 h-44 w-44 rounded-full bg-secondary/60 blur-3xl" />
+
+        <DialogHeader className="relative mb-1">
+          <DialogTitle className="text-xl font-bold tracking-tight text-foreground">
+            Profile Details
+          </DialogTitle>
+          <DialogDescription className="text-sm text-muted-foreground">
             Update your personal information.
           </DialogDescription>
         </DialogHeader>
 
-        <div className="animate-in fade-in slide-in-from-bottom-2 duration-200">
-          <form onSubmit={handleSave} className="space-y-4 mt-2">
+        <div className="relative animate-in fade-in slide-in-from-bottom-2 duration-200">
+          <form onSubmit={handleSave} className="space-y-4 mt-3">
 
+            {/* General error */}
             {generalError && (
-              <div className="flex items-center gap-2 p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-sm">
-                <AlertCircle size={15} />
+              <div className="flex items-center gap-2 p-3 rounded-2xl bg-destructive/10 border border-destructive/20 text-destructive text-sm">
+                <AlertCircle size={15} className="shrink-0" />
                 <span>{generalError}</span>
               </div>
             )}
@@ -126,70 +106,66 @@ export default function ProfileDetailsDialog({ user, fullUser, children }: Props
             {/* Avatar row */}
             <div className="flex items-center gap-4 py-1">
               <div className="relative shrink-0">
-                <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white/5 border border-white/10 text-lg font-bold text-white overflow-hidden">
+                <div className="flex h-14 w-14 items-center justify-center rounded-full bg-secondary text-primary text-lg font-bold overflow-hidden ring-2 ring-primary/20">
                   {user?.avatar
                     ? <img src={user.avatar} alt="" className="h-full w-full object-cover" />
                     : initials}
                 </div>
                 <button
                   type="button"
-                  className="absolute -bottom-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-zinc-800 border border-white/10 text-zinc-400 hover:text-white transition-colors"
+                  className="absolute -bottom-1 -right-1 flex h-6 w-6 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-sm hover:bg-primary/90 active:scale-95 transition-all duration-200"
                 >
-                  <Camera size={10} />
+                  <Camera size={11} />
                 </button>
               </div>
               <div>
-                <p className="text-sm font-semibold text-white">{user?.name ?? "User"}</p>
-                <p className="text-xs text-zinc-500 mt-0.5 capitalize">{fullUser?.role ?? "buyer"}</p>
+                <p className="text-sm font-semibold text-foreground">{user?.name ?? "User"}</p>
+                <p className="text-xs text-muted-foreground mt-0.5 capitalize">{fullUser?.role ?? "buyer"}</p>
               </div>
             </div>
 
             {/* Email — read only */}
-            <FormFieldWrapper label="Email">
-              <div className="flex items-center h-11 rounded-xl border border-white/10 bg-white/5 px-3 gap-2">
-                <span className="flex-1 text-sm text-zinc-500 truncate">
-                  {user?.email ?? "—"}
-                </span>
-                <span className="shrink-0 text-[10px] text-zinc-600 border border-white/8 rounded-md px-1.5 py-0.5">
-                  read-only
-                </span>
-              </div>
-            </FormFieldWrapper>
+            <div className="flex items-center h-12 rounded-2xl border border-border bg-muted px-3 gap-2">
+              <Mail size={14} className="text-muted-foreground shrink-0" />
+              <span className="flex-1 text-sm text-muted-foreground truncate">
+                {user?.email ?? "—"}
+              </span>
+              <span className="shrink-0 text-[10px] text-muted-foreground border border-border rounded-md px-1.5 py-0.5">
+                read-only
+              </span>
+            </div>
 
-            <FormFieldWrapper label="Full Name" required error={errors.name}>
-              <Input
-                value={values.name}
-                onChange={set("name")}
-                placeholder="Your full name"
-                className="bg-white/5 border-white/10 text-white h-11 rounded-xl focus:ring-emerald-500/50 placeholder:text-zinc-600 transition-all"
-              />
-            </FormFieldWrapper>
+            <Input
+              label="Full Name"
+              required
+              value={values.name}
+              onChange={set("name")}
+              error={errors.name}
+              id="profile-name"
+            />
 
             <div className="grid grid-cols-2 gap-3">
-              <FormFieldWrapper label="Username">
-                <Input
-                  value={values.username}
-                  onChange={set("username")}
-                  placeholder="username"
-                  className="bg-white/5 border-white/10 text-white h-11 rounded-xl focus:ring-emerald-500/50 placeholder:text-zinc-600 transition-all"
-                />
-              </FormFieldWrapper>
-              <FormFieldWrapper label="Phone" error={errors.phone}>
-                <Input
-                  value={values.phone}
-                  onChange={set("phone")}
-                  placeholder="10-digit number"
-                  type="tel"
-                  maxLength={10}
-                  className="bg-white/5 border-white/10 text-white h-11 rounded-xl focus:ring-emerald-500/50 placeholder:text-zinc-600 transition-all"
-                />
-              </FormFieldWrapper>
+              <Input
+                label="Username"
+                value={values.username}
+                onChange={set("username")}
+                id="profile-username"
+              />
+              <Input
+                label="Phone"
+                value={values.phone}
+                onChange={set("phone")}
+                error={errors.phone}
+                type="tel"
+                maxLength={10}
+                id="profile-phone"
+              />
             </div>
 
             <button
               type="submit"
               disabled={saving || saved}
-              className="w-full h-11 rounded-xl bg-white text-black hover:bg-zinc-100 font-bold text-sm shadow-[0_0_24px_rgba(255,255,255,0.08)] active:scale-[0.98] transition-all mt-1 disabled:opacity-70"
+              className="w-full h-11 rounded-full bg-primary text-primary-foreground font-semibold text-sm shadow-sm hover:bg-primary/90 active:scale-95 transition-all duration-200 ease-[cubic-bezier(0.2,0,0,1)] disabled:opacity-70 mt-1"
             >
               {saved ? (
                 <span className="flex items-center justify-center gap-2">
@@ -197,7 +173,7 @@ export default function ProfileDetailsDialog({ user, fullUser, children }: Props
                 </span>
               ) : saving ? (
                 <span className="flex items-center justify-center gap-2">
-                  <span className="h-4 w-4 animate-spin rounded-full border-2 border-black border-t-transparent" />
+                  <span className="h-4 w-4 animate-spin rounded-full border-2 border-primary-foreground border-t-transparent" />
                   Saving…
                 </span>
               ) : "Save Changes"}
