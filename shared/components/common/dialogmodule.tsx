@@ -454,7 +454,7 @@ function RegisterView({
   };
 
   return (
-    <div className="space-y-3 md:space-y-4">
+    <div className="space-y-2 md:space-y-4">
       {generalError && (
         <div className="flex items-center gap-2 p-3 rounded-2xl bg-destructive/10 border border-destructive/20 text-destructive text-sm">
           <AlertCircle size={15} />
@@ -879,12 +879,12 @@ const LoginModal = ({
                   : "otp-input",
               )
             }
-            className="p-1.5 rounded-full text-muted-foreground hover:text-foreground hover:bg-muted transition-all z-12"
+            className="p-1.5 rounded-full text-muted-foreground hover:text-foreground hover:bg-muted transition-all z-12 w-fit "
           >
             <ArrowLeft size={16} />
           </button>
         )}
-        <DialogClose className="z-12"/>
+        <DialogClose className="z-12 absolute"/>
 
         <DialogHeader className="mb-1 relative z-10">
           <DialogTitle className="text-2xl font-bold tracking-tight text-foreground">

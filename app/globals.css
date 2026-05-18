@@ -170,6 +170,25 @@ body {
   filter: invert(1);
 }
 
+/* Ensure dialog overlay and content are above all other elements and can receive events */
+[data-slot="dialog-overlay"] {
+  z-index: 999 !important;
+  pointer-events: auto !important;
+}
+
+[data-slot="dialog-content"] {
+  z-index: 1000 !important;
+  pointer-events: auto !important;
+}
+
+[data-slot="dialog-content"] * {
+  pointer-events: auto !important;
+}
+
+[data-slot="dialog-portal"] {
+  z-index: 999 !important;
+}
+
 @media (max-width: 768px) {
   .display {
     letter-spacing: -0.3px;

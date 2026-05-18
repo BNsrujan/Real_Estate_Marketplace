@@ -77,7 +77,7 @@ export default function ProfileDetailsDialog({ user, fullUser, children }: Props
       </div>
 
       <DialogContent className={cn(
-        "sm:max-w-md overflow-hidden rounded-3xl border-border bg-background p-6 shadow-xl",
+        "sm:max-w-md overflow-hidden rounded-3xl border-border bg-background p-6 shadow-xl z-[10000]",
       )}>
         {/* Atmospheric blurs */}
         <div aria-hidden="true" className="pointer-events-none absolute -top-20 -right-20 h-56 w-56 rounded-full bg-primary/10 blur-3xl" />
@@ -113,7 +113,7 @@ export default function ProfileDetailsDialog({ user, fullUser, children }: Props
                 </div>
                 <button
                   type="button"
-                  className="absolute -bottom-1 -right-1 flex h-6 w-6 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-sm hover:bg-primary/90 active:scale-95 transition-all duration-200"
+                  className="absolute -bottom-2 -right-1 flex p-2 h-3 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-sm hover:bg-primary/90 active:scale-95 transition-all duration-200"
                 >
                   <Camera size={11} />
                 </button>
