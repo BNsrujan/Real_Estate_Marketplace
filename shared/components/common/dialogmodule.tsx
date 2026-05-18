@@ -7,6 +7,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogDescription,
+  DialogClose,
 } from "@/shared/components/ui/dialog";
 import { Button } from "@/shared/components/ui/button";
 import { Input } from "@/shared/components/ui/input";
@@ -878,11 +879,12 @@ const LoginModal = ({
                   : "otp-input",
               )
             }
-            className="p-1.5 rounded-full text-muted-foreground hover:text-foreground hover:bg-muted transition-all"
+            className="p-1.5 rounded-full text-muted-foreground hover:text-foreground hover:bg-muted transition-all z-12"
           >
             <ArrowLeft size={16} />
           </button>
         )}
+        <DialogClose className="z-12"/>
 
         <DialogHeader className="mb-1 relative z-10">
           <DialogTitle className="text-2xl font-bold tracking-tight text-foreground">

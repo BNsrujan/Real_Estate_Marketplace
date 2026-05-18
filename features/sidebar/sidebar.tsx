@@ -91,7 +91,7 @@ function SidebarMenuItem({
         </TooltipTrigger>
         <TooltipContent
           side="right"
-          className="bg-popover border border-border text-foreground text-xs font-medium px-3 py-1.5 rounded-xl shadow-md z-[1100]"
+          className="bg-foreground border border-border text-background text-xs font-medium px-3 py-1.5 rounded-xl shadow-md z-[1100]"
         >
           {item.title}
         </TooltipContent>
@@ -167,7 +167,7 @@ export function AppSidebar() {
                       </TooltipTrigger>
                       <TooltipContent
                         side="right"
-                        className="bg-popover border border-border text-foreground text-xs font-medium px-3 py-1.5 rounded-xl shadow-md z-1100"
+                        className="bg-popover border border-border text-background bg-foreground text-xs font-medium px-3 py-1.5 rounded-xl shadow-md z-1100"
                       >
                         List Property
                       </TooltipContent>

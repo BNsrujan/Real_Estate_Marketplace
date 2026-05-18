@@ -46,7 +46,7 @@ const MapLayerSelector = ({ onLayerChange }: MapLayerSelectorProps) => {
         <button
           onClick={toggleExpanded}
           className="
-            group relative overflow-hidden rounded-lg md:rounded-3xl
+            group relative overflow-hidden rounded-lg md:rounded-xl 
             border border-white/15 bg-black/50 backdrop-blur-2xl
             shadow-[0_8px_32px_rgba(0,0,0,0.4)]
             transition-all duration-300 ease-[cubic-bezier(0.2,0,0,1)]
@@ -56,8 +56,8 @@ const MapLayerSelector = ({ onLayerChange }: MapLayerSelectorProps) => {
           "
         >
 
-          <div className="relative flex items-center gap-2 md:gap-4 p-0.5 md:p-0">
-            <div className="relative h-14 md:h-20 w-14 md:w-20 overflow-hidden rounded-md md:rounded-2xl border border-white/10">
+          <div className="relative flex items-center gap-2 md:gap-4 p-0.5 md:p-1 ">
+            <div className="relative h-14 md:h-20 w-14 md:w-20 overflow-hidden rounded-md md:rounded-lg border border-white/10">
               <Image
                 src={activeLayer.image}
                 alt={activeLayer.name}
