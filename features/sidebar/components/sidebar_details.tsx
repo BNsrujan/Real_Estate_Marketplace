@@ -544,7 +544,7 @@ export function DetailPanel() {
     <aside
       className={cn(
         'hidden md:flex flex-col',
-        'fixed left-16 md:left-22.5 top-0 h-screen',
+        'fixed left-16 md:left-22 top-0 h-screen',
         'w-105 md:w-125 lg:w-140 z-50',
         'border-r border-border bg-background/98 backdrop-blur-sm',
         'transition-transform duration-300 ease-[cubic-bezier(0.2,0,0,1)]',

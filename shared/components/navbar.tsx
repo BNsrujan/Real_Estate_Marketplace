@@ -74,7 +74,7 @@ const NavBar = () => {
       </div>
 
       {/* Filters */}
-      <div className="flex gap-2 md:mx-4 md:justify-end flex-wrap">
+      <div className="flex gap-2 md:mx-4 md:justify-end ">
         {/* District reset pill */}
         {activeDistrict && (
           <button
