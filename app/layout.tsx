@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 import { SidebarProvider } from "@/shared/components/ui/sidebar";
 import ToastContainer from "@/shared/components/common/toast_container";
 import GlobalLoginModal from "@/shared/components/common/global_login_modal";
+import AuthInitializer from "@/shared/components/common/auth_initializer";
 import { Metadata } from "next";
 import { TooltipProvider } from "@/shared/components/ui/tooltip";
 
@@ -63,6 +64,7 @@ export default function RootLayout({
           <SidebarProvider>
             <main>{children}</main>
           </SidebarProvider>
+          <AuthInitializer />
           <ToastContainer />
           <GlobalLoginModal />
         </TooltipProvider>
