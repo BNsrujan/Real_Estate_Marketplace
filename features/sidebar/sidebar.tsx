@@ -135,8 +135,8 @@ export function AppSidebar() {
 
       <div className="hidden md:flex h-screen overflow-hidden w-22 relative z-[800]">
         <Sidebar className="w-22 border-r border-border bg-sidebar flex flex-col items-center py-4">
-          <SidebarContent className="px-3 py-4 flex flex-col h-full">
-            <SidebarGroup className="flex-1">
+          <SidebarContent className="px-3 py-4 flex flex-col ">
+            <SidebarGroup className="">
               <nav aria-label="Primary navigation">
                 <ul className="space-y-1">
                   {SIDEBAR_MENUS.map((menu) => (
@@ -177,7 +177,7 @@ export function AppSidebar() {
               </nav>
             </SidebarGroup>
 
-            <Separator className="my-3 bg-border" />
+            <Separator className="my-3 bg-border flex justify-self-start items-start" />
 
             {/* Watchlist thumbnails */}
             <div className="flex-1 overflow-y-auto no-scrollbar">
