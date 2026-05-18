@@ -124,8 +124,8 @@ export default function MobileBottomDrawer() {
       direction="bottom"
     >
       <DrawerContent
-        className="bg-background border-t border-border rounded-t-3xl md:hidden max-h-[75vh] pb-20"
-        style={{ bottom: "4rem" }}
+        className="bg-background border-t border-border rounded-t-3xl md:hidden max-h-[75vh] "
+        style={{ bottom: "2rem" }}
       >
         {selectedProperty ? (
           /* ── Property detail ── */

@@ -52,7 +52,6 @@ function DrawerContent({
 }: React.ComponentProps<typeof DrawerPrimitive.Content>) {
   return (
     <DrawerPortal data-slot="drawer-portal">
-   
       <DrawerPrimitive.Content
         data-slot="drawer-content"
         className={cn(
