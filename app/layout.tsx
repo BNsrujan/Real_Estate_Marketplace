@@ -5,7 +5,7 @@ import Script from "next/script";
 import "./globals.css";
 import { cn } from "@/lib/utils";
 import { SidebarProvider } from "@/shared/components/ui/sidebar";
-import ToastContainer from "@/shared/components/common/toast_container";
+import { Toaster } from "@/shared/components/ui/sonner";
 import GlobalLoginModal from "@/shared/components/common/global_login_modal";
 import AuthInitializer from "@/shared/components/common/auth_initializer";
 import { Metadata } from "next";
@@ -46,7 +46,7 @@ export default function RootLayout({
             <main>{children}</main>
           </SidebarProvider>
           <AuthInitializer />
-          <ToastContainer />
+          <Toaster />
           <GlobalLoginModal />
         </TooltipProvider>
       </body>

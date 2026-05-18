@@ -1,38 +1,19 @@
-/**
- * toastService — Global notification system (SERVICE-002)
- *
- * Wraps the store's addToast / removeToast actions.
- * Import this instead of calling the store directly so call-sites
- * stay decoupled from state management.
- */
-
-function getStore() {
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
-  return require('@/shared/store').useStore;
-}
-
-function dispatch(
-  type: 'success' | 'error' | 'info' | 'warning',
-  message: string,
-  duration = 4000,
-) {
-  getStore().getState().addToast({ type, message, duration });
-}
+import { toast } from 'sonner';
 
 export const toastService = {
-  success(message: string, duration?: number) {
-    dispatch('success', message, duration);
+  success(message: string, duration = 4000) {
+    toast.success(message, { duration });
   },
-  error(message: string, duration?: number) {
-    dispatch('error', message, duration);
+  error(message: string, duration = 4000) {
+    toast.error(message, { duration });
   },
-  info(message: string, duration?: number) {
-    dispatch('info', message, duration);
+  info(message: string, duration = 4000) {
+    toast.info(message, { duration });
   },
-  warning(message: string, duration?: number) {
-    dispatch('warning', message, duration);
+  warning(message: string, duration = 4000) {
+    toast.warning(message, { duration });
   },
-  dismiss(id: string) {
-    getStore().getState().removeToast(id);
+  dismiss(id?: string | number) {
+    toast.dismiss(id);
   },
 };

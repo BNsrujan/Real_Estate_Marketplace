@@ -9,24 +9,19 @@ import { DetailPanel } from "@/features/sidebar/components/sidebar_details";
 import MobileBottomNav from "@/features/sidebar/components/mobile_bottom_nav";
 import MobileBottomDrawer from "@/features/sidebar/components/mobile_bottom_drawer";
 import { useState, useCallback, useRef, useEffect } from "react";
-import { useStore } from "@/shared/store";
+import { toast } from "sonner";
 
 const MAP_LOAD_TIMEOUT_MS = 8000;
 
 export default function HomePage() {
   const [isLoaded, setIsLoaded] = useState(false);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const addToast = useStore((s) => s.addToast);
-
   // Arm a timeout the moment this page mounts; clear it once the map reports loaded.
   useEffect(() => {
     timeoutRef.current = setTimeout(() => {
       if (!isLoaded) {
         setIsLoaded(true); // dismiss the loading screen anyway
-        addToast({
-          type: "warning",
-          message: "Map took too long to load. Try refreshing if tiles are missing.",
-        });
+        toast.warning("Map took too long to load. Try refreshing if tiles are missing.");
       }
     }, MAP_LOAD_TIMEOUT_MS);
 
