@@ -33,7 +33,7 @@ export default function StartExploreButton({ onClick }: Props) {
         />
 
         <span className="relative text-sm font-semibold tracking-wide text-primary-foreground">
-          Explore Karnataka
+          Explore Properties
         </span>
 
         <ArrowRight

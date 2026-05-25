@@ -1,10 +1,10 @@
 "use client";
 
 import { useCallback } from "react";
-import maplibregl from "maplibre-gl";
+import mapboxgl from "mapbox-gl";
 
 interface UseDistrictZoomOptions {
-  mapRef: React.RefObject<maplibregl.Map | null>;
+  mapRef: React.RefObject<mapboxgl.Map | null>;
 }
 
 export function useDistrictZoom({ mapRef }: UseDistrictZoomOptions) {

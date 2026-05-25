@@ -869,6 +869,7 @@ const LoginModal = ({
           className="pointer-events-none absolute -bottom-16 -left-16 h-48 w-48 rounded-full bg-secondary/60 blur-3xl"
         />
 
+    <DialogHeader className="flex flex-wrap w-fit">
         {(isRegister || isOtp) && (
           <button
             type="button"
@@ -886,13 +887,14 @@ const LoginModal = ({
         )}
         <DialogClose className="z-12 absolute"/>
 
-        <DialogHeader className="mb-1 relative z-10">
-          <DialogTitle className="text-2xl font-bold tracking-tight text-foreground">
+        <div className="mb-1 relative z-10 w-fit ">
+          <DialogTitle className="text-2xl font-bold tracking-tight text-foreground w-fit">
             {title}
           </DialogTitle>
-          <DialogDescription className="text-muted-foreground text-sm">
+          <DialogDescription className="text-muted-foreground text-sm w-fit">
             {description}
           </DialogDescription>
+        </div>
         </DialogHeader>
 
         <div

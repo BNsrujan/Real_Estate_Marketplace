@@ -1,4 +1,4 @@
-import maplibregl from "maplibre-gl";
+import mapboxgl from "mapbox-gl";
 import type { Property } from "@/shared/types";
 
 const SOURCE_ID = "property-markers-source";
@@ -8,12 +8,11 @@ const LAYER_ID = "property-markers-layer";
  * Renders property markers using a GeoJSON source and symbol layer for perfect sync and UI design.
  */
 export function addPropertyMarkers(
-  map: maplibregl.Map,
+  map: mapboxgl.Map,
   properties: Property[],
   onClick?: (property: Property) => void,
-): maplibregl.Marker[] {
+): mapboxgl.Marker[] {
   if (!map) return [];
-
 
   const ensurePinImage = async (type: string, color: string) => {
     const imgId = `sync-pin-${type}`;
@@ -70,13 +69,13 @@ export function addPropertyMarkers(
   };
 
   // 1. Ensure Source exists
-  let source = map.getSource(SOURCE_ID) as maplibregl.GeoJSONSource;
+  let source = map.getSource(SOURCE_ID) as mapboxgl.GeoJSONSource;
   if (!source) {
     map.addSource(SOURCE_ID, {
       type: "geojson",
       data: { type: "FeatureCollection", features: [] },
     });
-    source = map.getSource(SOURCE_ID) as maplibregl.GeoJSONSource;
+    source = map.getSource(SOURCE_ID) as mapboxgl.GeoJSONSource;
   }
 
   // 2. Update data

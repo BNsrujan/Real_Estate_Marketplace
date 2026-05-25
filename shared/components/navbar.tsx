@@ -79,7 +79,7 @@ const NavBar = () => {
         {activeDistrict && (
           <button
             onClick={() => setFilters({ activeDistrict: null })}
-            className={`flex items-center gap-1.5 px-3 py-2 text-xs text-nowrap rounded-full bg-primary/10 border border-primary/20 text-primary hover:bg-primary/20 active:scale-95 transition-all duration-200 ${MD3_EASE}`}
+            className={`flex items-center gap-1.5 px-3 md:px-4 py-2 text-xs text-nowrap md:text-sm rounded-full backdrop-blur-md active:scale-95 transition-all duration-200 ${MD3_EASE} bg-primary text-primary-foreground shadow-sm `}
           >
             {activeDistrict}
             <X size={11} />

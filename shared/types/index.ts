@@ -1,6 +1,6 @@
 // ─── Enums / Union Types ────────────────────────────────────────────────────
 
-export type LayerType = 'standard' | 'satellite' | 'traffic' | 'osm';
+export type LayerType = 'satellite' | 'streets' | 'outdoors' | 'light' | 'dark' | 'satelliteStreets';
 
 export type SidebarTab = 'explorer' | 'search' | 'saved' | 'messages';
 

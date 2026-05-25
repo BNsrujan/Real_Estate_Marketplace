@@ -1,7 +1,94 @@
-import maplibregl from "maplibre-gl";
+import mapboxgl from "mapbox-gl";
 
+export function addMapboxAdminBoundaries(map: mapboxgl.Map): void {
+  // Add Mapbox Streets v8 source (includes administrative boundaries)
+  if (!map.getSource("mapbox-streets")) {
+    map.addSource("mapbox-streets", {
+      type: "vector",
+      url: "mapbox://mapbox.mapbox-streets-v8",
+    });
+  }
 
-export function addMapLayers(map: maplibregl.Map): void {
+  // Country borders
+  if (!map.getLayer("country-borders")) {
+    map.addLayer({
+      id: "country-borders",
+      type: "line",
+      source: "mapbox-streets",
+      "source-layer": "admin",
+      filter: ["==", "admin_level", 0],
+      paint: {
+        "line-color": "#e6f2ff",
+        "line-width": [
+          "interpolate",
+          ["linear"],
+          ["zoom"],
+          2,
+          0.5,
+          4,
+          1.5,
+          8,
+          2,
+        ],
+        "line-opacity": [
+          "interpolate",
+          ["linear"],
+          ["zoom"],
+          2,
+          0.8,
+          4,
+          0.9,
+          12,
+          0.3,
+        ],
+      },
+      minzoom: 2,
+    });
+  }
+
+  // State/Province borders (admin_level 1)
+  if (!map.getLayer("state-borders")) {
+    map.addLayer({
+      id: "state-borders",
+      type: "line",
+      source: "mapbox-streets",
+      "source-layer": "admin",
+      filter: ["==", "admin_level", 1],
+      paint: {
+        "line-color": "#00ffff",
+        "line-width": [
+          "interpolate",
+          ["linear"],
+          ["zoom"],
+          4,
+          0.5,
+          5,
+          1,
+          8,
+          1.5,
+        ],
+        "line-opacity": [
+          "interpolate",
+          ["linear"],
+          ["zoom"],
+          4,
+          0.4,
+          5,
+          0.6,
+          12,
+          0.2,
+        ],
+      },
+      minzoom: 4,
+    });
+  }
+}
+
+/**
+ * Add custom GeoJSON layers for India-specific boundaries
+ * (Kept as fallback/supplement to Mapbox native borders)
+ */
+export function addMapLayers(map: mapboxgl.Map): void {
   map.addSource("india", { type: "geojson", data: "/data/india.geojson" });
   map.addLayer({
     id: "india-line",
@@ -61,24 +148,6 @@ export function addMapLayers(map: maplibregl.Map): void {
     minzoom: 6,
   });
 
-  map.addLayer({
-    id: "city-labels",
-    type: "symbol",
-    source: "district-centers",
-    layout: {
-      "text-field": ["get", "NAME_2"],
-      "text-allow-overlap": true,
-      "text-ignore-placement": true,
-      "text-justify": "center",
-      "text-size": ["interpolate", ["linear"], ["zoom"], 5, 12, 8, 18, 12, 24],
-      "text-font": ["Open Sans Bold", "Arial Unicode MS Bold"],
-    },
-    paint: {
-      "text-color": "#ffffff",
-      "text-halo-color": "#000000",
-      "text-halo-width": 2,
-      "text-halo-blur": 1,
-    },
-    minzoom: 4.9,
-  });
+  // Note: city-labels layer removed because it requires glyphs property in Mapbox style
+  // Text rendering is only available with full Mapbox vector styles that include glyphs
 }

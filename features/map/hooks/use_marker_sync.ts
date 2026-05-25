@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useCallback } from "react";
-import maplibregl from "maplibre-gl";
+import mapboxgl from "mapbox-gl";
 
 import { addPropertyMarkers } from "@/features/properties/components/property_markers";
 import { useStore } from "@/shared/store";
@@ -12,7 +12,7 @@ const MARKER_MAX_ZOOM = 16;
 const DISTRICT_ZOOM = 11;
 
 interface UseMarkerSyncOptions {
-  mapRef: React.RefObject<maplibregl.Map | null>;
+  mapRef: React.RefObject<mapboxgl.Map | null>;
   isStyleLoaded: boolean;
   onMarkerClick?: (property: Property) => void;
 }
@@ -22,7 +22,7 @@ export function useMarkerSync({
   isStyleLoaded,
   onMarkerClick,
 }: UseMarkerSyncOptions) {
-  const markersRef = useRef<maplibregl.Marker[]>([]);
+  const markersRef = useRef<mapboxgl.Marker[]>([]);
   const markerModeRef = useRef<"all" | "filtered" | null>(null);
   const blockMarkerRenderRef = useRef(false);
   const onMarkerClickRef = useRef(onMarkerClick);
@@ -44,7 +44,7 @@ export function useMarkerSync({
   }, []);
 
   const placeMarkers = useCallback(
-    (map: maplibregl.Map, data: Property[], mode: "all" | "filtered") => {
+    (map: mapboxgl.Map, data: Property[], mode: "all" | "filtered") => {
       if (map.getZoom() < MARKER_MIN_ZOOM) return;
       clearMarkers();
       markersRef.current = addPropertyMarkers(map, data, (prop) => {

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import maplibregl from "maplibre-gl";
+import mapboxgl from "mapbox-gl";
 import { PropertyMarkerService } from "@/features/properties/services/property_marker_service";
 import { useStore } from "@/shared/store";
 import type { Property } from "@/shared/types";
@@ -11,7 +11,7 @@ const MARKER_ZOOM_LEVEL = 12;
 const MARKER_ZOOM_DURATION = 1000;
 
 interface UsePropertyMarkersOptions {
-  mapRef: React.RefObject<maplibregl.Map | null>;
+  mapRef: React.RefObject<mapboxgl.Map | null>;
   isStyleLoaded: boolean;
   onMarkerClick?: (property: Property) => void;
   onMarkerHover?: (property: Property) => void;
@@ -84,7 +84,7 @@ export function usePropertyMarkers({
     );
   }
 
-  function handleMarkerClick(property: Property, map: maplibregl.Map) {
+  function handleMarkerClick(property: Property, map: mapboxgl.Map) {
     if (isAnimating) return;
 
     // On desktop the detail panel slides in from the left (~400px wide).

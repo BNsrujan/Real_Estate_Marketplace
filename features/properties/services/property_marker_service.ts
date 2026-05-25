@@ -1,4 +1,4 @@
-import maplibregl from "maplibre-gl";
+import mapboxgl from "mapbox-gl";
 import type { Property } from "@/shared/types";
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -49,14 +49,14 @@ const TYPE_CONFIG: Record<Property["type"], { color: string; iconPath: string }>
 // ─────────────────────────────────────────────────────────────────────────────
 
 export class PropertyMarkerService {
-  private map: maplibregl.Map | null;
+  private map: mapboxgl.Map | null;
   private properties: Property[] = [];
   private onMarkerClick?: (property: Property) => void;
   private onMarkerHover?: (property: Property) => void;
   private onMarkerLeave?: () => void;
   private imagesLoaded = false;
 
-  constructor(map: maplibregl.Map) {
+  constructor(map: mapboxgl.Map) {
     this.map = map;
     this.init();
   }
@@ -221,7 +221,7 @@ export class PropertyMarkerService {
     this.onMarkerLeave = onMarkerLeave;
 
     const updateSource = () => {
-      const source = this.map?.getSource(SOURCE_ID) as maplibregl.GeoJSONSource;
+      const source = this.map?.getSource(SOURCE_ID) as mapboxgl.GeoJSONSource;
       if (source) {
         source.setData({
           type: "FeatureCollection",
@@ -255,7 +255,7 @@ export class PropertyMarkerService {
 
   clearMarkers() {
     if (!this.map) return;
-    const source = this.map.getSource(SOURCE_ID) as maplibregl.GeoJSONSource;
+    const source = this.map.getSource(SOURCE_ID) as mapboxgl.GeoJSONSource;
     if (source) {
       source.setData({ type: "FeatureCollection", features: [] });
     }

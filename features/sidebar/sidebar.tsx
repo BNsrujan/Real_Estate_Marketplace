@@ -30,7 +30,7 @@ type SidebarMenu = {
 };
 
 const SIDEBAR_MENUS: SidebarMenu[] = [
-  { id: "map",      title: "Map Explorer",      Icon: Map,            description: "Explore Karnataka properties." },
+  { id: "map",      title: "Map Explorer",      Icon: Map,            description: "Explore properties." },
   { id: "search",   title: "Browse Properties", Icon: Search,         description: "Filter and discover listings." },
   { id: "saved",    title: "Saved Properties",  Icon: Bookmark,       description: "Your bookmarks and recent views." },
   { id: "messages", title: "My Enquiries",       Icon: MessageSquare,  description: "Enquiries you have submitted." },

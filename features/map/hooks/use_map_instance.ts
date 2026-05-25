@@ -1,11 +1,13 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import maplibregl from "maplibre-gl";
-import "maplibre-gl/dist/maplibre-gl.css";
+import mapboxgl from "mapbox-gl";
+import "mapbox-gl/dist/mapbox-gl.css";
+
+mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_API_KEY || "";
 
 import { MAP_CONFIG, TILE_SOURCES, getResponsiveMapConfig } from "@/lib/globe/map_config";
-import { addMapLayers } from "../services/map_layer_service";
+import { addMapLayers, addMapboxAdminBoundaries } from "../services/map_layer_service";
 import { useStore } from "@/shared/store";
 
 interface UseMapInstanceOptions {
@@ -22,7 +24,7 @@ export function useMapInstance({
   onZoom,
   onDistrictClick,
 }: UseMapInstanceOptions) {
-  const mapRef = useRef<maplibregl.Map | null>(null);
+  const mapRef = useRef<mapboxgl.Map | null>(null);
   const [isStyleLoaded, setIsStyleLoaded] = useState(false);
   const setMap = useStore.getState().setMap;
 
@@ -42,8 +44,9 @@ export function useMapInstance({
 
     const loadStart = Date.now();
     const cfg = getResponsiveMapConfig();
-    const map = new maplibregl.Map({
+    const map = new mapboxgl.Map({
       container: containerRef.current,
+      projection: { name: "globe" },
       center: cfg.center,
       zoom: cfg.zoom,
       pitch: 0,
@@ -52,7 +55,7 @@ export function useMapInstance({
       maxZoom: cfg.maxZoom,
       style: {
         version: 8,
-        projection: { type: "globe" },
+        projection: { name: "globe" },
         sources: {
           satellite: TILE_SOURCES.satellite,
           roads: TILE_SOURCES.roads,
@@ -99,7 +102,7 @@ export function useMapInstance({
             },
           },
         ],
-      } as maplibregl.StyleSpecification,
+      } as mapboxgl.StyleSpecification,
     });
 
     mapRef.current = map;
@@ -110,7 +113,16 @@ export function useMapInstance({
 
     map.on("style.load", () => {
       map.resize();
+      // Add both custom GeoJSON layers and Mapbox native admin boundaries
       addMapLayers(map);
+      addMapboxAdminBoundaries(map);
+      map.setFog({
+    color: 'rgb(186, 210, 235)', 
+    'high-color': 'rgb(36, 92, 223)', 
+    'horizon-blend': 0.02, 
+    'space-color': 'rgb(11, 11, 25)', // Background color
+    'star-intensity': 0.6 // Background star brightness (default 0.35 at low zoooms )
+  });
 
       map.on("click", (e) => {
         if (!map.getLayer("cities-fill")) return;
@@ -147,9 +159,11 @@ export function useMapInstance({
     // Sync viewport bounds after every pan/zoom ends
     map.on("moveend", () => {
       const b = map.getBounds();
-      setMap({
-        viewportBounds: [b.getWest(), b.getSouth(), b.getEast(), b.getNorth()],
-      });
+      if (b) {
+        setMap({
+          viewportBounds: [b.getWest(), b.getSouth(), b.getEast(), b.getNorth()],
+        });
+      }
     });
 
     // Store map instance so any feature can access it via the store

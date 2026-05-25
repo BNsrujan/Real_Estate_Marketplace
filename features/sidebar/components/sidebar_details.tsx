@@ -32,7 +32,7 @@ type MenuMeta = {
 };
 
 const MENU_META: Record<string, MenuMeta> = {
-  map:      { title: 'Map Explorer',      description: 'Explore Karnataka properties with interactive layers.', Icon: Map },
+  map:      { title: 'Map Explorer',      description: 'Explore properties with interactive layers.', Icon: Map },
   search:   { title: 'Browse Properties', description: 'Filter and discover listings across Karnataka.',         Icon: Search },
   saved:    { title: 'Saved Properties',  description: 'Your bookmarked properties.',                           Icon: Bookmark },
   messages: { title: 'My Enquiries',      description: 'Enquiries you have submitted to sellers.',              Icon: MessageSquare },

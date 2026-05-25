@@ -1,8 +1,8 @@
 export const MAP_CENTER: [number, number] = [78.9629, 24.5937];
 export const MAP_CONFIG = {
   center: MAP_CENTER,
-  zoom: 2.5,
-  minZoom: 2.3,
+  zoom: 1.7,
+  minZoom: 1.7,
   maxZoom: 17.4,
 };
 
@@ -16,7 +16,7 @@ export function getResponsiveMapConfig() {
   }
 
   if (w < 1024) {
-    return { center: MAP_CENTER, zoom: 2.3, minZoom: 1.4, maxZoom: 18 };
+    return { center: MAP_CENTER, zoom: 1.7, minZoom: 1.4, maxZoom: 18 };
   }
 
   return MAP_CONFIG;
@@ -28,6 +28,16 @@ export const ROTATION_CONFIG = {
 };
 
 export const TITLE_FADE_ZOOM = 3;
+
+
+export const MAPBOX_STYLES = {
+  streets: "mapbox://styles/mapbox/streets-v12",
+  outdoors: "mapbox://styles/mapbox/outdoors-v12",
+  light: "mapbox://styles/mapbox/light-v11",
+  dark: "mapbox://styles/mapbox/dark-v11",
+  satellite: "mapbox://styles/mapbox/satellite-v9",
+  satelliteStreets: "mapbox://styles/mapbox/satellite-streets-v12",
+} as const;
 
 export const TILE_SOURCES = {
   satellite: {
@@ -75,9 +85,11 @@ export const TILE_SOURCES = {
   },
 };
 
-export type LayerPreset = "satellite" | "standard" | "osm" | "traffic";
+export type LayerPreset = "satellite" | "standard" | "osm" | "traffic" | "streets" | "outdoors" | "light" | "dark" | "satelliteStreets";
 
 // Per-preset opacity values for the three base tile layers
+// Note: Mapbox built-in styles (streets, outdoors, light, dark, satellite, satelliteStreets) 
+// don't use these properties as they have their own complete styles
 export const LAYER_PRESETS: Record<
   LayerPreset,
   { satelliteOpacity: number; roadsOpacity: [number, number, number, number]; labelsOpacity: [number, number, number, number]; baseColor: string }
@@ -102,6 +114,37 @@ export const LAYER_PRESETS: Record<
   },
   traffic: {
     satelliteOpacity: 0.6,
+    roadsOpacity: [8, 0, 11, 1],
+    labelsOpacity: [9, 0, 12, 1],
+    baseColor: "#000000",
+  },
+  // Mapbox built-in styles (these use Mapbox's native styling)
+  streets: {
+    satelliteOpacity: 0,
+    roadsOpacity: [6, 0.6, 11, 1],
+    labelsOpacity: [7, 0.7, 12, 1],
+    baseColor: "#ffffff",
+  },
+  outdoors: {
+    satelliteOpacity: 0,
+    roadsOpacity: [6, 0.5, 11, 0.9],
+    labelsOpacity: [7, 0.6, 12, 0.95],
+    baseColor: "#f0e6d2",
+  },
+  light: {
+    satelliteOpacity: 0,
+    roadsOpacity: [6, 0.6, 11, 1],
+    labelsOpacity: [7, 0.7, 12, 1],
+    baseColor: "#ffffff",
+  },
+  dark: {
+    satelliteOpacity: 1,
+    roadsOpacity: [8, 0, 11, 1],
+    labelsOpacity: [9, 0, 12, 1],
+    baseColor: "#111111",
+  },
+  satelliteStreets: {
+    satelliteOpacity: 1,
     roadsOpacity: [8, 0, 11, 1],
     labelsOpacity: [9, 0, 12, 1],
     baseColor: "#000000",

@@ -9,7 +9,7 @@ import { useMapInstance } from "../hooks/use_map_instance";
 import { useMarkerSync } from "../hooks/use_marker_sync";
 import { useDistrictZoom } from "../hooks/use_district_zoom";
 import { usePropertyMarkers } from "@/features/properties/hooks/use_property_markers";
-import { TILE_SOURCES, TITLE_FADE_ZOOM } from "@/lib/globe/map_config";
+import { TITLE_FADE_ZOOM, MAPBOX_STYLES } from "@/lib/globe/map_config";
 import type { Property, LayerType } from "@/shared/types";
 import NavBar from "@/shared/components/navbar";
 import MapLayerSelector from "./layer_selector";
@@ -115,7 +115,10 @@ export function MapCanvas({ setIsLoaded }: Props) {
     }
     try {
       const map = mapInstance.current;
-      const pt = map.project([Number(hoveredProperty.lng), Number(hoveredProperty.lat)]);
+      const pt = map.project([
+        Number(hoveredProperty.lng),
+        Number(hoveredProperty.lat),
+      ]);
       const rect = map.getContainer().getBoundingClientRect();
       setHoverScreenPos({ x: pt.x + rect.left, y: pt.y + rect.top });
     } catch {
@@ -141,65 +144,19 @@ export function MapCanvas({ setIsLoaded }: Props) {
       if (!map) return;
 
       try {
-        const satSource = map.getSource("satellite") as any;
+        // Mapbox built-in styles - switch entire style
+        const mapboxStyles: Record<string, string | undefined> = {
+          streets: MAPBOX_STYLES.streets,
+          outdoors: MAPBOX_STYLES.outdoors,
+          light: MAPBOX_STYLES.light,
+          dark: MAPBOX_STYLES.dark,
+          satellite: MAPBOX_STYLES.satellite,
+          satelliteStreets: MAPBOX_STYLES.satelliteStreets,
+        };
 
-        if (layer === "osm") {
-          satSource?.setTiles(TILE_SOURCES.osm.tiles);
-          map.setPaintProperty("satellite", "raster-opacity", 1);
-          map.setPaintProperty("roads", "raster-opacity", 0);
-          map.setPaintProperty("labels", "raster-opacity", 0);
-        } else if (layer === "standard") {
-          satSource?.setTiles(TILE_SOURCES.topo.tiles);
-          map.setPaintProperty("satellite", "raster-opacity", 1);
-          map.setPaintProperty("roads", "raster-opacity", 0);
-          map.setPaintProperty("labels", "raster-opacity", 0);
-        } else if (layer === "traffic") {
-          satSource?.setTiles(TILE_SOURCES.satellite.tiles);
-          map.setPaintProperty("satellite", "raster-opacity", 0.7);
-          map.setPaintProperty("roads", "raster-opacity", [
-            "interpolate",
-            ["linear"],
-            ["zoom"],
-            8,
-            0,
-            11,
-            1,
-            18,
-            1,
-          ]);
-          map.setPaintProperty("labels", "raster-opacity", [
-            "interpolate",
-            ["linear"],
-            ["zoom"],
-            9,
-            0,
-            12,
-            1,
-          ]);
-        } else {
-          // satellite (default)
-          satSource?.setTiles(TILE_SOURCES.satellite.tiles);
-          map.setPaintProperty("satellite", "raster-opacity", 1);
-          map.setPaintProperty("roads", "raster-opacity", [
-            "interpolate",
-            ["linear"],
-            ["zoom"],
-            8,
-            0,
-            11,
-            0.9,
-            18,
-            1,
-          ]);
-          map.setPaintProperty("labels", "raster-opacity", [
-            "interpolate",
-            ["linear"],
-            ["zoom"],
-            9,
-            0,
-            12,
-            0.95,
-          ]);
+        if (mapboxStyles[layer]) {
+          map.setStyle(mapboxStyles[layer]!);
+          return;
         }
       } catch (e) {
         console.warn("Layer switch failed:", e);
@@ -245,10 +202,10 @@ export function MapCanvas({ setIsLoaded }: Props) {
           </div>
         )}
 
-         {!showButton && (
-        <div className="pointer-events-auto">
-          <MapControls map={mapInstance.current} />
-        </div>
+        {!showButton && (
+          <div className="pointer-events-auto">
+            <MapControls map={mapInstance.current} />
+          </div>
         )}
       </div>
 

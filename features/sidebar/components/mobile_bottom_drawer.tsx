@@ -24,7 +24,7 @@ type MenuContent = {
 };
 
 const MENU_CONTENT: Record<string, MenuContent> = {
-  map:      { id: "map",      title: "Map Explorer",     description: "Explore Karnataka properties with interactive layers.", Icon: Map },
+  map:      { id: "map",      title: "Map Explorer",     description: "Explore properties with interactive layers.", Icon: Map },
   search:   { id: "search",   title: "Smart Search",     description: "Search properties by filters, location, and landmarks.", Icon: Search },
   saved:    { id: "saved",    title: "Saved Properties", description: "Your bookmarked properties and recent views.", Icon: Bookmark },
   messages: { id: "messages", title: "Messages",         description: "Chat with agents and property owners.", Icon: Inbox },

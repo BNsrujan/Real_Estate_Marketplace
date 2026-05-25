@@ -9,13 +9,46 @@ type LayerDef = {
   id: LayerType;
   name: string;
   image: string;
+  description?: string;
 };
 
 const MAP_LAYERS: LayerDef[] = [
-  { id: "satellite", name: "Satellite", image: "/pics/layers/satellite.png" },
-  { id: "standard",  name: "Standard",  image: "/pics/layers/standard.png" },
-  { id: "traffic",   name: "Traffic",   image: "/pics/layers/traffic.png" },
-  { id: "osm",       name: "OSM",       image: "/pics/layers/osm.png" },
+  {
+    id: "satellite",
+    name: "Satellite",
+    image: "/pics/layers/satellite.png",
+    description: "Satellite imagery (Mapbox)",
+  },
+  {
+    id: "streets",
+    name: "Streets",
+    image: "/pics/layers/streets.png",
+    description: "Mapbox Streets style",
+  },
+  {
+    id: "outdoors",
+    name: "Outdoors",
+    image: "/pics/layers/outdoors.png",
+    description: "Mapbox Outdoors style",
+  },
+  {
+    id: "light",
+    name: "Light",
+    image: "/pics/layers/light.png",
+    description: "Light theme",
+  },
+  {
+    id: "dark",
+    name: "Dark",
+    image: "/pics/layers/dark.png",
+    description: "Dark theme",
+  },
+  {
+    id: "satelliteStreets",
+    name: "Sat+Streets",
+    image: "/pics/layers/satelliteStreets.png",
+    description: "Satellite + Streets",
+  },
 ];
 
 interface MapLayerSelectorProps {
@@ -24,12 +57,16 @@ interface MapLayerSelectorProps {
 
 const MapLayerSelector = ({ onLayerChange }: MapLayerSelectorProps) => {
   const activeLayerType = useStore((s) => s.map.activeLayer);
-  const setMap          = useStore((s) => s.setMap);
-  const isExpanded      = useStore((s) => s.ui.isBottomSheetOpen);
-  const setUI           = useStore((s) => s.setUI);
+  const setMap = useStore((s) => s.setMap);
+  const isExpanded = useStore((s) => s.ui.isBottomSheetOpen);
+  const setUI = useStore((s) => s.setUI);
 
-  const activeLayer  = MAP_LAYERS.find((l) => l.id === activeLayerType) ?? MAP_LAYERS[0];
-  const otherLayers  = useMemo(() => MAP_LAYERS.filter((l) => l.id !== activeLayer.id), [activeLayer]);
+  const activeLayer =
+    MAP_LAYERS.find((l) => l.id === activeLayerType) ?? MAP_LAYERS[0];
+  const otherLayers = useMemo(
+    () => MAP_LAYERS.filter((l) => l.id !== activeLayer.id),
+    [activeLayer],
+  );
 
   const handleLayerChange = (layer: LayerDef) => {
     setMap({ activeLayer: layer.id });
@@ -42,7 +79,6 @@ const MapLayerSelector = ({ onLayerChange }: MapLayerSelectorProps) => {
   return (
     <div className="relative w-full z-500 flex items-end gap-2 md:gap-4 flex-wrap md:flex-nowrap justify-start">
       <div className="relative flex items-end">
-
         <button
           onClick={toggleExpanded}
           className="
@@ -55,7 +91,6 @@ const MapLayerSelector = ({ onLayerChange }: MapLayerSelectorProps) => {
             w-full md:w-auto
           "
         >
-
           <div className="relative flex items-center gap-2 md:gap-4 p-0.5 md:p-1 ">
             <div className="relative h-14 md:h-20 w-14 md:w-20 overflow-hidden rounded-md md:rounded-lg border border-white/10">
               <Image
@@ -67,7 +102,9 @@ const MapLayerSelector = ({ onLayerChange }: MapLayerSelectorProps) => {
               <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/20 to-transparent" />
             </div>
             <div className="hidden md:block absolute text-left bottom-2 left-1/2 -translate-x-1/2">
-              <h3 className="text-sm font-medium text-white/50 z-20">{activeLayer.name}</h3>
+              <h3 className="text-sm font-medium text-white/50 z-20">
+                {activeLayer.name}
+              </h3>
             </div>
           </div>
         </button>
@@ -103,7 +140,9 @@ const MapLayerSelector = ({ onLayerChange }: MapLayerSelectorProps) => {
                 />
                 <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/20 to-transparent" />
                 <div className="absolute bottom-1.5 inset-x-0 flex justify-center">
-                  <h3 className="text-[10px] font-semibold text-white/50">{layer.name}</h3>
+                  <h3 className="text-[10px] font-semibold text-white/50">
+                    {layer.name}
+                  </h3>
                 </div>
               </div>
             </button>
