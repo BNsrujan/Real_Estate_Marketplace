@@ -75,7 +75,7 @@ export function MapCanvas({ setIsLoaded }: Props) {
     setShowButton(zoom < 4);
   }, []);
 
-  const { mapRef: mapInstance, isStyleLoaded } = useMapInstance({
+  const { mapRef: mapInstance, isStyleLoaded, styleLoadCount } = useMapInstance({
     containerRef: mapContainerRef,
     onLoad: () => {
       setIsLoaded(true);
@@ -98,6 +98,7 @@ export function MapCanvas({ setIsLoaded }: Props) {
   usePropertyMarkers({
     mapRef: mapInstance,
     isStyleLoaded,
+    styleLoadCount,
     onMarkerClick: handleMarkerClick,
     onMarkerHover: handleMarkerHover,
     onMarkerLeave: handleMarkerLeave,

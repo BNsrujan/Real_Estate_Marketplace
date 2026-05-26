@@ -3,23 +3,15 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import mapboxgl from "mapbox-gl";
 
-import {
-  Plus,
-  Minus,
-  Compass,
-  LocateFixed,
-  Loader2,
-  AlertCircle,
-} from "lucide-react";
+import { Plus, Minus, LocateFixed, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import {
-  getCurrentPositionHighAccuracy,
   getCurrentPositionLowAccuracy,
   watchPositionHighAccuracy,
   flyToPosition,
+  drawAccuracyCircle,
   removeAccuracyCircle,
   shouldWarnAccuracy,
-  handleGeolocationErrorWithRetry,
   type GeolocationResult,
   type GeolocationError,
 } from "@/features/map/services/geolocation_service";
@@ -37,6 +29,8 @@ export default function MapControls({ map }: MapControlsProps) {
   const locationMarkerRef = useRef<mapboxgl.Marker | null>(null);
   const watchIdRef = useRef<number | null>(null);
   const locateTimeoutRef = useRef<number | null>(null);
+  // Ref mirrors locationState so async callbacks/timeouts always read current value
+  const locationStateRef = useRef<LocationState>("idle");
 
   // Track map rotation
   useEffect(() => {
@@ -73,39 +67,40 @@ export default function MapControls({ map }: MapControlsProps) {
     });
   }, [map]);
 
+  const setLocationStateWithRef = (s: LocationState) => {
+    locationStateRef.current = s;
+    setLocationState(s);
+  };
+
   // Current Location — Enhanced with Accuracy Visualization
   const handleLocation = useCallback(() => {
     if (!map) return;
 
     // If already active, stop watching and remove marker
-    if (locationState === "active") {
+    if (locationStateRef.current === "active" || locationStateRef.current === "locating") {
       if (watchIdRef.current !== null) {
         navigator.geolocation.clearWatch(watchIdRef.current);
+        watchIdRef.current = null;
       }
-
       if (locateTimeoutRef.current !== null) {
         window.clearTimeout(locateTimeoutRef.current);
         locateTimeoutRef.current = null;
       }
-
       locationMarkerRef.current?.remove();
-      removeAccuracyCircle(map);
-
       locationMarkerRef.current = null;
-      watchIdRef.current = null;
-
-      setLocationState("idle");
+      removeAccuracyCircle(map);
+      setLocationStateWithRef("idle");
       return;
     }
 
     if (!navigator.geolocation) {
       toast.error("Geolocation not supported on this device.");
-      setLocationState("error");
-      setTimeout(() => setLocationState("idle"), 2000);
+      setLocationStateWithRef("error");
+      setTimeout(() => setLocationStateWithRef("idle"), 2000);
       return;
     }
 
-    setLocationState("locating");
+    setLocationStateWithRef("locating");
     let isFirstAccurate = false;
 
     // Create animated marker element
@@ -116,13 +111,11 @@ export default function MapControls({ map }: MapControlsProps) {
       <div class="h-4 w-4 rounded-full border-2 border-white bg-cyan-400 shadow-[0_0_20px_rgba(34,211,238,0.9)]"></div>
     `;
 
-    // Clear any existing watch
+    // Clear any existing watch/timeout
     if (watchIdRef.current !== null) {
       navigator.geolocation.clearWatch(watchIdRef.current);
       watchIdRef.current = null;
     }
-
-    // Clear any existing timeout
     if (locateTimeoutRef.current !== null) {
       window.clearTimeout(locateTimeoutRef.current);
       locateTimeoutRef.current = null;
@@ -134,18 +127,16 @@ export default function MapControls({ map }: MapControlsProps) {
       (result: GeolocationResult) => {
         const { latitude, longitude, accuracy } = result;
 
-        // Warn if accuracy is poor
-        if (shouldWarnAccuracy(accuracy)) {
-          if (locationState === "locating") {
-            toast.warning(
-              `Low precision: ±${Math.round(accuracy)}m. Try moving outdoors.`,
-              { duration: 3000 },
-            );
-          }
+        // Warn once if accuracy is poor — use ref to avoid stale closure
+        if (shouldWarnAccuracy(accuracy) && locationStateRef.current === "locating") {
+          toast.warning(
+            `Low precision: ±${Math.round(accuracy)}m. Try moving outdoors.`,
+            { duration: 3000 },
+          );
         }
 
-        // Update or create marker
         if (!locationMarkerRef.current) {
+          // First fix — create marker and fly to location
           locationMarkerRef.current = new mapboxgl.Marker({
             element: markerElement,
             anchor: "center",
@@ -153,44 +144,33 @@ export default function MapControls({ map }: MapControlsProps) {
             .setLngLat([longitude, latitude])
             .addTo(map);
 
-          // Fly to position with accuracy-based zoom
-          flyToPosition(map, latitude, longitude, accuracy, {
-            drawCircle: true,
-          });
+          flyToPosition(map, latitude, longitude, accuracy, { drawCircle: true });
         } else {
+          // Subsequent fixes — update marker + accuracy circle without flying
           locationMarkerRef.current.setLngLat([longitude, latitude]);
-
-          // Smooth pan to updated position
-          map.easeTo({
-            center: [longitude, latitude],
-            duration: 400,
-          });
-
-          // Redraw accuracy circle
           removeAccuracyCircle(map);
-          flyToPosition(map, latitude, longitude, accuracy, {
-            duration: 0,
-            drawCircle: true,
-          });
+          drawAccuracyCircle(map, latitude, longitude, accuracy);
+          // Gentle pan only — no competing flyTo
+          map.easeTo({ center: [longitude, latitude], duration: 400 });
         }
       },
 
       // onError — geolocation failed
       async (error: GeolocationError) => {
-        setLocationState("error");
-
         if (error.code === "PERMISSION_DENIED") {
           toast.error(error.message);
+          setLocationStateWithRef("error");
+          setTimeout(() => setLocationStateWithRef("idle"), 2500);
         } else if (error.code === "POSITION_UNAVAILABLE") {
           toast.error(error.message);
+          setLocationStateWithRef("error");
+          setTimeout(() => setLocationStateWithRef("idle"), 2500);
         } else if (error.code === "TIMEOUT") {
-          // Timeout → retry with low accuracy
+          // GPS timeout → retry with WiFi/IP location
           toast.warning("GPS timeout, trying WiFi/IP location...");
-
           try {
             const result = await getCurrentPositionLowAccuracy();
-            setLocationState("active");
-
+            setLocationStateWithRef("active");
             const { latitude, longitude, accuracy } = result;
             if (!locationMarkerRef.current) {
               locationMarkerRef.current = new mapboxgl.Marker({
@@ -202,46 +182,40 @@ export default function MapControls({ map }: MapControlsProps) {
             } else {
               locationMarkerRef.current.setLngLat([longitude, latitude]);
             }
-
-            flyToPosition(map, latitude, longitude, accuracy, {
-              drawCircle: true,
-            });
-
+            flyToPosition(map, latitude, longitude, accuracy, { drawCircle: true });
             toast.success("Location acquired (WiFi/IP)");
-          } catch (retryError) {
-            const err = retryError as GeolocationError;
+          } catch {
             toast.error("Could not determine location. Try again.");
+            setLocationStateWithRef("error");
+            setTimeout(() => setLocationStateWithRef("idle"), 2500);
           }
         }
-
-        setTimeout(() => {
-          setLocationState("idle");
-        }, 2500);
       },
 
       // onAccuracyThreshold — high-confidence position reached (<=30m)
       (result: GeolocationResult) => {
         if (!isFirstAccurate) {
           isFirstAccurate = true;
-          setLocationState("active");
+          setLocationStateWithRef("active");
           toast.success(`GPS locked: ±${Math.round(result.accuracy)}m`);
         }
       },
     );
 
     // ─── Timeout if no accurate position in 30 seconds ───
+    // Uses locationStateRef (not locationState) to avoid stale closure.
     locateTimeoutRef.current = window.setTimeout(() => {
-      if (locationState === "locating") {
+      if (locationStateRef.current === "locating") {
         if (watchIdRef.current !== null) {
           navigator.geolocation.clearWatch(watchIdRef.current);
           watchIdRef.current = null;
         }
-        setLocationState("error");
+        setLocationStateWithRef("error");
         toast.error("Location request timeout. Please try again.");
-        setTimeout(() => setLocationState("idle"), 2500);
+        setTimeout(() => setLocationStateWithRef("idle"), 2500);
       }
     }, 30000);
-  }, [map, locationState]);
+  }, [map]);
 
   useEffect(() => {
     return () => {

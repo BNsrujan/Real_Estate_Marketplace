@@ -182,14 +182,19 @@ export class PropertyMarkerService {
       });
     }
 
-    // Interactions
-    this.map.on("click", LAYER_ID, (e) => {
-      if (e.features && e.features[0]) {
-        const props = e.features[0].properties;
-        const property = this.properties.find(p => p.id === props?.id);
-        if (property) this.onMarkerClick?.(property);
-      }
-    });
+    // Shared click handler — used by both normal and active layers
+    const handleClick = (e: mapboxgl.MapLayerMouseEvent) => {
+      if (!e.features?.[0]) return;
+      // Stop the event from bubbling to the generic map click handler (district filter)
+      e.originalEvent.stopPropagation();
+      const props = e.features[0].properties;
+      const property = this.properties.find(p => p.id === props?.id);
+      if (property) this.onMarkerClick?.(property);
+    };
+
+    this.map.on("click", LAYER_ID, handleClick);
+    // Active marker is removed from LAYER_ID by filter — needs its own click handler
+    this.map.on("click", ACTIVE_LAYER_ID, handleClick);
 
     this.map.on("mouseenter", LAYER_ID, (e) => {
       if (!this.map) return;
@@ -201,7 +206,23 @@ export class PropertyMarkerService {
       }
     });
 
+    this.map.on("mouseenter", ACTIVE_LAYER_ID, (e) => {
+      if (!this.map) return;
+      this.map.getCanvas().style.cursor = "pointer";
+      if (e.features && e.features[0]) {
+        const props = e.features[0].properties;
+        const property = this.properties.find(p => p.id === props?.id);
+        if (property) this.onMarkerHover?.(property);
+      }
+    });
+
     this.map.on("mouseleave", LAYER_ID, () => {
+      if (!this.map) return;
+      this.map.getCanvas().style.cursor = "";
+      this.onMarkerLeave?.();
+    });
+
+    this.map.on("mouseleave", ACTIVE_LAYER_ID, () => {
       if (!this.map) return;
       this.map.getCanvas().style.cursor = "";
       this.onMarkerLeave?.();
@@ -262,15 +283,16 @@ export class PropertyMarkerService {
     this.properties = [];
   }
 
-  getMarkers() {
-    return this.properties.length > 0 ? [{} as any] : [];
+  hasMarkers(): boolean {
+    return this.properties.length > 0;
   }
 
   dispose() {
     if (!this.map) return;
-    // We don't necessarily want to remove shared images if multiple services exist
-    if (this.map.getLayer(LAYER_ID)) this.map.removeLayer(LAYER_ID);
     if (this.map.getLayer(ACTIVE_LAYER_ID)) this.map.removeLayer(ACTIVE_LAYER_ID);
+    if (this.map.getLayer(LAYER_ID)) this.map.removeLayer(LAYER_ID);
+    if (this.map.getSource(SOURCE_ID)) this.map.removeSource(SOURCE_ID);
+    this.imagesLoaded = false;
     this.map = null;
   }
 }

@@ -13,6 +13,7 @@ const MARKER_ZOOM_DURATION = 1000;
 interface UsePropertyMarkersOptions {
   mapRef: React.RefObject<mapboxgl.Map | null>;
   isStyleLoaded: boolean;
+  styleLoadCount?: number;
   onMarkerClick?: (property: Property) => void;
   onMarkerHover?: (property: Property) => void;
   onMarkerLeave?: () => void;
@@ -21,6 +22,7 @@ interface UsePropertyMarkersOptions {
 export function usePropertyMarkers({
   mapRef,
   isStyleLoaded,
+  styleLoadCount = 0,
   onMarkerClick,
   onMarkerHover,
   onMarkerLeave,
@@ -34,22 +36,25 @@ export function usePropertyMarkers({
   const setSelectedProperty = useStore((s) => s.setSelectedProperty);
   const isAnimating = useStore((s) => s.map.isAnimating);
 
-  // Initialize marker service
+  // Initialize (or re-initialize after setStyle) marker service.
+  // styleLoadCount increments on every style.load, so this effect re-runs
+  // whenever the map style is switched, re-creating the service with fresh images.
   useEffect(() => {
     const map = mapRef.current;
     if (!map || !isStyleLoaded) return;
 
+    // Dispose previous instance (clears layers + source from old style)
+    markerServiceRef.current?.dispose();
     markerServiceRef.current = new PropertyMarkerService(map);
 
     const handleZoom = () => {
       const zoom = map.getZoom();
       if (zoom < PROPERTY_MARKER_MIN_ZOOM) {
         markerServiceRef.current?.clearMarkers();
-      } else if (
-        markerServiceRef.current?.getMarkers().length === 0 &&
-        filtered.length > 0
-      ) {
-        renderMarkers();
+      } else if (!markerServiceRef.current?.hasMarkers()) {
+        // Read current filtered list imperatively to avoid stale closure
+        const { filtered: currentFiltered } = useStore.getState().properties;
+        if (currentFiltered.length > 0) renderMarkers(currentFiltered);
       }
     };
 
@@ -61,23 +66,23 @@ export function usePropertyMarkers({
       markerServiceRef.current = null;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [mapRef, isStyleLoaded]);
+  }, [mapRef, isStyleLoaded, styleLoadCount]);
 
   // Re-render markers whenever filtered properties change
   useEffect(() => {
     if (!isStyleLoaded || isLoading) return;
-    renderMarkers();
+    renderMarkers(filtered);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filtered, isStyleLoaded, isLoading]);
 
-  function renderMarkers() {
+  function renderMarkers(props: Property[]) {
     const map = mapRef.current;
     if (!map || !markerServiceRef.current) return;
     const zoom = map.getZoom();
     if (zoom < PROPERTY_MARKER_MIN_ZOOM) return;
 
     markerServiceRef.current.addMarkers(
-      filtered,
+      props,
       (prop) => handleMarkerClick(prop, map),
       (prop) => onMarkerHover?.(prop),
       () => onMarkerLeave?.(),

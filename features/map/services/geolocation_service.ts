@@ -101,27 +101,25 @@ export function drawAccuracyCircle(
       data: geoJSON,
     });
 
-    // Fill layer (semi-transparent)
-    map.addLayer(
-      {
-        id: "accuracy-fill",
-        type: "fill",
-        source: "accuracy-circle",
-        paint: {
-          "fill-color": "#4A90E2",
-          "fill-opacity": [
-            "interpolate",
-            ["linear"],
-            ["zoom"],
-            10,
-            0.25,
-            16,
-            0.1,
-          ],
-        },
+    // Fill layer (semi-transparent).
+    // No beforeId — the custom raster style has no "water" layer to insert before.
+    map.addLayer({
+      id: "accuracy-fill",
+      type: "fill",
+      source: "accuracy-circle",
+      paint: {
+        "fill-color": "#4A90E2",
+        "fill-opacity": [
+          "interpolate",
+          ["linear"],
+          ["zoom"],
+          10,
+          0.25,
+          16,
+          0.1,
+        ],
       },
-      "water" // Insert below labels
-    );
+    });
 
     // Border layer (outline)
     map.addLayer({
