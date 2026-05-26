@@ -26,6 +26,9 @@ export function useMapInstance({
 }: UseMapInstanceOptions) {
   const mapRef = useRef<mapboxgl.Map | null>(null);
   const [isStyleLoaded, setIsStyleLoaded] = useState(false);
+  // Increments on every style.load — consumers can depend on this to re-init
+  // after map.setStyle() wipes all custom layers/sources/images.
+  const [styleLoadCount, setStyleLoadCount] = useState(0);
   const setMap = useStore.getState().setMap;
 
   // Store callbacks in refs so the useEffect closure never goes stale
@@ -125,6 +128,10 @@ export function useMapInstance({
   });
 
       map.on("click", (e) => {
+        // If a property marker was clicked its handler called stopPropagation —
+        // the originalEvent is cancelled so we bail out here to avoid also
+        // triggering the district filter on every single marker click.
+        if (e.originalEvent.cancelBubble) return;
         if (!map.getLayer("cities-fill")) return;
         const features = map.queryRenderedFeatures(e.point, {
           layers: ["cities-fill"],
@@ -135,6 +142,7 @@ export function useMapInstance({
       });
 
       setIsStyleLoaded(true);
+      setStyleLoadCount((c) => c + 1);
     });
 
     map.on("load", () => {
@@ -177,5 +185,5 @@ export function useMapInstance({
     };
   }, [setMap]);
 
-  return { mapRef, isStyleLoaded };
+  return { mapRef, isStyleLoaded, styleLoadCount };
 }
