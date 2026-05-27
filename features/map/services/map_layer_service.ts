@@ -148,6 +148,38 @@ export function addMapLayers(map: mapboxgl.Map): void {
     minzoom: 6,
   });
 
-  // Note: city-labels layer removed because it requires glyphs property in Mapbox style
-  // Text rendering is only available with full Mapbox vector styles that include glyphs
+  map.addLayer({
+    id: "district-labels",
+    type: "symbol",
+    source: "district-centers",
+    layout: {
+      "text-field": ["get", "NAME_2"],
+      "text-size": [
+        "interpolate",
+        ["linear"],
+        ["zoom"],
+        5,
+        12,
+        8,
+        15,
+      ],
+      "text-allow-overlap": true,
+      "text-ignore-placement": true,
+    },
+    paint: {
+      "text-color": "#f8fdff",
+      "text-halo-color": "#00141c",
+      "text-halo-width": 1.5,
+      "text-opacity": [
+        "interpolate",
+        ["linear"],
+        ["zoom"],
+        5,
+        0,
+        5.5,
+        1,
+      ],
+    },
+    minzoom: 5,
+  });
 }
