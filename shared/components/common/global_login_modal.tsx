@@ -9,6 +9,7 @@ import {
   verifyOtp,
 } from "@/features/profile/api/auth_api";
 import { notifyAuthRestored, notifyAuthAborted } from "@/shared/services/api.service";
+import { toastService } from "@/shared/services/toast.service";
 import { useWatchlistSync } from "@/features/properties/hooks/use_watchlist_sync";
 import LoginModal, {
   type LoginData,
@@ -25,7 +26,12 @@ declare global {
       accounts: {
         id: {
           initialize: (config: { client_id: string; callback: (r: { credential: string }) => void }) => void;
-          prompt: (cb?: (n: { isNotDisplayed: () => boolean; isSkippedMoment: () => boolean }) => void) => void;
+          prompt: (cb?: (n: {
+            isNotDisplayed: () => boolean;
+            isSkippedMoment: () => boolean;
+            getNotDisplayedReason?: () => string;
+            getSkippedReason?: () => string;
+          }) => void) => void;
         };
       };
     };
@@ -39,6 +45,10 @@ export default function GlobalLoginModal() {
   const loginSuccess = useStore((s) => s.loginSuccess);
   const closeLoginModal = useStore((s) => s.closeLoginModal);
   const { loadWatchlist, saveProperty } = useWatchlistSync();
+
+  const showAuthError = (message: string) => {
+    throw new Error(message);
+  };
 
   const afterAuth = (user: Parameters<typeof loginSuccess>[0], token: string) => {
     const pendingAction = useStore.getState().auth.pendingAction;
@@ -60,52 +70,115 @@ export default function GlobalLoginModal() {
   };
 
   const handleLogin = async (data: LoginData) => {
-    const { user, token } = await loginApi(data.email, data.password);
-    afterAuth(user, token);
+    try {
+      const { user, token } = await loginApi(data.email.trim(), data.password);
+      afterAuth(user, token);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Invalid email or password.";
+      showAuthError(message);
+    }
   };
 
   const handleRegister = async (data: RegisterData) => {
-    const { user, token } = await registerApi({
-      firstName: data.firstName,
-      lastName: data.lastName,
-      mobile: data.mobile,
-      email: data.email,
-      password: data.password,
-    });
-    afterAuth(user, token);
+    try {
+      const { user, token } = await registerApi({
+        firstName: data.firstName,
+        lastName: data.lastName,
+        mobile: data.mobile.trim(),
+        email: data.email.trim(),
+        password: data.password,
+      });
+      afterAuth(user, token);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Registration failed. Please try again.";
+      showAuthError(message);
+    }
   };
 
   const handleGoogleLogin = async () => {
     const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
-    if (!clientId) throw new Error("Google Sign-In is not configured.");
+    if (!clientId) showAuthError("Google Sign-In is not configured.");
 
     const credential = await new Promise<string>((resolve, reject) => {
       if (!window.google?.accounts?.id) {
         reject(new Error("Google Sign-In script is not loaded. Please refresh the page."));
         return;
       }
+      let settled = false;
+      const fail = (message: string) => {
+        if (settled) return;
+        settled = true;
+        reject(new Error(message));
+      };
+      const timeout = window.setTimeout(() => {
+        fail("Google Sign-In did not open. Check that this site origin is allowed for the Google client ID.");
+      }, 8000);
+
       window.google.accounts.id.initialize({
-        client_id: clientId,
-        callback: (response) => resolve(response.credential),
+        client_id: clientId!,
+        callback: (response) => {
+          if (!response.credential) {
+            fail("Google sign-in did not return a credential. Please try again.");
+            return;
+          }
+          settled = true;
+          window.clearTimeout(timeout);
+          resolve(response.credential);
+        },
       });
       window.google.accounts.id.prompt((notification) => {
         if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
-          reject(new Error("Google sign-in was cancelled or blocked. Please try again."));
+          window.clearTimeout(timeout);
+          const reason = notification.getNotDisplayedReason?.() ?? notification.getSkippedReason?.();
+          fail(
+            reason === "invalid_client"
+              ? "Google Sign-In is not enabled for this site origin. Please use email or OTP sign-in."
+              : "Google sign-in was cancelled or blocked. Please try again.",
+          );
         }
       });
     });
 
-    const { user, token } = await googleAuthApi(credential);
-    afterAuth(user, token);
+    try {
+      const { user, token } = await googleAuthApi(credential);
+      afterAuth(user, token);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Google sign-in failed.";
+      showAuthError(message);
+    }
   };
 
   const handleOtpRequest = async (data: OtpRequestData) => {
-    await requestOtp(data.contact, data.type);
+    const contact = data.contact.trim();
+    const validEmail = /\S+@\S+\.\S+/.test(contact);
+    const validPhone = /^\+?[\d\s\-()]{7,15}$/.test(contact);
+
+    if ((data.type === "email" && !validEmail) || (data.type === "phone" && !validPhone)) {
+      showAuthError("Enter a valid email or phone number.");
+    }
+
+    try {
+      await requestOtp(contact, data.type);
+      toastService.success("OTP sent successfully.");
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Failed to send OTP. Please try again.";
+      showAuthError(message);
+    }
   };
 
   const handleOtpVerify = async (data: OtpVerifyData) => {
-    const { user, token } = await verifyOtp(data.contact, data.type, data.otp);
-    afterAuth(user, token);
+    const otp = data.otp.trim();
+    if (!/^\d{6}$/.test(otp)) {
+      showAuthError("Enter the 6-digit OTP.");
+    }
+
+    try {
+      const { user, token } = await verifyOtp(data.contact.trim(), data.type, otp);
+      afterAuth(user, token);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Incorrect OTP. Please try again.";
+      showAuthError(message);
+    }
   };
 
   return (

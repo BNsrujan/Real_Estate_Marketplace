@@ -12,6 +12,7 @@ function Switch({
   return (
     <SwitchPrimitive.Root
       data-slot="switch"
+      type="button"
       className={cn(
         // MD3 pill track: 52×32dp scale → 44×24px at 0.75 ratio
         "peer relative inline-flex max-h-7 w-12 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent",

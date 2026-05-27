@@ -1,8 +1,13 @@
 import { NextResponse, type NextRequest } from 'next/server';
 
 const AUTH_COOKIE = 'auth_session';
+const LOGGED_OUT_COOKIE = 'auth_logged_out';
 
 function hasAuthCookie(request: NextRequest): boolean {
+  if (request.cookies.get(LOGGED_OUT_COOKIE)?.value) {
+    return false;
+  }
+
   const value = request.cookies.get(AUTH_COOKIE)?.value;
   return Boolean(value && value !== 'null' && value !== 'undefined');
 }

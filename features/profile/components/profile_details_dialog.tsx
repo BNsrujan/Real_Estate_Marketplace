@@ -72,7 +72,13 @@ export default function ProfileDetailsDialog({ user, fullUser, children }: Props
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <div onClick={() => setOpen(true)} className="cursor-pointer">
+      <div
+        onClick={(event) => {
+          event.stopPropagation();
+          setOpen(true);
+        }}
+        className="cursor-pointer"
+      >
         {children}
       </div>
 

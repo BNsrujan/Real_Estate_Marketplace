@@ -1,19 +1,27 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Globe, Sun, Moon, Monitor, Bell, Check } from "lucide-react";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription,
 } from "@/shared/components/ui/dialog";
 import { Switch } from "@/shared/components/ui/switch";
 import { cn } from "@/lib/utils";
+import { useStore } from "@/shared/store";
+import {
+  applyAppSettings,
+  loadAppSettings,
+  saveAppLanguage,
+  saveAppSettings,
+  type AppSettings,
+  type AppLanguage as Language,
+  type AppTheme as Theme,
+} from "@/shared/services/app_settings.service";
+import { toastService } from "@/shared/services/toast.service";
 
 interface Props {
   children: React.ReactNode;
 }
-
-type Theme = "light" | "dark" | "system";
-type Language = "en" | "hi" | "kn";
 
 const THEMES: { value: Theme; label: string; icon: React.ComponentType<{ size?: number; className?: string }> }[] = [
   { value: "light",  label: "Light",  icon: Sun },
@@ -43,20 +51,55 @@ function SectionLabel({
 }
 
 export default function AppSettingsDialog({ children }: Props) {
+  const settings = useStore((s) => s.settings);
+  const setSettings = useStore((s) => s.setSettings);
   const [open, setOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
-  const [theme, setTheme] = useState<Theme>("system");
+  const [theme, setTheme] = useState<Theme>("light");
   const [language, setLanguage] = useState<Language>("en");
   const [notifications, setNotifications] = useState(true);
   const [marketingEmails, setMarketingEmails] = useState(false);
+
+  const commitSettings = (nextSettings: AppSettings) => {
+    setSettings(nextSettings);
+    saveAppSettings(nextSettings);
+  };
+
+  const commitLanguage = (nextLanguage: Language) => {
+    const currentSettings = useStore.getState().settings;
+    const nextSettings = { ...currentSettings, language: nextLanguage };
+    setLanguage(nextLanguage);
+    setSettings({ language: nextLanguage });
+    saveAppLanguage(nextLanguage, nextSettings);
+  };
+
+  useEffect(() => {
+    const stored = loadAppSettings();
+    setSettings(stored);
+    applyAppSettings(stored);
+  }, [setSettings]);
+
+  const handleOpenChange = (nextOpen: boolean) => {
+    if (nextOpen && !open) {
+      setTheme(settings.theme);
+      setLanguage(settings.language);
+      setNotifications(settings.notifications);
+      setMarketingEmails(settings.marketingEmails);
+      setSaved(false);
+    }
+    setOpen(nextOpen);
+  };
 
   async function handleSave(e: React.FormEvent) {
     e.preventDefault();
     setSaving(true);
     try {
-      await new Promise((r) => setTimeout(r, 700));
+      const nextSettings = { theme, language, notifications, marketingEmails };
+      commitSettings(nextSettings);
+      await new Promise((r) => setTimeout(r, 300));
       setSaved(true);
+      toastService.success("Settings saved.");
       setTimeout(() => { setSaved(false); setOpen(false); }, 1200);
     } finally {
       setSaving(false);
@@ -64,8 +107,14 @@ export default function AppSettingsDialog({ children }: Props) {
   }
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <div onClick={() => setOpen(true)} className="cursor-pointer">
+    <Dialog open={open} onOpenChange={handleOpenChange}>
+      <div
+        onClick={(event) => {
+          event.stopPropagation();
+          handleOpenChange(true);
+        }}
+        className="cursor-pointer"
+      >
         {children}
       </div>
 
@@ -94,7 +143,7 @@ export default function AppSettingsDialog({ children }: Props) {
                   <button
                     key={lang.value}
                     type="button"
-                    onClick={() => setLanguage(lang.value)}
+                    onClick={() => commitLanguage(lang.value)}
                     className={cn(
                       "flex flex-col items-center gap-1 rounded-2xl border py-3 px-2 text-center transition-all duration-200 ease-[cubic-bezier(0.2,0,0,1)] active:scale-95",
                       language === lang.value
@@ -122,7 +171,16 @@ export default function AppSettingsDialog({ children }: Props) {
                   <button
                     key={value}
                     type="button"
-                    onClick={() => setTheme(value)}
+                    onClick={() => {
+                      const nextSettings = {
+                        theme: value,
+                        language,
+                        notifications,
+                        marketingEmails,
+                      };
+                      setTheme(value);
+                      commitSettings(nextSettings);
+                    }}
                     className={cn(
                       "flex flex-col items-center gap-2 rounded-2xl border py-3.5 transition-all duration-200 ease-[cubic-bezier(0.2,0,0,1)] active:scale-95",
                       theme === value
@@ -145,13 +203,31 @@ export default function AppSettingsDialog({ children }: Props) {
                   label="Property Alerts"
                   description="Updates on saved properties and new listings"
                   value={notifications}
-                  onChange={setNotifications}
+                  onChange={(value) => {
+                    const nextSettings = {
+                      theme,
+                      language,
+                      notifications: value,
+                      marketingEmails,
+                    };
+                    setNotifications(value);
+                    commitSettings(nextSettings);
+                  }}
                 />
                 <ToggleRow
                   label="Marketing Emails"
                   description="News, tips and market insights"
                   value={marketingEmails}
-                  onChange={setMarketingEmails}
+                  onChange={(value) => {
+                    const nextSettings = {
+                      theme,
+                      language,
+                      notifications,
+                      marketingEmails: value,
+                    };
+                    setMarketingEmails(value);
+                    commitSettings(nextSettings);
+                  }}
                 />
               </div>
             </div>

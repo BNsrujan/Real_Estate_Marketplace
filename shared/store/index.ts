@@ -10,13 +10,17 @@ import type {
   FilterState,
   LayerType,
   MobilePanel,
-  SidebarTab,
   PendingAction,
   BlogPostCard,
   BlogPostDetail,
   DashboardStats,
   EnquiryWithProperty,
 } from '@/shared/types';
+import {
+  clearClientAuthData,
+  clearLogoutMarker,
+  clearServerAuthCookie,
+} from '@/shared/services/auth_session.service';
 
 // ─── Geo types (local, avoids maplibre-gl SSR issues) ────────────────────────
 
@@ -55,13 +59,22 @@ interface NammaDharaniStore {
   };
   setAuth: (patch: Partial<NammaDharaniStore['auth']>) => void;
   loginSuccess: (user: UserProfile, token: string) => void;
-  logout: () => void;
+  logout: () => Promise<void>;
   openLoginModal: (pendingAction?: PendingAction) => void;
   closeLoginModal: () => void;
 
+  // ─── SETTINGS ───────────────────────────────────────────────────────────
+  settings: {
+    theme: 'light' | 'dark' | 'system';
+    language: 'en' | 'hi' | 'kn';
+    notifications: boolean;
+    marketingEmails: boolean;
+  };
+  setSettings: (patch: Partial<NammaDharaniStore['settings']>) => void;
+
   // ─── MAP ─────────────────────────────────────────────────────────────────
   map: {
-    instance: any | null; // maplibregl.Map — typed as any to avoid SSR import
+    instance: unknown | null; // maplibregl.Map — kept opaque to avoid SSR import
     isLoaded: boolean;
     currentZoom: number;
     currentBearing: number;
@@ -175,7 +188,9 @@ export const useStore = create<NammaDharaniStore>()(
         set((s) => ({ auth: { ...s.auth, ...patch } }), false, 'auth/set'),
       loginSuccess: (user, token) => {
         if (typeof window !== 'undefined') {
-          localStorage.setItem('auth_token', token);
+          clearLogoutMarker();
+          if (token) localStorage.setItem('auth_token', token);
+          else localStorage.removeItem('auth_token');
         }
         set(
           (s) => ({
@@ -192,10 +207,8 @@ export const useStore = create<NammaDharaniStore>()(
           'auth/loginSuccess',
         );
       },
-      logout: () => {
-        if (typeof window !== 'undefined') {
-          localStorage.removeItem('auth_token');
-        }
+      logout: async () => {
+        clearClientAuthData();
         set(
           (s) => ({
             auth: {
@@ -203,12 +216,15 @@ export const useStore = create<NammaDharaniStore>()(
               isAuthenticated: false,
               user: null,
               token: null,
+              isLoginModalOpen: false,
+              pendingAction: null,
             },
             watchlist: { ...s.watchlist, saved: [] },
           }),
           false,
           'auth/logout',
         );
+        await clearServerAuthCookie();
       },
       openLoginModal: (pendingAction) =>
         set(
@@ -230,6 +246,20 @@ export const useStore = create<NammaDharaniStore>()(
           }),
           false,
           'auth/closeLoginModal',
+        ),
+
+      // ─── SETTINGS ───────────────────────────────────────────────────────
+      settings: {
+        theme: 'light',
+        language: 'en',
+        notifications: true,
+        marketingEmails: false,
+      },
+      setSettings: (patch) =>
+        set(
+          (s) => ({ settings: { ...s.settings, ...patch } }),
+          false,
+          'settings/set',
         ),
 
       // ─── MAP ────────────────────────────────────────────────────────────
@@ -420,6 +450,7 @@ export const selectMap = (s: NammaDharaniStore) => s.map;
 export const selectProperties = (s: NammaDharaniStore) => s.properties;
 export const selectFilters = (s: NammaDharaniStore) => s.filters;
 export const selectWatchlist = (s: NammaDharaniStore) => s.watchlist;
+export const selectSettings = (s: NammaDharaniStore) => s.settings;
 export const selectUI = (s: NammaDharaniStore) => s.ui;
 export const selectBlog = (s: NammaDharaniStore) => s.blog;
 export const selectDashboard = (s: NammaDharaniStore) => s.dashboard;
