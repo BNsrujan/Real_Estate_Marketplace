@@ -5,6 +5,13 @@ import ProfileModal from "./profile_modal";
 import { useStore } from "@/shared/store";
 import { useSidebarStore } from "@/features/sidebar/store/sidebar_store";
 
+const RADIX_DIALOG_SELECTOR = [
+  "[data-radix-portal]",
+  "[data-slot='dialog-content']",
+  "[data-slot='dialog-overlay']",
+  "[role='dialog']",
+].join(",");
+
 const Profile = () => {
   const user = useStore((s) => s.auth.user);
   const openLoginModal = useStore((s) => s.openLoginModal);
@@ -17,7 +24,7 @@ const Profile = () => {
       const target = event.target as Element;
       // Clicks inside Radix portals (dialogs, drawers) live in document.body outside
       // profileRef — don't treat those as "outside" clicks.
-      if (target?.closest?.("[data-radix-portal]")) return;
+      if (target?.closest?.(RADIX_DIALOG_SELECTOR)) return;
       if (profileRef.current && !profileRef.current.contains(target)) {
         setProfileMenuOpen(false);
       }

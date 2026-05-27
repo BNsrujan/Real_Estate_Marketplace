@@ -289,6 +289,11 @@ export class PropertyMarkerService {
 
   dispose() {
     if (!this.map) return;
+    if (!(this.map as { style?: unknown }).style) {
+      this.imagesLoaded = false;
+      this.map = null;
+      return;
+    }
     if (this.map.getLayer(ACTIVE_LAYER_ID)) this.map.removeLayer(ACTIVE_LAYER_ID);
     if (this.map.getLayer(LAYER_ID)) this.map.removeLayer(LAYER_ID);
     if (this.map.getSource(SOURCE_ID)) this.map.removeSource(SOURCE_ID);

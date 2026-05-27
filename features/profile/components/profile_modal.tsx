@@ -46,7 +46,7 @@ export default function ProfileModal({ user, onLogout }: ProfileModalProps) {
     setIsLoggingOut(true);
     try {
       if (onLogout) await onLogout();
-      logout();
+      await logout();
     } catch {
       // silent
     } finally {

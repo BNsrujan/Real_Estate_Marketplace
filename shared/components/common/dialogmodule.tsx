@@ -13,6 +13,7 @@ import { Button } from "@/shared/components/ui/button";
 import { Input } from "@/shared/components/ui/input";
 import { AlertCircle, Eye, EyeOff, ArrowLeft, Phone, Mail } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { toastService } from "@/shared/services/toast.service";
 
 export interface LoginData {
   email: string;
@@ -260,9 +261,9 @@ function LoginView({
       await onLogin?.(form);
       onSuccess();
     } catch (err: unknown) {
-      setGeneralError(
-        err instanceof Error ? err.message : "Invalid email or password.",
-      );
+      const message = err instanceof Error ? err.message : "Invalid email or password.";
+      setGeneralError(message);
+      toastService.error(message);
     } finally {
       setLoading(false);
     }
@@ -274,9 +275,9 @@ function LoginView({
       await onGoogleLogin?.();
       onSuccess();
     } catch (err: unknown) {
-      setGeneralError(
-        err instanceof Error ? err.message : "Google sign-in failed.",
-      );
+      const message = err instanceof Error ? err.message : "Google sign-in failed.";
+      setGeneralError(message);
+      toastService.error(message);
     } finally {
       setGoogleLoading(false);
     }
@@ -354,7 +355,7 @@ function LoginView({
         </Button>
 
         <p className="text-center text-xs text-muted-foreground">
-          Don't have an account?{" "}
+          Don&apos;t have an account?{" "}
           <button
             type="button"
             onClick={onSwitchToRegister}
@@ -429,11 +430,12 @@ function RegisterView({
       await onRegister?.(form);
       onSuccess();
     } catch (err: unknown) {
-      setGeneralError(
+      const message =
         err instanceof Error
           ? err.message
-          : "Registration failed. Please try again.",
-      );
+          : "Registration failed. Please try again.";
+      setGeneralError(message);
+      toastService.error(message);
     } finally {
       setLoading(false);
     }
@@ -445,9 +447,9 @@ function RegisterView({
       await onGoogleLogin?.();
       onSuccess();
     } catch (err: unknown) {
-      setGeneralError(
-        err instanceof Error ? err.message : "Google sign-in failed.",
-      );
+      const message = err instanceof Error ? err.message : "Google sign-in failed.";
+      setGeneralError(message);
+      toastService.error(message);
     } finally {
       setGoogleLoading(false);
     }
@@ -590,11 +592,12 @@ function OtpInputView({
       await onOtpRequest?.({ contact: contact.trim(), type });
       onOtpSent(contact.trim(), type);
     } catch (err: unknown) {
-      setError(
+      const message =
         err instanceof Error
           ? err.message
-          : "Failed to send OTP. Please try again.",
-      );
+          : "Failed to send OTP. Please try again.";
+      setError(message);
+      toastService.error(message);
     } finally {
       setLoading(false);
     }
@@ -611,7 +614,7 @@ function OtpInputView({
           )}
         </div>
         <p className="text-sm text-muted-foreground text-center">
-          We'll send a 6-digit OTP to your {isEmail ? "email" : "phone"}
+          We&apos;ll send a 6-digit OTP to your {isEmail ? "email" : "phone"}
         </p>
       </div>
 
@@ -703,9 +706,9 @@ function OtpVerifyView({
       await onOtpVerify?.({ contact, type, otp });
       onSuccess();
     } catch (err: unknown) {
-      setError(
-        err instanceof Error ? err.message : "Incorrect OTP. Please try again.",
-      );
+      const message = err instanceof Error ? err.message : "Incorrect OTP. Please try again.";
+      setError(message);
+      toastService.error(message);
       setOtp("");
     } finally {
       setLoading(false);
@@ -720,7 +723,9 @@ function OtpVerifyView({
       setCountdown(OTP_RESEND_SECONDS);
       setOtp("");
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Failed to resend OTP.");
+      const message = err instanceof Error ? err.message : "Failed to resend OTP.";
+      setError(message);
+      toastService.error(message);
     } finally {
       setResending(false);
     }
