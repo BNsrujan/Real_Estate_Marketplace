@@ -18,6 +18,7 @@ import Profile from "@/features/profile/components/Profile";
 import { usePropertyStore } from "@/features/properties/hooks/use_property_store";
 import PropertyHoverCard from "@/features/properties/components/property_card";
 import { useStore } from "@/shared/store";
+import { addMapLayers, addMapboxAdminBoundaries } from "../services/map_layer_service";
 
 interface Props {
   setIsLoaded: React.Dispatch<React.SetStateAction<boolean>>;
@@ -156,6 +157,10 @@ export function MapCanvas({ setIsLoaded }: Props) {
         };
 
         if (mapboxStyles[layer]) {
+          map.once("style.load", () => {
+            addMapLayers(map);
+            addMapboxAdminBoundaries(map);
+          });
           map.setStyle(mapboxStyles[layer]!);
           return;
         }
@@ -222,6 +227,7 @@ export function MapCanvas({ setIsLoaded }: Props) {
           transition-all duration-400 ease-in-out
           [text-shadow:0_0_40px_rgba(108,207,255,0.6)]
           font-['Orbitron',sans-serif]
+          z-[3] opacity-100
         "
       >
         NAMMA DHARANI
