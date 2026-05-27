@@ -59,6 +59,7 @@ export function useMapInstance({
       style: {
         version: 8,
         projection: { name: "globe" },
+        glyphs: "mapbox://fonts/mapbox/{fontstack}/{range}.pbf",
         sources: {
           satellite: TILE_SOURCES.satellite,
           roads: TILE_SOURCES.roads,
