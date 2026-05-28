@@ -28,7 +28,7 @@ export function useAuthStore<T>(
     user: User | null;
     userProfile: UserProfile | null;
     login: (user: User) => void;
-    logout: () => void;
+    logout: () => Promise<void>;
   }) => T,
 ): T {
   return useStore((s) =>

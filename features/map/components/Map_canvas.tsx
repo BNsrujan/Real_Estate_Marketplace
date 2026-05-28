@@ -214,7 +214,7 @@ export function MapCanvas({ setIsLoaded }: Props) {
       <div
         ref={titleRef}
         className="
-          absolute top-5 left-0 w-full 
+          absolute top-5 left-0 w-full z-[3]
           text-center pointer-events-none
           text-[clamp(28px,7vw,110px)]
           tracking-[clamp(4px,2vw,14px)]

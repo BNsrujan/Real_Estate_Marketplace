@@ -1,5 +1,6 @@
 import { apiService } from '@/shared/services/api.service';
 import { notifyAuthRestored } from '@/shared/services/api.service';
+import { clearClientAuthData, clearServerAuthCookie } from '@/shared/services/auth_session.service';
 import type { UserProfile, ApiResponse, Property } from '@/shared/types';
 
 // ─── Backend response shapes ──────────────────────────────────────────────────
@@ -46,10 +47,12 @@ interface BackendWatchlistItem {
 // ─── Mappers ─────────────────────────────────────────────────────────────────
 
 function mapBackendUser(u: BackendUser): UserProfile {
+  const emailPrefix = deriveUsernameFromEmail(u.email);
+
   return {
     id: u.id,
-    username: u.username,
-    name: u.name ?? u.username,
+    username: u.username || emailPrefix,
+    name: u.name ?? u.username ?? emailPrefix,
     email: u.email,
     phone: u.phone ?? '',
     role: u.role,
@@ -58,6 +61,16 @@ function mapBackendUser(u: BackendUser): UserProfile {
     avatarUrl: u.avatarUrl ?? null,
     createdAt: u.createdAt,
   };
+}
+
+function deriveUsernameFromEmail(email: string): string {
+  return email
+    .split('@')[0]
+    .toLowerCase()
+    .replace(/[^a-z0-9_]/g, '_')
+    .replace(/_+/g, '_')
+    .replace(/^_+|_+$/g, '')
+    .slice(0, 40) || 'user';
 }
 
 function mapWatchlistItem(item: BackendWatchlistItem): Property {
@@ -122,12 +135,13 @@ function normalizePropertyType(type: string): Property['type'] {
 // Tokens now live in the httpOnly auth_session cookie managed by the backend.
 // These helpers are kept as no-ops so existing callers don't need immediate changes.
 
-export function saveAuthToken(_token: string): void { /* no-op: tokens are in cookie */ }
-export function clearAuthToken(): void { /* no-op: backend clears cookie on logout */ }
+export function saveAuthToken(_token: string): void { void _token; /* no-op: tokens are in cookie */ }
+export function clearAuthToken(): void { clearClientAuthData(); }
 export function hasAuthToken(): boolean { return false; /* cookie is httpOnly — not readable from JS */ }
 
 export async function logout(): Promise<void> {
-  await apiService.post('/api/v1/auth/logout', {});
+  clearClientAuthData();
+  await clearServerAuthCookie();
 }
 
 // ─── Auth API calls ───────────────────────────────────────────────────────────
@@ -145,6 +159,7 @@ export async function register(opts: {
     email: opts.email,
     password: opts.password,
     phone: opts.mobile,
+    username: deriveUsernameFromEmail(opts.email),
   });
   return { user: mapBackendUser(res.data.user), token: '' };
 }

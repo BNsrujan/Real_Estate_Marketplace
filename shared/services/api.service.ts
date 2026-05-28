@@ -22,6 +22,10 @@ interface QueuedRequest {
 const retryQueue: QueuedRequest[] = [];
 let isRefreshing = false;
 
+function shouldQueueAuthFailure(endpoint: string): boolean {
+  return !endpoint.startsWith('/api/v1/auth/');
+}
+
 function flushQueue(success: boolean) {
   isRefreshing = false;
   const items = retryQueue.splice(0);
@@ -69,7 +73,7 @@ async function request<T>(
 
   // 401 means the backend has already attempted the silent refresh and both tokens are expired.
   // Queue the request and open the login modal — no separate /refresh call needed.
-  if (response.status === 401 && !options._isRetry) {
+  if (response.status === 401 && !options._isRetry && shouldQueueAuthFailure(endpoint)) {
     const store = getStore();
     const { openLoginModal } = store.getState();
 

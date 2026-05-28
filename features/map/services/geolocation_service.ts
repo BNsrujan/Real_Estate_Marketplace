@@ -156,6 +156,7 @@ export function drawAccuracyCircle(
  * Cleans up accuracy circle visualization from the map.
  */
 export function removeAccuracyCircle(map: mapboxgl.Map) {
+  if (!(map as { style?: unknown }).style) return;
   if (map.getLayer("accuracy-fill")) map.removeLayer("accuracy-fill");
   if (map.getLayer("accuracy-border")) map.removeLayer("accuracy-border");
   if (map.getSource("accuracy-circle")) map.removeSource("accuracy-circle");
@@ -242,7 +243,7 @@ export function getCurrentPositionLowAccuracy(): Promise<GeolocationResult> {
       },
       (error) => {
         let code: GeolocationError["code"] = "UNKNOWN";
-        let message = "Could not determine location.";
+        const message = "Could not determine location.";
 
         if (error.code === error.PERMISSION_DENIED) {
           code = "PERMISSION_DENIED";
