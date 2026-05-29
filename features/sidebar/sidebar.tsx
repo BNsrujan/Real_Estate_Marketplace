@@ -1,7 +1,14 @@
 "use client";
 
 import { useCallback, useState } from "react";
-import { Map, Bookmark, MessageSquare, Search, BookOpen, Plus } from "lucide-react";
+import {
+  Map,
+  Bookmark,
+  MessageSquare,
+  Search,
+  BookOpen,
+  Plus,
+} from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -30,11 +37,36 @@ type SidebarMenu = {
 };
 
 const SIDEBAR_MENUS: SidebarMenu[] = [
-  { id: "map",      title: "Map Explorer",      Icon: Map,            description: "Explore properties." },
-  { id: "search",   title: "Browse Properties", Icon: Search,         description: "Filter and discover listings." },
-  { id: "saved",    title: "Saved Properties",  Icon: Bookmark,       description: "Your bookmarks and recent views." },
-  { id: "messages", title: "My Enquiries",       Icon: MessageSquare,  description: "Enquiries you have submitted." },
-  { id: "blog",     title: "Blog",              Icon: BookOpen,       description: "Real estate insights and news." },
+  {
+    id: "map",
+    title: "Map Explorer",
+    Icon: Map,
+    description: "Explore properties.",
+  },
+  {
+    id: "search",
+    title: "Browse Properties",
+    Icon: Search,
+    description: "Filter and discover listings.",
+  },
+  {
+    id: "saved",
+    title: "Saved Properties",
+    Icon: Bookmark,
+    description: "Your bookmarks and recent views.",
+  },
+  {
+    id: "messages",
+    title: "My Enquiries",
+    Icon: MessageSquare,
+    description: "Enquiries you have submitted.",
+  },
+  {
+    id: "blog",
+    title: "Blog",
+    Icon: BookOpen,
+    description: "Real estate insights and news.",
+  },
 ];
 
 const AUTH_GATED_MENUS: Exclude<MenuId, null>[] = [];
@@ -70,28 +102,33 @@ function SidebarMenuItem({
               relative flex h-8 w-14 items-center justify-center rounded-full
               transition-all duration-300 ease-[cubic-bezier(0.2,0,0,1)]
               active:scale-95
-              ${pressed
-                ? "bg-secondary shadow-sm"
-                : "bg-transparent hover:bg-muted"
+              ${
+                pressed
+                  ? "bg-secondary shadow-sm"
+                  : "bg-transparent hover:bg-muted"
               }
             `}
           >
             <Icon
               size={20}
               className={`transition-colors duration-200 ${
-                pressed ? "text-primary" : "text-muted-foreground group-hover:text-foreground"
+                pressed
+                  ? "text-primary"
+                  : "text-muted-foreground group-hover:text-foreground"
               }`}
             />
           </div>
-          <span className={`text-[10px] font-medium transition-colors duration-200 leading-none ${
-            pressed ? "text-primary" : "text-muted-foreground"
-          }`}>
+          <span
+            className={`text-[10px] font-medium transition-colors duration-200 leading-none ${
+              pressed ? "text-primary" : "text-muted-foreground"
+            }`}
+          >
             {item.title.split(" ")[0]}
           </span>
         </TooltipTrigger>
         <TooltipContent
           side="right"
-          className="bg-foreground border border-border text-background text-xs font-medium px-3 py-1.5 rounded-xl shadow-md z-[1100]"
+          className="bg-foreground border border-border text-background text-xs font-medium px-3 py-1.5 rounded-xl shadow-md z-1100"
         >
           {item.title}
         </TooltipContent>
@@ -104,19 +141,27 @@ function SidebarMenuItem({
 
 export function AppSidebar() {
   const [showSellModal, setShowSellModal] = useState(false);
-  const activeMenu      = useSidebarStore((s) => s.activeMenu);
-  const setActiveMenu   = useSidebarStore((s) => s.setActiveMenu);
-  const isPanelOpen     = useSidebarStore((s) => s.isPanelOpen);
-  const openPanel       = useSidebarStore((s) => s.openPanel);
-  const togglePanel     = useSidebarStore((s) => s.togglePanel);
+  const activeMenu = useSidebarStore((s) => s.activeMenu);
+  const setActiveMenu = useSidebarStore((s) => s.setActiveMenu);
+  const isPanelOpen = useSidebarStore((s) => s.isPanelOpen);
+  const openPanel = useSidebarStore((s) => s.openPanel);
+  const togglePanel = useSidebarStore((s) => s.togglePanel);
   const savedProperties = useSidebarStore((s) => s.savedProperties);
   const isAuthenticated = useStore((s) => s.auth.isAuthenticated);
-  const openLoginModal  = useStore((s) => s.openLoginModal);
+  const openLoginModal = useStore((s) => s.openLoginModal);
+  const selectedProperty = useStore((s) => s.properties.selectedProperty);
+  const setSelectedProperty = useStore((s) => s.setSelectedProperty);
 
   const handleMenuActivate = useCallback(
     (id: MenuId) => {
       if (id && AUTH_GATED_MENUS.includes(id) && !isAuthenticated) {
         openLoginModal();
+        return;
+      }
+      if (selectedProperty) {
+        setSelectedProperty(null);
+        setActiveMenu(id);
+        openPanel();
         return;
       }
       if (id === activeMenu) {
@@ -126,14 +171,25 @@ export function AppSidebar() {
         openPanel();
       }
     },
-    [activeMenu, setActiveMenu, openPanel, togglePanel, isAuthenticated, openLoginModal],
+    [
+      activeMenu,
+      selectedProperty,
+      setSelectedProperty,
+      setActiveMenu,
+      openPanel,
+      togglePanel,
+      isAuthenticated,
+      openLoginModal,
+    ],
   );
 
   return (
     <>
-      {showSellModal && <SellFormModal onClose={() => setShowSellModal(false)} />}
+      {showSellModal && (
+        <SellFormModal onClose={() => setShowSellModal(false)} />
+      )}
 
-      <div className="hidden md:flex h-screen overflow-hidden w-22 relative z-[800]">
+      <div className="hidden md:flex h-screen overflow-hidden w-22 relative z-800">
         <Sidebar className="w-22 border-r border-border bg-sidebar flex flex-col items-center py-4">
           <SidebarContent className="px-3 py-4 flex flex-col ">
             <SidebarGroup className="">
@@ -155,7 +211,10 @@ export function AppSidebar() {
                       <TooltipTrigger
                         aria-label="List Property"
                         onClick={() => {
-                          if (!isAuthenticated) { openLoginModal(); return; }
+                          if (!isAuthenticated) {
+                            openLoginModal();
+                            return;
+                          }
                           setShowSellModal(true);
                         }}
                         className="group flex flex-col items-center gap-1 w-full py-1 focus-visible:outline-none"
@@ -163,11 +222,13 @@ export function AppSidebar() {
                         <div className="relative flex h-8 w-14 items-center justify-center rounded-full bg-primary/10 hover:bg-primary/20 transition-all duration-300 active:scale-95">
                           <Plus size={20} className="text-primary" />
                         </div>
-                        <span className="text-[10px] font-medium text-primary leading-none">List</span>
+                        <span className="text-[10px] font-medium text-primary leading-none">
+                          List
+                        </span>
                       </TooltipTrigger>
                       <TooltipContent
                         side="right"
-                        className="bg-popover border border-border text-background bg-foreground text-xs font-medium px-3 py-1.5 rounded-xl shadow-md z-1100"
+                        className="bg-popover border border-border text-background text-xs font-medium px-3 py-1.5 rounded-xl shadow-md z-1100"
                       >
                         List Property
                       </TooltipContent>
