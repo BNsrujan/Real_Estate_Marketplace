@@ -100,6 +100,22 @@ function AuthGate({
 
 // ─── Browse Panel ─────────────────────────────────────────────────────────────
 
+const BROWSE_PROPERTY_LIMIT = 200;
+
+function matchesBrowseSearch(property: Property, query: string): boolean {
+  const normalizedQuery = query.trim().toLowerCase();
+  if (!normalizedQuery) return true;
+
+  return [
+    property.title,
+    property.districtName,
+    property.city,
+    property.taluk,
+    property.address,
+    property.description,
+  ].some((value) => value?.toLowerCase().includes(normalizedQuery));
+}
+
 function BrowsePanel({ onOpen }: { onOpen: (p: Property) => void }) {
   const [results, setResults]             = useState<Property[]>([]);
   const [isLoading, setIsLoading]         = useState(false);
@@ -111,11 +127,11 @@ function BrowsePanel({ onOpen }: { onOpen: (p: Property) => void }) {
   const load = useCallback(async () => {
     setIsLoading(true);
     try {
-      const params: Parameters<typeof getProperties>[0] = { limit: 40 };
-      if (search.trim())              params.search  = search.trim();
+      const params: Parameters<typeof getProperties>[0] = { limit: BROWSE_PROPERTY_LIMIT };
       if (selectedTypes.length === 1) params.type    = selectedTypes[0];
       if (listingType !== 'all')      params.listing = listingType;
-      setResults(await getProperties(params));
+      const properties = await getProperties(params);
+      setResults(properties.filter((property) => matchesBrowseSearch(property, search)));
     } catch {
       setResults([]);
     } finally {
@@ -465,6 +481,8 @@ function BlogPanel() {
 export function DetailPanel() {
   const activeMenu          = useSidebarStore((s) => s.activeMenu);
   const isPanelOpen         = useSidebarStore((s) => s.isPanelOpen);
+  const setActiveMenu       = useSidebarStore((s) => s.setActiveMenu);
+  const closePanel          = useSidebarStore((s) => s.closePanel);
   const savedProperties     = useSidebarStore((s) => s.savedProperties);
   const selectedProperty    = useSidebarStore((s) => s.selectedProperty);
   const setSelectedProperty = useSidebarStore((s) => s.setSelectedProperty);
@@ -497,6 +515,11 @@ export function DetailPanel() {
     setEnquiryMsg('');
     setEnquiryPhone('');
     setEnquirySent(false);
+  };
+
+  const handlePanelClose = () => {
+    closePanel();
+    setActiveMenu(null);
   };
 
   const handleSave = () => {
@@ -869,7 +892,16 @@ export function DetailPanel() {
           // ── Menu content (no property selected) ──────────────────────────
           <>
             {/* Header */}
-            <div className="shrink-0 border-b border-border/60 px-6 pt-6 pb-5">
+            <div className="relative shrink-0 border-b border-border/60 px-6 pt-6 pb-5">
+              <button
+                type="button"
+                aria-label="Close panel"
+                onClick={handlePanelClose}
+                className="absolute top-3 right-3 flex items-center justify-center w-8 h-8 rounded-full bg-black/60 text-white hover:bg-black/80 transition-colors active:scale-95"
+              >
+                <X size={16} />
+              </button>
+
               <div className="flex items-start gap-4">
                 <div className="relative shrink-0">
                   <div aria-hidden="true" className="absolute inset-0 rounded-2xl bg-primary/20 blur-md opacity-60" />

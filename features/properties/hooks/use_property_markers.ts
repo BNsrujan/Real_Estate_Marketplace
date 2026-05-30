@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import mapboxgl from "mapbox-gl";
 import { PropertyMarkerService } from "@/features/properties/services/property_marker_service";
 import { useStore } from "@/shared/store";
@@ -33,8 +33,57 @@ export function usePropertyMarkers({
   // Read from global store — updated by usePropertyStore + filter changes
   const filtered = useStore((s) => s.properties.filtered);
   const isLoading = useStore((s) => s.properties.isLoading);
+  const selectedProperty = useStore((s) => s.properties.selectedProperty);
   const setSelectedProperty = useStore((s) => s.setSelectedProperty);
   const isAnimating = useStore((s) => s.map.isAnimating);
+
+  const handleMarkerClick = useCallback(
+    (property: Property, map: mapboxgl.Map) => {
+      if (isAnimating) return;
+
+      // On desktop the detail panel slides in from the left (~400px wide).
+      // Adding left padding shifts the viewport centre into the visible area
+      // so the clicked marker lands to the right of the panel, not behind it.
+      // On mobile the panel is a bottom drawer, so no left offset is needed.
+      const isDesktop = typeof window !== 'undefined' && window.innerWidth >= 768;
+      const panelLeftPx = isDesktop ? 400 : 0;
+
+      map.flyTo({
+        center: [Number(property.lng), Number(property.lat)],
+        zoom: MARKER_ZOOM_LEVEL,
+        duration: MARKER_ZOOM_DURATION,
+        curve: 1.42,
+        padding: { left: panelLeftPx, top: 0, right: 0, bottom: 0 },
+      });
+
+      if (activeMarkerRef.current) {
+        markerServiceRef.current?.updateMarkerActive(activeMarkerRef.current, false);
+      }
+      activeMarkerRef.current = property.id;
+      markerServiceRef.current?.updateMarkerActive(property.id, true);
+
+      setSelectedProperty(property);
+      onMarkerClick?.(property);
+    },
+    [isAnimating, onMarkerClick, setSelectedProperty],
+  );
+
+  const renderMarkers = useCallback(
+    (props: Property[]) => {
+      const map = mapRef.current;
+      if (!map || !markerServiceRef.current) return;
+      const zoom = map.getZoom();
+      if (zoom < PROPERTY_MARKER_MIN_ZOOM) return;
+
+      markerServiceRef.current.addMarkers(
+        props,
+        (prop) => handleMarkerClick(prop, map),
+        (prop) => onMarkerHover?.(prop),
+        () => onMarkerLeave?.(),
+      );
+    },
+    [handleMarkerClick, mapRef, onMarkerHover, onMarkerLeave],
+  );
 
   // Initialize (or re-initialize after setStyle) marker service.
   // styleLoadCount increments on every style.load, so this effect re-runs
@@ -65,57 +114,21 @@ export function usePropertyMarkers({
       markerServiceRef.current?.dispose();
       markerServiceRef.current = null;
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [mapRef, isStyleLoaded, styleLoadCount]);
+  }, [mapRef, isStyleLoaded, styleLoadCount, renderMarkers]);
 
   // Re-render markers whenever filtered properties change
   useEffect(() => {
     if (!isStyleLoaded || isLoading) return;
     renderMarkers(filtered);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filtered, isStyleLoaded, isLoading]);
+  }, [filtered, isStyleLoaded, isLoading, renderMarkers]);
 
-  function renderMarkers(props: Property[]) {
-    const map = mapRef.current;
-    if (!map || !markerServiceRef.current) return;
-    const zoom = map.getZoom();
-    if (zoom < PROPERTY_MARKER_MIN_ZOOM) return;
-
-    markerServiceRef.current.addMarkers(
-      props,
-      (prop) => handleMarkerClick(prop, map),
-      (prop) => onMarkerHover?.(prop),
-      () => onMarkerLeave?.(),
-    );
-  }
-
-  function handleMarkerClick(property: Property, map: mapboxgl.Map) {
-    if (isAnimating) return;
-
-    // On desktop the detail panel slides in from the left (~400px wide).
-    // Adding left padding shifts the viewport centre into the visible area
-    // so the clicked marker lands to the right of the panel, not behind it.
-    // On mobile the panel is a bottom drawer, so no left offset is needed.
-    const isDesktop = typeof window !== 'undefined' && window.innerWidth >= 768;
-    const panelLeftPx = isDesktop ? 400 : 0;
-
-    map.flyTo({
-      center: [Number(property.lng), Number(property.lat)],
-      zoom: MARKER_ZOOM_LEVEL,
-      duration: MARKER_ZOOM_DURATION,
-      curve: 1.42,
-      padding: { left: panelLeftPx, top: 0, right: 0, bottom: 0 },
-    });
-
+  useEffect(() => {
+    if (selectedProperty) return;
     if (activeMarkerRef.current) {
       markerServiceRef.current?.updateMarkerActive(activeMarkerRef.current, false);
+      activeMarkerRef.current = null;
     }
-    activeMarkerRef.current = property.id;
-    markerServiceRef.current?.updateMarkerActive(property.id, true);
-
-    setSelectedProperty(property);
-    onMarkerClick?.(property);
-  }
+  }, [selectedProperty]);
 
   return {
     setActiveMarker: (propertyId: string) => {
