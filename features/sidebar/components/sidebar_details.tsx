@@ -116,7 +116,7 @@ function matchesBrowseSearch(property: Property, query: string): boolean {
   ].some((value) => value?.toLowerCase().includes(normalizedQuery));
 }
 
-function BrowsePanel({ onOpen }: { onOpen: (p: Property) => void }) {
+export function BrowsePanel({ onOpen }: { onOpen: (p: Property) => void }) {
   const [results, setResults]             = useState<Property[]>([]);
   const [isLoading, setIsLoading]         = useState(false);
   const [search, setSearch]               = useState('');
@@ -285,7 +285,7 @@ function BrowsePanel({ onOpen }: { onOpen: (p: Property) => void }) {
 
 // ─── Enquiries Panel ──────────────────────────────────────────────────────────
 
-function EnquiriesPanel() {
+export function EnquiriesPanel() {
   const [enquiries, setEnquiries] = useState<EnquiryWithProperty[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -350,7 +350,7 @@ function EnquiriesPanel() {
 
 // ─── Blog Panel ───────────────────────────────────────────────────────────────
 
-function BlogPanel() {
+export function BlogPanel() {
   const [posts, setPosts]       = useState<BlogPostCard[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selected, setSelected] = useState<BlogPostCard | null>(null);
