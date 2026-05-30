@@ -8,7 +8,7 @@ interface Props {
 
 export default function StartExploreButton({ onClick }: Props) {
   return (
-    <div className="absolute bottom-6 md:bottom-12 left-1/2 z-20 flex w-full -translate-x-1/2 justify-center px-4">
+    <div className="absolute bottom-16 min-[390px]:bottom-20 md:bottom-12 left-1/2 z-20 flex w-full -translate-x-1/2 justify-center px-4 [@media(max-width:389px)_and_(max-height:780px)]:[&>button]:py-2.5">
       <button
         onClick={onClick}
         className="

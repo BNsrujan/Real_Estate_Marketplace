@@ -75,7 +75,11 @@ export function MapCanvas({ setIsLoaded }: Props) {
     setShowButton(zoom < 4);
   }, []);
 
-  const { mapRef: mapInstance, isStyleLoaded, styleLoadCount } = useMapInstance({
+  const {
+    mapRef: mapInstance,
+    isStyleLoaded,
+    styleLoadCount,
+  } = useMapInstance({
     containerRef: mapContainerRef,
     onLoad: () => {
       setIsLoaded(true);
@@ -196,7 +200,7 @@ export function MapCanvas({ setIsLoaded }: Props) {
         <StarField />
       </div>
 
-      <div className="absolute md:bottom-0 bottom-26 inset-0 z-2 pointer-events-none">
+      <div className="absolute inset-0 z-2 pointer-events-none">
         {showButton && (
           <div className="pointer-events-auto">
             <StartExploreButton onClick={zoomToKarnataka} />
