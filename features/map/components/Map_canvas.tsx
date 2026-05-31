@@ -178,7 +178,7 @@ export function MapCanvas({ setIsLoaded }: Props) {
   }, [isStyleLoaded, activeLayer, handleLayerChange]);
 
   return (
-    <div className="relative w-full h-screen overflow-hidden">
+    <div className="relative w-full h-screen h-[100svh] md:h-screen overflow-hidden">
       {/* Map */}
       <div
         ref={mapContainerRef}
@@ -218,7 +218,7 @@ export function MapCanvas({ setIsLoaded }: Props) {
       <div
         ref={titleRef}
         className="
-          absolute top-5 left-0 w-full z-[3]
+          absolute top-[calc(env(safe-area-inset-top)+1rem)] md:top-5 left-0 w-full z-[3]
           text-center pointer-events-none
           text-[clamp(28px,7vw,110px)]
           tracking-[clamp(4px,2vw,14px)]
