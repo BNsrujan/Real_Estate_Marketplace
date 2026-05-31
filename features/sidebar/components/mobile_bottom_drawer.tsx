@@ -5,7 +5,6 @@ import Image from "next/image";
 import {
   Map, Search, Bookmark, BookmarkCheck, Bell, Activity,
   TrendingUp, Inbox, MapPin, X, Phone, Lock, Send, CheckCircle,
-  BookOpen,
 } from "lucide-react";
 import PropertyCard from "@/features/properties/components/property_card";
 import { submitEnquiry } from "@/features/properties/api/enquiry_api";
@@ -16,7 +15,6 @@ import { useWatchlistSync } from "@/features/properties/hooks/use_watchlist_sync
 import { SidebarCard } from "@/shared/ui/sidebar_card";
 import type { PropertyDetail } from "@/shared/types";
 import { Drawer, DrawerContent } from "@/shared/components/ui/drawer";
-import { BlogPanel, BrowsePanel, EnquiriesPanel } from "./sidebar_details";
 
 type MenuContent = {
   id: string;
@@ -27,10 +25,9 @@ type MenuContent = {
 
 const MENU_CONTENT: Record<string, MenuContent> = {
   map:      { id: "map",      title: "Map Explorer",     description: "Explore properties with interactive layers.", Icon: Map },
-  search:   { id: "search",   title: "Browse Properties", description: "Filter and discover listings across Karnataka.", Icon: Search },
+  search:   { id: "search",   title: "Smart Search",     description: "Search properties by filters, location, and landmarks.", Icon: Search },
   saved:    { id: "saved",    title: "Saved Properties", description: "Your bookmarked properties and recent views.", Icon: Bookmark },
-  messages: { id: "messages", title: "My Enquiries",     description: "Enquiries you have submitted to sellers.", Icon: Inbox },
-  blog:     { id: "blog",     title: "Blog",             description: "Real estate insights, news and guides.", Icon: BookOpen },
+  messages: { id: "messages", title: "Messages",         description: "Chat with agents and property owners.", Icon: Inbox },
 };
 
 export default function MobileBottomDrawer() {
@@ -127,7 +124,8 @@ export default function MobileBottomDrawer() {
       direction="bottom"
     >
       <DrawerContent
-        className="bottom-16 bg-background border-t border-border rounded-t-3xl md:hidden max-h-[calc(100dvh-5rem)]"
+        className="bg-background border-t border-border rounded-t-3xl md:hidden max-h-[75vh] "
+        style={{ bottom: "2rem" }}
       >
         {selectedProperty ? (
           /* ── Property detail ── */
@@ -330,9 +328,25 @@ export default function MobileBottomDrawer() {
               )}
 
               {activeMenu === "search" && (
-                <div className="h-[calc(100dvh-14rem)] min-h-96 overflow-hidden">
-                  <BrowsePanel onOpen={(p) => { setSelectedProperty(p); }} />
-                </div>
+                <>
+                  <div className="flex items-center gap-3 rounded-t-xl rounded-b-none border-0 border-b-2 border-border bg-input px-4 py-3 focus-within:border-primary transition-colors">
+                    <Search size={16} className="text-muted-foreground shrink-0" />
+                    <input
+                      placeholder="Search properties..."
+                      className="w-full bg-transparent text-sm text-foreground outline-none placeholder:text-muted-foreground"
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    {["Under ₹50L", "Villa", "Apartment", "Commercial"].map((item) => (
+                      <button
+                        key={item}
+                        className="rounded-full border border-border bg-muted px-3 py-2.5 text-xs text-foreground transition-all duration-200 hover:bg-secondary active:scale-95"
+                      >
+                        {item}
+                      </button>
+                    ))}
+                  </div>
+                </>
               )}
 
               {activeMenu === "saved" && (
@@ -365,11 +379,11 @@ export default function MobileBottomDrawer() {
               )}
 
               {activeMenu === "messages" && (
-                !isAuthenticated ? (
-                  <SidebarCard className="p-4">
+                <SidebarCard className="p-4">
+                  {!isAuthenticated ? (
                     <div className="flex flex-col items-center gap-3 text-center">
                       <Lock size={24} className="text-muted-foreground" />
-                      <p className="text-xs text-muted-foreground">Login to see your enquiries.</p>
+                      <p className="text-xs text-muted-foreground">Login to see your messages.</p>
                       <button
                         onClick={() => openLoginModal()}
                         className="w-full rounded-full bg-primary px-4 py-2 text-xs font-semibold text-primary-foreground hover:bg-primary/90 active:scale-95 transition-all"
@@ -377,14 +391,10 @@ export default function MobileBottomDrawer() {
                         Login
                       </button>
                     </div>
-                  </SidebarCard>
-                ) : (
-                  <EnquiriesPanel />
-                )
-              )}
-
-              {activeMenu === "blog" && (
-                <BlogPanel />
+                  ) : (
+                    <p className="text-xs text-muted-foreground">No messages yet.</p>
+                  )}
+                </SidebarCard>
               )}
             </div>
 
