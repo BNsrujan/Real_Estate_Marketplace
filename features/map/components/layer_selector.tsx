@@ -114,6 +114,7 @@ const MapLayerSelector = ({ onLayerChange }: MapLayerSelectorProps) => {
           className={`
             absolute bottom-0 left-full ml-2 md:ml-4
             flex items-end gap-2 md:gap-3
+            max-w-[calc(100vw-6rem)] overflow-x-auto overscroll-x-contain no-scrollbar md:max-w-none md:overflow-visible
             transition-all duration-500 ease-[cubic-bezier(0.2,0,0,1)]
             ${isExpanded ? "translate-x-0 opacity-100" : "-translate-x-10 opacity-0 pointer-events-none"}
           `}
@@ -123,7 +124,7 @@ const MapLayerSelector = ({ onLayerChange }: MapLayerSelectorProps) => {
               key={layer.id}
               onClick={() => handleLayerChange(layer)}
               className="
-                group relative overflow-hidden rounded-lg md:rounded-xl
+                group relative shrink-0 overflow-hidden rounded-lg md:rounded-xl
                 border border-white/10 bg-black/40 backdrop-blur-xl shadow-xl
                 transition-all duration-300 ease-[cubic-bezier(0.2,0,0,1)]
                 hover:scale-[1.05] hover:border-white/20

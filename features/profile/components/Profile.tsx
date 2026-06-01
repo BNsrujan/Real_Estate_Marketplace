@@ -39,7 +39,7 @@ const Profile = () => {
         <>
           <button
             onClick={() => { closePanel(); setProfileMenuOpen((p) => !p); }}
-            className="flex items-center gap-2 rounded-full bg-white/20 px-1 py-1 backdrop-blur-md hover:bg-white/30 transition"
+            className="flex h-11 w-11 md:h-auto md:w-auto items-center justify-center md:gap-2 rounded-full bg-background/90 md:bg-white/20 p-1 backdrop-blur-md border border-border/40 md:border-0 shadow-sm md:shadow-none hover:bg-background/95 md:hover:bg-white/30 transition"
           >
             <div className="w-8 md:w-10 h-8 md:h-10 rounded-full bg-gray-300 flex items-center justify-center">
               <span className="text-black font-bold text-xs md:text-sm">
@@ -52,7 +52,7 @@ const Profile = () => {
       ) : (
         <button
           onClick={() => openLoginModal()}
-          className="flex items-center gap-2 rounded-lg bg-white/20 px-4 py-2 backdrop-blur-md hover:bg-white/30 transition text-white font-medium text-sm"
+          className="flex h-11 items-center gap-2 rounded-full md:rounded-lg bg-background/90 md:bg-white/20 px-4 py-2 backdrop-blur-md border border-border/40 md:border-0 shadow-sm md:shadow-none hover:bg-background/95 md:hover:bg-white/30 transition text-foreground md:text-white font-medium text-sm"
         >
           Login
         </button>
