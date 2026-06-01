@@ -123,7 +123,7 @@ export default function AppSettingsDialog({ children }: Props) {
         <div aria-hidden="true" className="pointer-events-none absolute -top-20 -right-20 h-56 w-56 rounded-full bg-primary/10 blur-3xl" />
         <div aria-hidden="true" className="pointer-events-none absolute -bottom-16 -left-16 h-44 w-44 rounded-full bg-secondary/60 blur-3xl" />
 
-        <DialogHeader className="relative mb-1">
+        <DialogHeader className="relative mb-1 flex-col gap-1 pr-10">
           <DialogTitle className="text-xl font-bold tracking-tight text-foreground">
             App Settings
           </DialogTitle>
