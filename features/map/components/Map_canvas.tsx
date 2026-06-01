@@ -234,7 +234,7 @@ export function MapCanvas({ setIsLoaded }: Props) {
       {/* UI Panels */}
       {!showButton && (
         <div className="absolute inset-0 z-4 pointer-events-none flex ">
-          <div className="relative ">
+          <div className="relative w-full md:w-auto">
             <div className="absolute md:-top-3 left-0 right-0 pointer-events-auto p-3 md:px-4 md:py-0 ">
               <NavBar />
             </div>
