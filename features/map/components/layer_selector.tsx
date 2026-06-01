@@ -77,8 +77,8 @@ const MapLayerSelector = ({ onLayerChange }: MapLayerSelectorProps) => {
   const toggleExpanded = () => setUI({ isBottomSheetOpen: !isExpanded });
 
   return (
-    <div className="relative w-full z-500 flex items-end gap-2 md:gap-4 flex-wrap md:flex-nowrap justify-start">
-      <div className="relative flex items-end">
+    <div className="relative z-500 flex w-full min-w-0 items-end justify-start gap-2 md:gap-4">
+      <div className="relative flex w-full min-w-0 items-end md:w-auto">
         <button
           onClick={toggleExpanded}
           className="
@@ -88,7 +88,7 @@ const MapLayerSelector = ({ onLayerChange }: MapLayerSelectorProps) => {
             transition-all duration-300 ease-[cubic-bezier(0.2,0,0,1)]
             hover:scale-[1.03] hover:border-white/25 hover:shadow-[0_12px_40px_rgba(0,0,0,0.5)]
             active:scale-[0.98]
-            w-full md:w-auto
+            shrink-0
           "
         >
           <div className="relative flex items-center gap-2 md:gap-4 p-0.5 md:p-1 ">
@@ -112,9 +112,8 @@ const MapLayerSelector = ({ onLayerChange }: MapLayerSelectorProps) => {
         {/* Other layers — slide out on expand */}
         <div
           className={`
-            absolute bottom-0 left-full ml-2 md:ml-4
-            flex items-end gap-2 md:gap-3
-            max-w-[calc(100vw-6rem)] overflow-x-auto overscroll-x-contain no-scrollbar md:max-w-none md:overflow-visible
+            absolute bottom-0 left-[4.25rem] right-0 md:left-full md:right-auto md:ml-4
+            flex min-w-0 flex-nowrap items-end gap-2 overflow-x-auto overscroll-x-contain no-scrollbar md:min-w-max md:gap-3 md:overflow-visible
             transition-all duration-500 ease-[cubic-bezier(0.2,0,0,1)]
             ${isExpanded ? "translate-x-0 opacity-100" : "-translate-x-10 opacity-0 pointer-events-none"}
           `}
