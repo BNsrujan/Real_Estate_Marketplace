@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { AlertCircle, Camera, Check, Mail } from "lucide-react";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription,
@@ -9,6 +9,7 @@ import { Input } from "@/shared/components/ui/input";
 import { cn } from "@/lib/utils";
 import type { UserProfile } from "@/shared/types";
 import { updateProfile } from "@/features/profile/api/auth_api";
+import { uploadToCloudinary } from "@/features/sell/api/sell_api";
 import { useStore } from "@/shared/store";
 
 interface Props {
@@ -19,16 +20,35 @@ interface Props {
 
 export default function ProfileDetailsDialog({ user, fullUser, children }: Props) {
   const setAuth = useStore((s) => s.setAuth);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [open, setOpen] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [saved, setSaved] = useState(false);
   const [generalError, setGeneralError] = useState<string | null>(null);
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(fullUser?.avatarUrl ?? user?.avatar ?? null);
   const [values, setValues] = useState({
     name: fullUser?.name ?? user?.name ?? "",
     phone: fullUser?.phone ?? "",
     username: fullUser?.username ?? "",
   });
   const [errors, setErrors] = useState<Partial<typeof values>>({});
+
+  useEffect(() => {
+    return () => {
+      if (avatarPreview?.startsWith("blob:")) URL.revokeObjectURL(avatarPreview);
+    };
+  }, [avatarPreview]);
+
+  function handleOpenChange(nextOpen: boolean) {
+    if (nextOpen && !open) {
+      setAvatarPreview(null);
+      setAvatarUrl(fullUser?.avatarUrl ?? user?.avatar ?? null);
+      setGeneralError(null);
+    }
+    setOpen(nextOpen);
+  }
 
   function set(key: keyof typeof values) {
     return (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -48,7 +68,7 @@ export default function ProfileDetailsDialog({ user, fullUser, children }: Props
 
   async function handleSave(e: React.FormEvent) {
     e.preventDefault();
-    if (!validate()) return;
+    if (!validate() || uploadingAvatar) return;
     setSaving(true);
     setGeneralError(null);
     try {
@@ -56,6 +76,7 @@ export default function ProfileDetailsDialog({ user, fullUser, children }: Props
         name: values.name.trim(),
         phone: values.phone.trim() || undefined,
         username: values.username.trim() || undefined,
+        avatarUrl: avatarUrl ?? undefined,
       });
       setAuth({ user: updated });
       setSaved(true);
@@ -67,15 +88,41 @@ export default function ProfileDetailsDialog({ user, fullUser, children }: Props
     }
   }
 
+  async function handleAvatarFile(file: File | undefined) {
+    if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      setGeneralError("Please choose an image file.");
+      return;
+    }
+
+    const previewUrl = URL.createObjectURL(file);
+    setAvatarPreview((current) => {
+      if (current?.startsWith("blob:")) URL.revokeObjectURL(current);
+      return previewUrl;
+    });
+    setUploadingAvatar(true);
+    setGeneralError(null);
+
+    try {
+      const uploadedUrl = await uploadToCloudinary(file);
+      setAvatarUrl(uploadedUrl);
+    } catch {
+      setGeneralError("Image upload failed. Check Cloudinary configuration.");
+    } finally {
+      setUploadingAvatar(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  }
+
   const initials = (user?.name ?? "U")
     .split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2);
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <div
         onClick={(event) => {
           event.stopPropagation();
-          setOpen(true);
+          handleOpenChange(true);
         }}
         className="cursor-pointer"
       >
@@ -89,7 +136,7 @@ export default function ProfileDetailsDialog({ user, fullUser, children }: Props
         <div aria-hidden="true" className="pointer-events-none absolute -top-20 -right-20 h-56 w-56 rounded-full bg-primary/10 blur-3xl" />
         <div aria-hidden="true" className="pointer-events-none absolute -bottom-16 -left-16 h-44 w-44 rounded-full bg-secondary/60 blur-3xl" />
 
-        <DialogHeader className="relative mb-1">
+        <DialogHeader className="relative mb-1 flex-col gap-1 pr-10">
           <DialogTitle className="text-xl font-bold tracking-tight text-foreground">
             Profile Details
           </DialogTitle>
@@ -113,20 +160,38 @@ export default function ProfileDetailsDialog({ user, fullUser, children }: Props
             <div className="flex items-center gap-4 py-1">
               <div className="relative shrink-0">
                 <div className="flex h-14 w-14 items-center justify-center rounded-full bg-secondary text-primary text-lg font-bold overflow-hidden ring-2 ring-primary/20">
-                  {user?.avatar
-                    ? <img src={user.avatar} alt="" className="h-full w-full object-cover" />
+                  {avatarPreview || avatarUrl
+                    ? <img src={avatarPreview ?? avatarUrl ?? ""} alt="" className="h-full w-full object-cover" />
                     : initials}
                 </div>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  className="sr-only"
+                  onChange={(event) => handleAvatarFile(event.target.files?.[0])}
+                  disabled={uploadingAvatar || saving}
+                />
                 <button
                   type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={uploadingAvatar || saving}
                   className="absolute -bottom-2 -right-1 flex p-2 h-3 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-sm hover:bg-primary/90 active:scale-95 transition-all duration-200"
+                  aria-label="Upload profile image"
                 >
-                  <Camera size={11} />
+                  {uploadingAvatar ? (
+                    <span className="h-3 w-3 animate-spin rounded-full border-2 border-primary-foreground border-t-transparent" />
+                  ) : (
+                    <Camera size={11} />
+                  )}
                 </button>
               </div>
               <div>
                 <p className="text-sm font-semibold text-foreground">{user?.name ?? "User"}</p>
                 <p className="text-xs text-muted-foreground mt-0.5 capitalize">{fullUser?.role ?? "buyer"}</p>
+                {uploadingAvatar && (
+                  <p className="text-[11px] text-muted-foreground mt-1">Uploading image…</p>
+                )}
               </div>
             </div>
 
@@ -170,7 +235,7 @@ export default function ProfileDetailsDialog({ user, fullUser, children }: Props
 
             <button
               type="submit"
-              disabled={saving || saved}
+              disabled={saving || saved || uploadingAvatar}
               className="w-full h-11 rounded-full bg-primary text-primary-foreground font-semibold text-sm shadow-sm hover:bg-primary/90 active:scale-95 transition-all duration-200 ease-[cubic-bezier(0.2,0,0,1)] disabled:opacity-70 mt-1"
             >
               {saved ? (
