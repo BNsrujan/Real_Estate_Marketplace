@@ -27,10 +27,18 @@ export default function MobileBottomNav() {
   const togglePanel     = useSidebarStore((s) => s.togglePanel);
   const isAuthenticated = useStore((s) => s.auth.isAuthenticated);
   const openLoginModal  = useStore((s) => s.openLoginModal);
+  const selectedProperty = useStore((s) => s.properties.selectedProperty);
+  const setSelectedProperty = useStore((s) => s.setSelectedProperty);
 
   const handleTap = (id: Exclude<SidebarMenuId, null>) => {
     if (AUTH_GATED.includes(id) && !isAuthenticated) {
       openLoginModal();
+      return;
+    }
+    if (selectedProperty) {
+      setSelectedProperty(null);
+      setActiveMenu(id);
+      openPanel();
       return;
     }
     if (id === activeMenu && isPanelOpen) {
