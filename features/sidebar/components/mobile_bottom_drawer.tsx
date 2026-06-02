@@ -3,8 +3,8 @@
 import React, { useMemo, useEffect, useState } from "react";
 import Image from "next/image";
 import {
-  Map, Search, Bookmark, BookmarkCheck, Bell, Activity,
-  TrendingUp, Inbox, MapPin, X, Phone, Lock, Send, CheckCircle,
+  Map, Search, Bookmark, BookmarkCheck,
+  Inbox, MapPin, X, Phone, Lock, Send, CheckCircle,
 } from "lucide-react";
 import PropertyCard from "@/features/properties/components/property_card";
 import { submitEnquiry } from "@/features/properties/api/enquiry_api";
@@ -15,6 +15,7 @@ import { useWatchlistSync } from "@/features/properties/hooks/use_watchlist_sync
 import { SidebarCard } from "@/shared/ui/sidebar_card";
 import type { PropertyDetail } from "@/shared/types";
 import { Drawer, DrawerContent } from "@/shared/components/ui/drawer";
+import { AuthGate, BrowsePanel, EnquiriesPanel } from "./sidebar_details";
 
 type MenuContent = {
   id: string;
@@ -25,15 +26,16 @@ type MenuContent = {
 
 const MENU_CONTENT: Record<string, MenuContent> = {
   map:      { id: "map",      title: "Map Explorer",     description: "Explore properties with interactive layers.", Icon: Map },
-  search:   { id: "search",   title: "Smart Search",     description: "Search properties by filters, location, and landmarks.", Icon: Search },
-  saved:    { id: "saved",    title: "Saved Properties", description: "Your bookmarked properties and recent views.", Icon: Bookmark },
-  messages: { id: "messages", title: "Messages",         description: "Chat with agents and property owners.", Icon: Inbox },
+  search:   { id: "search",   title: "Browse Properties", description: "Filter and discover listings across Karnataka.", Icon: Search },
+  saved:    { id: "saved",    title: "Saved Properties", description: "Your bookmarked properties.", Icon: Bookmark },
+  messages: { id: "messages", title: "My Enquiries",     description: "Enquiries you have submitted to sellers.", Icon: Inbox },
 };
 
 export default function MobileBottomDrawer() {
   const activeMenu          = useSidebarStore((s) => s.activeMenu);
   const isPanelOpen         = useSidebarStore((s) => s.isPanelOpen);
   const closePanel          = useSidebarStore((s) => s.closePanel);
+  const savedProperties     = useSidebarStore((s) => s.savedProperties);
   const selectedProperty    = useSidebarStore((s) => s.selectedProperty);
   const setSelectedProperty = useSidebarStore((s) => s.setSelectedProperty);
 
@@ -61,11 +63,25 @@ export default function MobileBottomDrawer() {
   const [propertyDetail,    setPropertyDetail]    = useState<PropertyDetail | null>(null);
 
   useEffect(() => {
-    if (!selectedProperty) { setPropertyDetail(null); return; }
-    getPropertyById(selectedProperty.id)
-      .then(setPropertyDetail)
-      .catch(() => setPropertyDetail(null));
+    const propertyId = selectedProperty?.id;
+    if (!propertyId) return;
+
+    let cancelled = false;
+    getPropertyById(propertyId)
+      .then((detail) => {
+        if (!cancelled) setPropertyDetail(detail);
+      })
+      .catch(() => {
+        if (!cancelled) setPropertyDetail(null);
+      });
+
+    return () => {
+      cancelled = true;
+    };
   }, [selectedProperty?.id]);
+
+  const activePropertyDetail =
+    propertyDetail?.id === selectedProperty?.id ? propertyDetail : null;
 
   const handleClose = () => {
     setSelectedProperty(null);
@@ -256,8 +272,8 @@ export default function MobileBottomDrawer() {
               )}
 
               {/* Extended details */}
-              {propertyDetail?.residentialDetails && (() => {
-                const r = propertyDetail.residentialDetails;
+              {activePropertyDetail?.residentialDetails && (() => {
+                const r = activePropertyDetail.residentialDetails;
                 const chips = [
                   r.bhkLabel,
                   r.bedrooms != null && `${r.bedrooms} Bed`,
@@ -276,11 +292,11 @@ export default function MobileBottomDrawer() {
                 ) : null;
               })()}
 
-              {propertyDetail?.amenities && propertyDetail.amenities.length > 0 && (
+              {activePropertyDetail?.amenities && activePropertyDetail.amenities.length > 0 && (
                 <div className="rounded-2xl border border-border bg-card p-3">
                   <p className="label mb-2">Amenities</p>
                   <div className="flex flex-wrap gap-1.5">
-                    {propertyDetail.amenities.map((a) => (
+                    {activePropertyDetail.amenities.map((a) => (
                       <span key={a.id} className="rounded-full bg-primary/10 border border-primary/20 px-2.5 py-1 text-xs text-primary">{a.name}</span>
                     ))}
                   </div>
@@ -315,62 +331,45 @@ export default function MobileBottomDrawer() {
 
             <div className="space-y-3">
               {activeMenu === "map" && (
-                <>
-                  {["Live Property Layers", "Nearby Infrastructure", "Satellite Intelligence"].map((title) => (
-                    <SidebarCard key={title} className="p-4">
-                      <h3 className="mb-1.5 font-semibold text-foreground text-sm">{title}</h3>
-                      <p className="text-xs leading-relaxed text-muted-foreground">
-                        Advanced real estate visualization powered by Karnataka geo-spatial intelligence.
-                      </p>
-                    </SidebarCard>
-                  ))}
-                </>
+                <SidebarCard className="flex flex-col items-center gap-3 py-10 text-center">
+                  <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-border bg-secondary">
+                    <Map size={24} className="text-primary opacity-60" />
+                  </div>
+                  <p className="text-sm text-muted-foreground leading-relaxed max-w-52">
+                    Click any property marker on the map to view its details here.
+                  </p>
+                </SidebarCard>
               )}
 
               {activeMenu === "search" && (
-                <>
-                  <div className="flex items-center gap-3 rounded-t-xl rounded-b-none border-0 border-b-2 border-border bg-input px-4 py-3 focus-within:border-primary transition-colors">
-                    <Search size={16} className="text-muted-foreground shrink-0" />
-                    <input
-                      placeholder="Search properties..."
-                      className="w-full bg-transparent text-sm text-foreground outline-none placeholder:text-muted-foreground"
-                    />
-                  </div>
-                  <div className="grid grid-cols-2 gap-2">
-                    {["Under ₹50L", "Villa", "Apartment", "Commercial"].map((item) => (
-                      <button
-                        key={item}
-                        className="rounded-full border border-border bg-muted px-3 py-2.5 text-xs text-foreground transition-all duration-200 hover:bg-secondary active:scale-95"
-                      >
-                        {item}
-                      </button>
-                    ))}
-                  </div>
-                </>
+                <div className="-mx-4 -mb-4 h-[56vh]">
+                  <BrowsePanel onOpen={(p) => setSelectedProperty(p)} />
+                </div>
               )}
 
               {activeMenu === "saved" && (
                 <div className="space-y-3">
                   {!isAuthenticated ? (
-                    <SidebarCard className="p-4 flex flex-col items-center gap-3 text-center">
-                      <Lock size={24} className="text-muted-foreground" />
-                      <p className="text-xs text-muted-foreground">Login to view saved properties.</p>
-                      <button
-                        onClick={() => openLoginModal()}
-                        className="w-full rounded-full bg-primary px-4 py-2 text-xs font-semibold text-primary-foreground hover:bg-primary/90 active:scale-95 transition-all"
-                      >
-                        Login
-                      </button>
-                    </SidebarCard>
-                  ) : saved.length === 0 ? (
-                    <SidebarCard className="p-4">
-                      <p className="text-xs text-muted-foreground">No saved properties yet. Start exploring the map to bookmark listings.</p>
+                    <AuthGate
+                      icon={Lock}
+                      message="Sign in to view your saved properties."
+                      onLogin={() => openLoginModal()}
+                    />
+                  ) : savedProperties.length === 0 ? (
+                    <SidebarCard className="flex flex-col items-center gap-3 py-10 text-center">
+                      <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-border bg-secondary">
+                        <Bookmark size={24} className="text-primary opacity-60" />
+                      </div>
+                      <p className="text-sm text-muted-foreground">
+                        No saved properties yet. Start exploring the map to bookmark listings.
+                      </p>
                     </SidebarCard>
                   ) : (
-                    saved.map((property) => (
+                    savedProperties.map((property) => (
                       <PropertyCard
                         key={property.id}
                         property={property}
+                        variant="grid"
                         onOpen={(p) => { setSelectedProperty(p); }}
                       />
                     ))
@@ -379,38 +378,18 @@ export default function MobileBottomDrawer() {
               )}
 
               {activeMenu === "messages" && (
-                <SidebarCard className="p-4">
+                <div className="-mx-4 -mb-4">
                   {!isAuthenticated ? (
-                    <div className="flex flex-col items-center gap-3 text-center">
-                      <Lock size={24} className="text-muted-foreground" />
-                      <p className="text-xs text-muted-foreground">Login to see your messages.</p>
-                      <button
-                        onClick={() => openLoginModal()}
-                        className="w-full rounded-full bg-primary px-4 py-2 text-xs font-semibold text-primary-foreground hover:bg-primary/90 active:scale-95 transition-all"
-                      >
-                        Login
-                      </button>
-                    </div>
+                    <AuthGate
+                      icon={Lock}
+                      message="Sign in to see your enquiries."
+                      onLogin={() => openLoginModal()}
+                    />
                   ) : (
-                    <p className="text-xs text-muted-foreground">No messages yet.</p>
+                    <EnquiriesPanel />
                   )}
-                </SidebarCard>
+                </div>
               )}
-            </div>
-
-            {/* Quick actions */}
-            <div className="mt-6 space-y-2 border-t border-border pt-4">
-              <p className="label">Quick Access</p>
-              {[
-                { Icon: Bell,       label: "Notifications" },
-                { Icon: Activity,   label: "Recent Activity" },
-                { Icon: TrendingUp, label: "Trending Locations" },
-              ].map(({ Icon, label }) => (
-                <SidebarCard key={label} className="flex items-center gap-3 p-3 cursor-pointer hover:bg-secondary/60 transition-colors duration-200">
-                  <Icon size={16} className="text-primary shrink-0" />
-                  <span className="text-xs text-foreground">{label}</span>
-                </SidebarCard>
-              ))}
             </div>
           </div>
         )}
