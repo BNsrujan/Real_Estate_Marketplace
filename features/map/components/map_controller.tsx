@@ -23,7 +23,6 @@ interface MapControlsProps {
 type LocationState = "idle" | "locating" | "active" | "error";
 
 export default function MapControls({ map }: MapControlsProps) {
-  const [bearing, setBearing] = useState(0);
   const [locationState, setLocationState] = useState<LocationState>("idle");
 
   const locationMarkerRef = useRef<mapboxgl.Marker | null>(null);
@@ -31,21 +30,6 @@ export default function MapControls({ map }: MapControlsProps) {
   const locateTimeoutRef = useRef<number | null>(null);
   // Ref mirrors locationState so async callbacks/timeouts always read current value
   const locationStateRef = useRef<LocationState>("idle");
-
-  // Track map rotation
-  useEffect(() => {
-    if (!map) return;
-
-    const onRotate = () => {
-      setBearing(map.getBearing());
-    };
-
-    map.on("rotate", onRotate);
-
-    return () => {
-      map.off("rotate", onRotate);
-    };
-  }, [map]);
 
   // Zoom In
   const handleZoomIn = useCallback(() => {
@@ -238,7 +222,7 @@ export default function MapControls({ map }: MapControlsProps) {
   }, [map]);
 
   return (
-    <div className="absolute bottom-6 right-6 z-50 flex flex-col items-center gap-3">
+    <div className="absolute bottom-20 right-6 z-50 flex flex-col items-center gap-3 md:bottom-6">
       {/* Current Location */}
       <button
         onClick={handleLocation}
