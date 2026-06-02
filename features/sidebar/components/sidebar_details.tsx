@@ -68,7 +68,7 @@ function SectionLabel({ children }: { children: React.ReactNode }) {
 
 // ─── Auth Gate ────────────────────────────────────────────────────────────────
 
-function AuthGate({
+export function AuthGate({
   icon: Icon,
   message,
   onLogin,
@@ -139,7 +139,12 @@ export function BrowsePanel({ onOpen }: { onOpen: (p: Property) => void }) {
     }
   }, [search, selectedTypes, listingType]);
 
-  useEffect(() => { load(); }, []);
+  useEffect(() => {
+    const timer = window.setTimeout(() => { void load(); }, 0);
+    return () => window.clearTimeout(timer);
+    // BrowsePanel intentionally loads once on mount; user actions apply later filter changes.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   function toggleType(type: PropertyType) {
     setSelectedTypes((prev) =>
@@ -500,11 +505,25 @@ export function DetailPanel() {
   const [propertyDetail,    setPropertyDetail]    = useState<PropertyDetail | null>(null);
 
   useEffect(() => {
-    if (!selectedProperty) { setPropertyDetail(null); return; }
-    getPropertyById(selectedProperty.id)
-      .then(setPropertyDetail)
-      .catch(() => setPropertyDetail(null));
+    const propertyId = selectedProperty?.id;
+    if (!propertyId) return;
+
+    let cancelled = false;
+    getPropertyById(propertyId)
+      .then((detail) => {
+        if (!cancelled) setPropertyDetail(detail);
+      })
+      .catch(() => {
+        if (!cancelled) setPropertyDetail(null);
+      });
+
+    return () => {
+      cancelled = true;
+    };
   }, [selectedProperty?.id]);
+
+  const activePropertyDetail =
+    propertyDetail?.id === selectedProperty?.id ? propertyDetail : null;
 
   const isSaved     = selectedProperty ? saved.some((p) => p.id === selectedProperty.id) : false;
   const menuContent = activeMenu ? MENU_META[activeMenu] ?? null : null;
@@ -684,8 +703,8 @@ export function DetailPanel() {
               )}
 
               {/* Residential details */}
-              {propertyDetail?.residentialDetails && (() => {
-                const r = propertyDetail.residentialDetails;
+              {activePropertyDetail?.residentialDetails && (() => {
+                const r = activePropertyDetail.residentialDetails;
                 const chips = [
                   r.bhkLabel,
                   r.bedrooms  != null && `${r.bedrooms} Bed`,
@@ -708,8 +727,8 @@ export function DetailPanel() {
               })()}
 
               {/* Agriculture details */}
-              {propertyDetail?.agricultureDetails && (() => {
-                const a = propertyDetail.agricultureDetails;
+              {activePropertyDetail?.agricultureDetails && (() => {
+                const a = activePropertyDetail.agricultureDetails;
                 const rows = [
                   a.waterSource  && ['Water Source', a.waterSource],
                   a.soilType     && ['Soil Type',    a.soilType],
@@ -731,8 +750,8 @@ export function DetailPanel() {
               })()}
 
               {/* Road info */}
-              {selectedProperty.roadAccess && propertyDetail?.roadInfo && (() => {
-                const ri = propertyDetail.roadInfo;
+              {selectedProperty.roadAccess && activePropertyDetail?.roadInfo && (() => {
+                const ri = activePropertyDetail.roadInfo;
                 const rows = [
                   ri.roadWidth  && ['Road Width',  ri.roadWidth],
                   ri.roadType   && ['Road Type',   ri.roadType],
@@ -758,11 +777,11 @@ export function DetailPanel() {
               })()}
 
               {/* Amenities */}
-              {propertyDetail?.amenities && propertyDetail.amenities.length > 0 && (
+              {activePropertyDetail?.amenities && activePropertyDetail.amenities.length > 0 && (
                 <div className="rounded-2xl border border-border bg-card p-4 shadow-sm">
                   <SectionLabel>Amenities</SectionLabel>
                   <div className="flex flex-wrap gap-2">
-                    {propertyDetail.amenities.map((a) => (
+                    {activePropertyDetail.amenities.map((a) => (
                       <span
                         key={a.id}
                         className="rounded-full bg-primary/10 border border-primary/20 px-3 py-1 text-xs font-medium text-primary"
