@@ -151,6 +151,7 @@ interface NammaDharaniStore {
     mobilePanel: MobilePanel;
     isBottomSheetOpen: boolean;
     bottomSheetExpanded: boolean;
+    savedPropertiesDistrictFilter: string | null;
   };
   setUI: (patch: Partial<NammaDharaniStore['ui']>) => void;
   setActiveSidebarTab: (tab: SidebarMenuId) => void;
@@ -392,6 +393,7 @@ export const useStore = create<NammaDharaniStore>()(
         mobilePanel: 'map',
         isBottomSheetOpen: false,
         bottomSheetExpanded: false,
+        savedPropertiesDistrictFilter: null,
       },
       setUI: (patch) =>
         set((s) => ({ ui: { ...s.ui, ...patch } }), false, 'ui/set'),

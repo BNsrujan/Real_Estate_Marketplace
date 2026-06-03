@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import Image from 'next/image';
 import {
   Map, Search, MessageSquare, BookOpen,
@@ -114,6 +114,10 @@ function matchesBrowseSearch(property: Property, query: string): boolean {
     property.address,
     property.description,
   ].some((value) => value?.toLowerCase().includes(normalizedQuery));
+}
+
+function getSavedPropertyDistrict(property: Property): string {
+  return property.city?.trim() || property.districtName?.trim() || property.taluk?.trim() || 'Karnataka';
 }
 
 export function BrowsePanel({ onOpen }: { onOpen: (p: Property) => void }) {
@@ -495,6 +499,8 @@ export function DetailPanel() {
   const saved           = useStore((s) => s.watchlist.saved);
   const isAuthenticated = useStore((s) => s.auth.isAuthenticated);
   const openLoginModal  = useStore((s) => s.openLoginModal);
+  const activeSavedDistrict = useStore((s) => s.ui.savedPropertiesDistrictFilter);
+  const setUI = useStore((s) => s.setUI);
   const { saveProperty, unsaveProperty } = useWatchlistSync();
 
   const [showEnquiry,       setShowEnquiry]       = useState(false);
@@ -527,6 +533,29 @@ export function DetailPanel() {
 
   const isSaved     = selectedProperty ? saved.some((p) => p.id === selectedProperty.id) : false;
   const menuContent = activeMenu ? MENU_META[activeMenu] ?? null : null;
+  const visibleSavedProperties = useMemo(
+    () =>
+      activeSavedDistrict
+        ? savedProperties.filter(
+            (property) =>
+              getSavedPropertyDistrict(property).toLowerCase() === activeSavedDistrict.toLowerCase(),
+          )
+        : savedProperties,
+    [activeSavedDistrict, savedProperties],
+  );
+
+  useEffect(() => {
+    if (
+      activeSavedDistrict &&
+      savedProperties.length > 0 &&
+      !savedProperties.some(
+        (property) =>
+          getSavedPropertyDistrict(property).toLowerCase() === activeSavedDistrict.toLowerCase(),
+      )
+    ) {
+      setUI({ savedPropertiesDistrictFilter: null });
+    }
+  }, [activeSavedDistrict, savedProperties, setUI]);
 
   const handleClose = () => {
     setSelectedProperty(null);
@@ -978,16 +1007,41 @@ export function DetailPanel() {
                       No saved properties yet. Start exploring the map to bookmark listings.
                     </p>
                   </SidebarCard>
+                ) : visibleSavedProperties.length === 0 ? (
+                  <SidebarCard className="flex flex-col items-center gap-3 py-10 text-center">
+                    <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-border bg-secondary">
+                      <Bookmark size={24} className="text-primary opacity-60" />
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      No saved properties in {activeSavedDistrict}.
+                    </p>
+                  </SidebarCard>
                 ) : (
-                  <div className="grid grid-cols-2 gap-3">
-                    {savedProperties.map((property) => (
-                      <PropertyCard
-                        key={property.id}
-                        property={property}
-                        variant="grid"
-                        onOpen={(p) => setSelectedProperty(p)}
-                      />
-                    ))}
+                  <div className="space-y-3">
+                    {activeSavedDistrict && (
+                      <div className="flex items-center justify-between rounded-2xl border border-border bg-secondary px-3 py-2">
+                        <span className="text-xs font-medium text-muted-foreground">
+                          {activeSavedDistrict} (+{visibleSavedProperties.length})
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => setUI({ savedPropertiesDistrictFilter: null })}
+                          className="text-xs font-semibold text-primary hover:text-primary/80"
+                        >
+                          Clear
+                        </button>
+                      </div>
+                    )}
+                    <div className="grid grid-cols-2 gap-3">
+                      {visibleSavedProperties.map((property) => (
+                        <PropertyCard
+                          key={property.id}
+                          property={property}
+                          variant="grid"
+                          onOpen={(p) => setSelectedProperty(p)}
+                        />
+                      ))}
+                    </div>
                   </div>
                 )}
               </div>
