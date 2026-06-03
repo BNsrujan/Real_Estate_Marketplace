@@ -65,13 +65,16 @@ export function MapCanvas({ setIsLoaded }: Props) {
 
   const handleMarkerClick = useCallback(
     (prop: Property) => {
-      showPropertyPreview(prop);
       if (window.innerWidth < 768) {
+        clearHoverTimeout();
+        setHoveredProperty(null);
         setSelectedProperty(prop);
-        setUI({ activeSidebarTab: "map", isPanelOpen: false });
+        setUI({ activeSidebarTab: "map", isPanelOpen: true });
+        return;
       }
+      showPropertyPreview(prop);
     },
-    [setSelectedProperty, setUI, showPropertyPreview],
+    [clearHoverTimeout, setSelectedProperty, setUI, showPropertyPreview],
   );
 
   const handleMarkerHover = useCallback(
