@@ -29,40 +29,66 @@ export function MapCanvas({ setIsLoaded }: Props) {
 
   const [showButton, setShowButton] = useState(true);
   const [hoveredProperty, setHoveredProperty] = useState<Property | null>(null);
-  const [hoverScreenPos, setHoverScreenPos] = useState<{
-    x: number;
-    y: number;
-  } | null>(null);
   const hoverTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const [mounted, setMounted] = useState(false);
 
   const setSelectedProperty = useStore((s) => s.setSelectedProperty);
   const setUI = useStore((s) => s.setUI);
 
-  useEffect(() => {
-    setMounted(true);
+  const clearHoverTimeout = useCallback(() => {
+    if (hoverTimeoutRef.current) {
+      clearTimeout(hoverTimeoutRef.current);
+      hoverTimeoutRef.current = null;
+    }
   }, []);
 
-  const handleMarkerClick = useCallback(
+  useEffect(() => {
+    return () => clearHoverTimeout();
+  }, [clearHoverTimeout]);
+
+  const showPropertyPreview = useCallback(
     (prop: Property) => {
+      clearHoverTimeout();
+      setHoveredProperty(prop);
+    },
+    [clearHoverTimeout],
+  );
+
+  const openPropertyDetails = useCallback(
+    (prop: Property) => {
+      clearHoverTimeout();
+      setHoveredProperty(null);
       setSelectedProperty(prop);
       setUI({ isPanelOpen: true, activeSidebarTab: "map" });
     },
-    [setSelectedProperty, setUI],
+    [clearHoverTimeout, setSelectedProperty, setUI],
   );
 
-  const handleMarkerHover = useCallback((prop: Property) => {
-    if (window.innerWidth < 768) return;
-    if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
-    setHoveredProperty(prop);
-  }, []);
+  const handleMarkerClick = useCallback(
+    (prop: Property) => {
+      showPropertyPreview(prop);
+      if (window.innerWidth < 768) {
+        setSelectedProperty(prop);
+        setUI({ activeSidebarTab: "map", isPanelOpen: false });
+      }
+    },
+    [setSelectedProperty, setUI, showPropertyPreview],
+  );
+
+  const handleMarkerHover = useCallback(
+    (prop: Property) => {
+      if (window.innerWidth < 768) return;
+      showPropertyPreview(prop);
+    },
+    [showPropertyPreview],
+  );
 
   const handleMarkerLeave = useCallback(() => {
-    if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
+    if (window.innerWidth < 768) return;
+    clearHoverTimeout();
     hoverTimeoutRef.current = setTimeout(() => {
       setHoveredProperty(null);
     }, 150); // Small delay to prevent flickering
-  }, []);
+  }, [clearHoverTimeout]);
 
   const filterByDistrictRef = useRef<(name: string) => void>(() => {});
 
@@ -112,11 +138,9 @@ export function MapCanvas({ setIsLoaded }: Props) {
     filterByDistrictRef.current = filterByDistrict;
   }, [filterByDistrict]);
 
-  // Compute hover card screen position whenever hoveredProperty changes
-  useEffect(() => {
+  const hoverScreenPos = (() => {
     if (!hoveredProperty || !mapInstance.current) {
-      setHoverScreenPos(null);
-      return;
+      return null;
     }
     try {
       const map = mapInstance.current;
@@ -125,13 +149,11 @@ export function MapCanvas({ setIsLoaded }: Props) {
         Number(hoveredProperty.lat),
       ]);
       const rect = map.getContainer().getBoundingClientRect();
-      setHoverScreenPos({ x: pt.x + rect.left, y: pt.y + rect.top });
+      return { x: pt.x + rect.left, y: pt.y + rect.top };
     } catch {
-      setHoverScreenPos(null);
+      return null;
     }
-    // mapInstance is a stable ref — omitting it is intentional
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [hoveredProperty]);
+  })();
 
   // Expose district reset to Navbar (store-driven via resetFilters) and map controls
   const resetDistrictFilterRef = useRef(resetDistrictFilter);
@@ -239,7 +261,7 @@ export function MapCanvas({ setIsLoaded }: Props) {
               <NavBar />
             </div>
 
-            <div className="absolute bottom-30 md:bottom-0 left-0 right-0 pointer-events-auto p-3 md:p-4 lg:p-4">
+            <div className="absolute bottom-30 md:bottom-4 left-0 right-0 md:right-auto pointer-events-auto p-3 md:p-0">
               <MapLayerSelector onLayerChange={handleLayerChange} />
             </div>
           </div>
@@ -249,21 +271,40 @@ export function MapCanvas({ setIsLoaded }: Props) {
         </div>
       )}
 
-      {/* Hover card — floating near marker, desktop only */}
-      {mounted &&
+      {/* Property preview — hover on desktop, tap on mobile */}
+      {typeof document !== "undefined" &&
         hoveredProperty &&
         hoverScreenPos &&
-        window.innerWidth >= 768 &&
         createPortal(
           <div
-            className="fixed pointer-events-none transition-all duration-200"
+            className="fixed pointer-events-auto transition-all duration-200"
             style={{
-              left: hoverScreenPos.x + 24,
-              top: hoverScreenPos.y - 120,
+              left:
+                window.innerWidth >= 768
+                  ? hoverScreenPos.x + 24
+                  : Math.max(
+                      12,
+                      Math.min(hoverScreenPos.x - 144, window.innerWidth - 300),
+                    ),
+              top:
+                window.innerWidth >= 768
+                  ? hoverScreenPos.y - 120
+                  : Math.max(12, hoverScreenPos.y - 220),
               zIndex: 99999,
             }}
+            onMouseEnter={clearHoverTimeout}
+            onMouseLeave={handleMarkerLeave}
+            onPointerDown={(e) => {
+              if (window.innerWidth < 768) e.stopPropagation();
+            }}
+            onClick={(e) => {
+              if (window.innerWidth < 768) e.stopPropagation();
+            }}
           >
-            <PropertyHoverCard property={hoveredProperty} onOpen={() => {}} />
+            <PropertyHoverCard
+              property={hoveredProperty}
+              onOpen={openPropertyDetails}
+            />
           </div>,
           document.body,
         )}

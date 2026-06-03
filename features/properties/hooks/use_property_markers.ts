@@ -34,7 +34,6 @@ export function usePropertyMarkers({
   const filtered = useStore((s) => s.properties.filtered);
   const isLoading = useStore((s) => s.properties.isLoading);
   const selectedProperty = useStore((s) => s.properties.selectedProperty);
-  const setSelectedProperty = useStore((s) => s.setSelectedProperty);
   const isAnimating = useStore((s) => s.map.isAnimating);
 
   const handleMarkerClick = useCallback(
@@ -62,10 +61,9 @@ export function usePropertyMarkers({
       activeMarkerRef.current = property.id;
       markerServiceRef.current?.updateMarkerActive(property.id, true);
 
-      setSelectedProperty(property);
       onMarkerClick?.(property);
     },
-    [isAnimating, onMarkerClick, setSelectedProperty],
+    [isAnimating, onMarkerClick],
   );
 
   const renderMarkers = useCallback(

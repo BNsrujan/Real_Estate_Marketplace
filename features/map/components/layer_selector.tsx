@@ -77,7 +77,7 @@ const MapLayerSelector = ({ onLayerChange }: MapLayerSelectorProps) => {
   const toggleExpanded = () => setUI({ isBottomSheetOpen: !isExpanded });
 
   return (
-    <div className="relative z-500 flex w-full min-w-0 items-end justify-start gap-2 md:gap-4">
+    <div className="relative z-500 flex w-full min-w-0 items-end justify-start gap-2 md:w-auto md:overflow-visible md:gap-4">
       <div className="relative flex w-full min-w-0 items-end md:w-auto">
         <button
           onClick={toggleExpanded}
