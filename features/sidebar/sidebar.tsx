@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import {
   Map,
   Bookmark,
@@ -26,6 +26,7 @@ import {
   TooltipTrigger,
 } from "@/shared/components/ui/tooltip";
 import { SellFormModal } from "@/features/sell/components/sell_form_modal";
+import type { Property } from "@/shared/types";
 
 type MenuId = SidebarMenuId;
 
@@ -70,6 +71,10 @@ const SIDEBAR_MENUS: SidebarMenu[] = [
 ];
 
 const AUTH_GATED_MENUS: Exclude<MenuId, null>[] = [];
+
+function getSavedPropertyDistrict(property: Property): string {
+  return property.city?.trim() || property.districtName?.trim() || property.taluk?.trim() || "Karnataka";
+}
 
 // ─── MD3 Navigation Rail item ─────────────────────────────────────────────────
 
@@ -151,6 +156,21 @@ export function AppSidebar() {
   const openLoginModal = useStore((s) => s.openLoginModal);
   const selectedProperty = useStore((s) => s.properties.selectedProperty);
   const setSelectedProperty = useStore((s) => s.setSelectedProperty);
+  const activeSavedDistrict = useStore((s) => s.ui.savedPropertiesDistrictFilter);
+  const setUI = useStore((s) => s.setUI);
+
+  const savedDistricts = useMemo(() => {
+    const groups = new globalThis.Map<string, Property[]>();
+    savedProperties.forEach((property) => {
+      const district = getSavedPropertyDistrict(property);
+      groups.set(district, [...(groups.get(district) ?? []), property]);
+    });
+    return Array.from(groups, ([districtName, properties]) => ({
+      districtName,
+      properties,
+      count: properties.length,
+    }));
+  }, [savedProperties]);
 
   const handleMenuActivate = useCallback(
     (id: MenuId) => {
@@ -181,6 +201,19 @@ export function AppSidebar() {
       isAuthenticated,
       openLoginModal,
     ],
+  );
+
+  const handleDistrictShortcut = useCallback(
+    (districtName: string) => {
+      if (selectedProperty) setSelectedProperty(null);
+      setUI({
+        savedPropertiesDistrictFilter:
+          activeSavedDistrict?.toLowerCase() === districtName.toLowerCase() ? null : districtName,
+        isPanelOpen: true,
+      });
+      setActiveMenu("saved");
+    },
+    [activeSavedDistrict, selectedProperty, setActiveMenu, setSelectedProperty, setUI],
   );
 
   return (
@@ -243,8 +276,15 @@ export function AppSidebar() {
             {/* Watchlist thumbnails */}
             <div className="flex-1 overflow-y-auto no-scrollbar">
               <div className="gap-3 flex flex-col py-2">
-                {savedProperties.map((property) => (
-                  <WatchlistBadge key={property.id} property={property} />
+                {savedDistricts.map((district) => (
+                  <WatchlistBadge
+                    key={district.districtName}
+                    districtName={district.districtName}
+                    count={district.count}
+                    properties={district.properties}
+                    active={activeSavedDistrict?.toLowerCase() === district.districtName.toLowerCase()}
+                    onClick={() => handleDistrictShortcut(district.districtName)}
+                  />
                 ))}
               </div>
             </div>
