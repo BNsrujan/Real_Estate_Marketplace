@@ -17,10 +17,19 @@ interface QueuedRequest {
   resolve: (value: unknown) => void;
   reject: (reason: unknown) => void;
   execute: () => Promise<unknown>;
+  signal?: AbortSignal;
+  cleanup?: () => void;
 }
 
+const MAX_RETRY_QUEUE_SIZE = 50;
 const retryQueue: QueuedRequest[] = [];
 let isRefreshing = false;
+
+function createAbortError(): Error {
+  const error = new Error('Request aborted');
+  error.name = 'AbortError';
+  return error;
+}
 
 function shouldQueueAuthFailure(endpoint: string): boolean {
   return !endpoint.startsWith('/api/v1/auth/');
@@ -30,6 +39,12 @@ function flushQueue(success: boolean) {
   isRefreshing = false;
   const items = retryQueue.splice(0);
   items.forEach((item) => {
+    item.cleanup?.();
+    if (item.signal?.aborted) {
+      item.reject(createAbortError());
+      return;
+    }
+
     if (success) {
       item.execute().then(item.resolve).catch(item.reject);
     } else {
@@ -78,11 +93,39 @@ async function request<T>(
     const { openLoginModal } = store.getState();
 
     return new Promise<T>((resolve, reject) => {
-      retryQueue.push({
+      if (options.signal?.aborted) {
+        reject(createAbortError());
+        return;
+      }
+
+      const queuedRequest: QueuedRequest = {
         resolve: resolve as (v: unknown) => void,
         reject,
         execute: () => request<T>(method, endpoint, body, { ...options, _isRetry: true }),
-      });
+        signal: options.signal,
+      };
+
+      if (options.signal) {
+        const handleAbort = () => {
+          const index = retryQueue.indexOf(queuedRequest);
+          if (index !== -1) retryQueue.splice(index, 1);
+          if (retryQueue.length === 0) isRefreshing = false;
+          queuedRequest.cleanup?.();
+          reject(createAbortError());
+        };
+        options.signal.addEventListener('abort', handleAbort, { once: true });
+        queuedRequest.cleanup = () => {
+          options.signal?.removeEventListener('abort', handleAbort);
+        };
+      }
+
+      while (retryQueue.length >= MAX_RETRY_QUEUE_SIZE) {
+        const dropped = retryQueue.shift();
+        dropped?.cleanup?.();
+        dropped?.reject(new Error('Retry queue limit exceeded'));
+      }
+
+      retryQueue.push(queuedRequest);
 
       if (!isRefreshing) {
         isRefreshing = true;

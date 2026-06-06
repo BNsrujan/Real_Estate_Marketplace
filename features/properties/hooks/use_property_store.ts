@@ -11,6 +11,10 @@ import { getProperties } from "../api/property_api";
 import { useStore } from "@/shared/store";
 import { propertyFilterService } from "@/shared/services/propertyFilter.service";
 
+function isAbortError(error: unknown): boolean {
+  return error instanceof Error && error.name === "AbortError";
+}
+
 export function usePropertyStore() {
   const setProperties = useStore((s) => s.setProperties);
   const all = useStore((s) => s.properties.all);
@@ -18,23 +22,29 @@ export function usePropertyStore() {
 
   // Initial fetch — runs once
   useEffect(() => {
+    const controller = new AbortController();
+
     setProperties({ isLoading: true, error: null });
 
-    getProperties({ limit: 200 })
+    getProperties({ limit: 200 }, { signal: controller.signal })
       .then((data) => {
         setProperties({ all: data, isLoading: false });
       })
       .catch((err: Error) => {
+        if (isAbortError(err)) return;
         setProperties({
           isLoading: false,
           error: { code: 0, message: err.message, retryable: true },
         });
       });
+
+    return () => {
+      controller.abort();
+    };
   }, [setProperties]);
 
   // Reactive filter — runs whenever all or filters change
   useEffect(() => {
-    if (all.length === 0) return;
     const filtered = propertyFilterService.apply(all, filters);
     setProperties({ filtered });
   }, [all, filters, setProperties]);
