@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { getProperties, type PropertyFilters } from "../api/property_api";
 import type { Property } from "@/shared/types";
 
@@ -25,15 +25,17 @@ export function useProperties(options: UsePropertiesOptions = {}): UseProperties
   const [error, setError] = useState<string | null>(null);
   const requestIdRef = useRef(0);
 
-  const filters = options.filters;
-  const requestKey = useMemo(
-    () =>
-      JSON.stringify({
-        district: options.district ?? null,
-        filters: filters ?? {},
-      }),
-    [options.district, filters],
-  );
+  const district = options.district ?? null;
+  const {
+    type,
+    listing,
+    minPrice,
+    maxPrice,
+    search,
+    featured,
+    page,
+    limit,
+  } = options.filters ?? {};
 
   useEffect(() => {
     const controller = new AbortController();
@@ -45,31 +47,50 @@ export function useProperties(options: UsePropertiesOptions = {}): UseProperties
       setError(null);
     });
 
-    const parsed = JSON.parse(requestKey) as {
-      district: string | null;
-      filters: Omit<PropertyFilters, "district">;
-    };
-    const filters: PropertyFilters = {
-      ...parsed.filters,
-      ...(parsed.district ? { district: parsed.district } : {}),
+    const requestFilters: PropertyFilters = {
+      ...(type ? { type } : {}),
+      ...(listing ? { listing } : {}),
+      ...(minPrice !== undefined ? { minPrice } : {}),
+      ...(maxPrice !== undefined ? { maxPrice } : {}),
+      ...(search ? { search } : {}),
+      ...(featured !== undefined ? { featured } : {}),
+      ...(page ? { page } : {}),
+      ...(limit ? { limit } : {}),
+      ...(district ? { district } : {}),
     };
 
-    getProperties(filters, { signal: controller.signal })
+    getProperties(requestFilters, { signal: controller.signal })
       .then((data) => {
-        if (requestIdRef.current === requestId) setProperties(data);
+        if (requestIdRef.current === requestId && !controller.signal.aborted) {
+          setProperties(data);
+        }
       })
       .catch((err: Error) => {
         if (isAbortError(err)) return;
-        if (requestIdRef.current === requestId) setError(err.message);
+        if (requestIdRef.current === requestId && !controller.signal.aborted) {
+          setError(err.message);
+        }
       })
       .finally(() => {
-        if (requestIdRef.current === requestId) setIsLoading(false);
+        if (requestIdRef.current === requestId && !controller.signal.aborted) {
+          setIsLoading(false);
+        }
       });
 
     return () => {
       controller.abort();
     };
-  }, [requestKey]);
+  }, [
+    district,
+    type,
+    listing,
+    minPrice,
+    maxPrice,
+    search,
+    featured,
+    page,
+    limit,
+  ]);
 
   return { properties, isLoading, error };
 }

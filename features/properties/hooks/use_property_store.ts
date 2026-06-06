@@ -6,7 +6,7 @@
  * recomputes store.properties.filtered whenever filters change.
  */
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { getProperties } from "../api/property_api";
 import { useStore } from "@/shared/store";
 import { propertyFilterService } from "@/shared/services/propertyFilter.service";
@@ -19,23 +19,29 @@ export function usePropertyStore() {
   const setProperties = useStore((s) => s.setProperties);
   const all = useStore((s) => s.properties.all);
   const filters = useStore((s) => s.filters);
+  const requestIdRef = useRef(0);
 
   // Initial fetch — runs once
   useEffect(() => {
     const controller = new AbortController();
+    const requestId = ++requestIdRef.current;
 
     setProperties({ isLoading: true, error: null });
 
     getProperties({ limit: 200 }, { signal: controller.signal })
       .then((data) => {
-        setProperties({ all: data, isLoading: false });
+        if (requestIdRef.current === requestId && !controller.signal.aborted) {
+          setProperties({ all: data, isLoading: false });
+        }
       })
       .catch((err: Error) => {
         if (isAbortError(err)) return;
-        setProperties({
-          isLoading: false,
-          error: { code: 0, message: err.message, retryable: true },
-        });
+        if (requestIdRef.current === requestId && !controller.signal.aborted) {
+          setProperties({
+            isLoading: false,
+            error: { code: 0, message: err.message, retryable: true },
+          });
+        }
       });
 
     return () => {
