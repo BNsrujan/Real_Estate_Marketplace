@@ -21,7 +21,6 @@ export function clearClientAuthData(): void {
   }
 
   localStorage.setItem(LOGGED_OUT_STORAGE_KEY, String(Date.now()));
-  document.cookie = 'auth_session=; Max-Age=0; path=/; SameSite=Lax';
   document.cookie = `${LOGGED_OUT_COOKIE}=1; Max-Age=604800; path=/; SameSite=Lax`;
 }
 
@@ -37,14 +36,26 @@ export function hasExplicitLogoutMarker(): boolean {
 }
 
 export async function clearServerAuthCookie(): Promise<void> {
-  if (!env.apiUrl) return;
+  if (!env.apiUrl) {
+    throw new Error('API URL is not configured; cannot clear server auth cookie.');
+  }
 
-  await fetch(`${env.apiUrl}/api/v1/auth/logout`, {
+  const response = await fetch(`${env.apiUrl}/api/v1/auth/logout`, {
     method: 'POST',
     credentials: 'include',
     headers: { 'Content-Type': 'application/json' },
     body: '{}',
-  }).catch(() => {
-    // Client state is still cleared; a later successful logout can clear the httpOnly cookie.
   });
+
+  if (!response.ok) {
+    throw new Error(`Logout failed with status ${response.status}.`);
+  }
+}
+
+export async function logoutAuthSession(): Promise<void> {
+  try {
+    await clearServerAuthCookie();
+  } finally {
+    clearClientAuthData();
+  }
 }

@@ -1,6 +1,6 @@
 import { apiService } from '@/shared/services/api.service';
 import { notifyAuthRestored } from '@/shared/services/api.service';
-import { clearClientAuthData, clearServerAuthCookie } from '@/shared/services/auth_session.service';
+import { clearClientAuthData, logoutAuthSession } from '@/shared/services/auth_session.service';
 import type { UserProfile, ApiResponse, Property } from '@/shared/types';
 
 // ─── Backend response shapes ──────────────────────────────────────────────────
@@ -140,8 +140,7 @@ export function clearAuthToken(): void { clearClientAuthData(); }
 export function hasAuthToken(): boolean { return false; /* cookie is httpOnly — not readable from JS */ }
 
 export async function logout(): Promise<void> {
-  clearClientAuthData();
-  await clearServerAuthCookie();
+  await logoutAuthSession();
 }
 
 // ─── Auth API calls ───────────────────────────────────────────────────────────
