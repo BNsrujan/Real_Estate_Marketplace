@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { getProperties, type PropertyFilters } from "../api/property_api";
 import type { Property } from "@/shared/types";
 
@@ -15,37 +15,61 @@ interface UsePropertiesResult {
   error: string | null;
 }
 
+function isAbortError(error: unknown): boolean {
+  return error instanceof Error && error.name === "AbortError";
+}
+
 export function useProperties(options: UsePropertiesOptions = {}): UsePropertiesResult {
   const [properties, setProperties] = useState<Property[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const requestIdRef = useRef(0);
+
+  const filters = options.filters;
+  const requestKey = useMemo(
+    () =>
+      JSON.stringify({
+        district: options.district ?? null,
+        filters: filters ?? {},
+      }),
+    [options.district, filters],
+  );
 
   useEffect(() => {
-    let cancelled = false;
+    const controller = new AbortController();
+    const requestId = ++requestIdRef.current;
 
-    setIsLoading(true);
-    setError(null);
+    queueMicrotask(() => {
+      if (requestIdRef.current !== requestId || controller.signal.aborted) return;
+      setIsLoading(true);
+      setError(null);
+    });
 
+    const parsed = JSON.parse(requestKey) as {
+      district: string | null;
+      filters: Omit<PropertyFilters, "district">;
+    };
     const filters: PropertyFilters = {
-      ...options.filters,
-      ...(options.district ? { district: options.district } : {}),
+      ...parsed.filters,
+      ...(parsed.district ? { district: parsed.district } : {}),
     };
 
-    getProperties(filters)
+    getProperties(filters, { signal: controller.signal })
       .then((data) => {
-        if (!cancelled) setProperties(data);
+        if (requestIdRef.current === requestId) setProperties(data);
       })
       .catch((err: Error) => {
-        if (!cancelled) setError(err.message);
+        if (isAbortError(err)) return;
+        if (requestIdRef.current === requestId) setError(err.message);
       })
       .finally(() => {
-        if (!cancelled) setIsLoading(false);
+        if (requestIdRef.current === requestId) setIsLoading(false);
       });
 
     return () => {
-      cancelled = true;
+      controller.abort();
     };
-  }, [options.district]);
+  }, [requestKey]);
 
   return { properties, isLoading, error };
 }
