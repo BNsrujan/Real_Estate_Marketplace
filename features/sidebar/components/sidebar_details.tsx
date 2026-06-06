@@ -260,7 +260,7 @@ export function BrowsePanel({ onOpen }: { onOpen: (p: Property) => void }) {
       {/* Results grid */}
       <div className="flex-1 min-h-0 overflow-y-auto px-3 pb-4">
         {isLoading ? (
-          <div className="grid grid-cols-2 gap-2">
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-2 md:gap-2">
             {Array.from({ length: 6 }).map((_, i) => (
               <div key={i} className="space-y-2 rounded-2xl border border-border bg-card p-2">
                 <Skeleton className="h-28 w-full rounded-xl" />
@@ -281,7 +281,7 @@ export function BrowsePanel({ onOpen }: { onOpen: (p: Property) => void }) {
             </button>
           </div>
         ) : (
-          <div className="grid grid-cols-2 gap-2">
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-2 md:gap-2">
             {results.map((p) => (
               <PropertyCard key={p.id} property={p} variant="grid" onOpen={onOpen} />
             ))}

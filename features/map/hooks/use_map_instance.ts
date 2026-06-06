@@ -6,7 +6,7 @@ import "mapbox-gl/dist/mapbox-gl.css";
 
 mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_API_KEY || "";
 
-import { MAP_CONFIG, TILE_SOURCES, getResponsiveMapConfig } from "@/lib/globe/map_config";
+import { TILE_SOURCES, getResponsiveMapConfig } from "@/lib/globe/map_config";
 import { addMapLayers, addMapboxAdminBoundaries } from "../services/map_layer_service";
 import { useStore } from "@/shared/store";
 
@@ -115,7 +115,28 @@ export function useMapInstance({
     const ro = new ResizeObserver(() => map.resize());
     ro.observe(containerRef.current);
 
-    map.on("style.load", () => {
+    let disposed = false;
+
+    const handleStyleDataLoading = () => {
+      if (!disposed) setIsStyleLoaded(false);
+    };
+
+    const handleMapClick = (e: mapboxgl.MapMouseEvent) => {
+      // If a property marker was clicked its handler called stopPropagation —
+      // the originalEvent is cancelled so we bail out here to avoid also
+      // triggering the district filter on every single marker click.
+      if (e.originalEvent.cancelBubble) return;
+      if (!map.getLayer("cities-fill")) return;
+      const features = map.queryRenderedFeatures(e.point, {
+        layers: ["cities-fill"],
+      });
+      if (!features.length) return;
+      const name = features[0].properties?.NAME_2;
+      if (name) onDistrictClickRef.current(name);
+    };
+
+    const handleStyleLoad = () => {
+      if (disposed) return;
       map.resize();
       // Add both custom GeoJSON layers and Mapbox native admin boundaries
       addMapLayers(map);
@@ -128,63 +149,74 @@ export function useMapInstance({
     'star-intensity': 0.6 // Background star brightness (default 0.35 at low zoooms )
   });
 
-      map.on("click", (e) => {
-        // If a property marker was clicked its handler called stopPropagation —
-        // the originalEvent is cancelled so we bail out here to avoid also
-        // triggering the district filter on every single marker click.
-        if (e.originalEvent.cancelBubble) return;
-        if (!map.getLayer("cities-fill")) return;
-        const features = map.queryRenderedFeatures(e.point, {
-          layers: ["cities-fill"],
-        });
-        if (!features.length) return;
-        const name = features[0].properties?.NAME_2;
-        if (name) onDistrictClickRef.current(name);
-      });
-
       setIsStyleLoaded(true);
       setStyleLoadCount((c) => c + 1);
-    });
+    };
 
-    map.on("load", () => {
+    const handleLoad = () => {
+      if (disposed) return;
       requestAnimationFrame(() => {
+        if (disposed) return;
         map.resize();
         setMap({ isLoaded: true });
         const elapsed = Date.now() - loadStart;
         const delay = Math.max(0, 200 - elapsed);
-        setTimeout(() => onLoadRef.current(), delay);
+        setTimeout(() => {
+          if (!disposed) onLoadRef.current();
+        }, delay);
       });
-    });
+    };
 
-    map.on("zoom", () => {
+    const handleZoom = () => {
+      if (disposed) return;
       onZoomRef.current(map.getZoom());
       setMap({ currentZoom: map.getZoom() });
-    });
+    };
 
-    map.on("rotate", () => {
+    const handleRotate = () => {
+      if (disposed) return;
       setMap({ currentBearing: map.getBearing() });
-    });
+    };
 
     // Sync viewport bounds after every pan/zoom ends
-    map.on("moveend", () => {
+    const handleMoveEnd = () => {
+      if (disposed) return;
       const b = map.getBounds();
       if (b) {
         setMap({
           viewportBounds: [b.getWest(), b.getSouth(), b.getEast(), b.getNorth()],
         });
       }
-    });
+    };
+
+    map.on("styledataloading", handleStyleDataLoading);
+    map.on("style.load", handleStyleLoad);
+    map.on("load", handleLoad);
+    map.on("click", handleMapClick);
+    map.on("zoom", handleZoom);
+    map.on("rotate", handleRotate);
+    map.on("moveend", handleMoveEnd);
 
     // Store map instance so any feature can access it via the store
     setMap({ instance: map, isLoaded: false });
 
     return () => {
+      disposed = true;
       ro.disconnect();
+      map.off("styledataloading", handleStyleDataLoading);
+      map.off("style.load", handleStyleLoad);
+      map.off("load", handleLoad);
+      map.off("click", handleMapClick);
+      map.off("zoom", handleZoom);
+      map.off("rotate", handleRotate);
+      map.off("moveend", handleMoveEnd);
       map.remove();
       mapRef.current = null;
+      (containerRef as React.MutableRefObject<HTMLDivElement | null>).current = null;
+      setIsStyleLoaded(false);
       setMap({ instance: null, isLoaded: false });
     };
-  }, [setMap]);
+  }, [containerRef, setMap]);
 
   return { mapRef, isStyleLoaded, styleLoadCount };
 }

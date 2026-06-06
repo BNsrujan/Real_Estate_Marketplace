@@ -168,39 +168,29 @@ export function MapCanvas({ setIsLoaded }: Props) {
     mapRef: mapInstance,
   });
 
-  const handleLayerChange = useCallback(
-    (layer: LayerType) => {
-      const map = mapInstance.current;
-      if (!map) return;
-
-      try {
-        // Mapbox built-in styles - switch entire style
-        const mapboxStyles: Record<string, string | undefined> = {
-          streets: MAPBOX_STYLES.streets,
-          outdoors: MAPBOX_STYLES.outdoors,
-          light: MAPBOX_STYLES.light,
-          dark: MAPBOX_STYLES.dark,
-          satellite: MAPBOX_STYLES.satellite,
-          satelliteStreets: MAPBOX_STYLES.satelliteStreets,
-        };
-
-        if (mapboxStyles[layer]) {
-          map.setStyle(mapboxStyles[layer]!);
-          return;
-        }
-      } catch (e) {
-        console.warn("Layer switch failed:", e);
-      }
-    },
-    [mapInstance],
-  );
-
   const activeLayer = useStore((s) => s.map.activeLayer);
   useEffect(() => {
-    if (isStyleLoaded && mapInstance.current) {
-      handleLayerChange(activeLayer);
+    const map = mapInstance.current;
+    if (!isStyleLoaded || !map) return;
+
+    try {
+      // Mapbox built-in styles - switch entire style
+      const mapboxStyles: Record<LayerType, string | undefined> = {
+        streets: MAPBOX_STYLES.streets,
+        outdoors: MAPBOX_STYLES.outdoors,
+        light: MAPBOX_STYLES.light,
+        dark: MAPBOX_STYLES.dark,
+        satellite: MAPBOX_STYLES.satellite,
+        satelliteStreets: MAPBOX_STYLES.satelliteStreets,
+      };
+
+      if (mapboxStyles[activeLayer]) {
+        map.setStyle(mapboxStyles[activeLayer]!);
+      }
+    } catch (e) {
+      console.warn("Layer switch failed:", e);
     }
-  }, [isStyleLoaded, activeLayer, handleLayerChange]);
+  }, [isStyleLoaded, activeLayer, mapInstance]);
 
   return (
     <div className="relative w-full h-screen h-[100svh] md:h-screen overflow-hidden">
@@ -265,7 +255,7 @@ export function MapCanvas({ setIsLoaded }: Props) {
             </div>
 
             <div className="absolute bottom-30 md:bottom-4 left-0 right-0 md:right-auto pointer-events-auto p-3 md:p-0">
-              <MapLayerSelector onLayerChange={handleLayerChange} />
+              <MapLayerSelector />
             </div>
           </div>
           <div className="absolute top-3 right-3 pointer-events-auto ">

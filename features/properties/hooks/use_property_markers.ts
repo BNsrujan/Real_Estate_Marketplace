@@ -114,11 +114,11 @@ export function usePropertyMarkers({
     };
   }, [mapRef, isStyleLoaded, styleLoadCount, renderMarkers]);
 
-  // Re-render markers whenever filtered properties change
+  // Re-render markers whenever filtered properties or the current style change.
   useEffect(() => {
     if (!isStyleLoaded || isLoading) return;
     renderMarkers(filtered);
-  }, [filtered, isStyleLoaded, isLoading, renderMarkers]);
+  }, [filtered, isStyleLoaded, isLoading, renderMarkers, styleLoadCount]);
 
   useEffect(() => {
     if (selectedProperty) return;

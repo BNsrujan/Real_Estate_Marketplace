@@ -95,41 +95,43 @@ function SidebarMenuItem({
   return (
     <li>
       <Tooltip>
-        <TooltipTrigger
-          aria-label={item.title}
-          title={item.title}
-          onClick={() => onActivate(item.id)}
-          className="group flex flex-col items-center gap-1 w-full py-1 focus-visible:outline-none"
-        >
-          {/* MD3 Nav Rail indicator pill */}
-          <div
-            className={`
-              relative flex h-8 w-14 items-center justify-center rounded-full
-              transition-all duration-300 ease-[cubic-bezier(0.2,0,0,1)]
-              active:scale-95
-              ${
-                pressed
-                  ? "bg-secondary shadow-sm"
-                  : "bg-transparent hover:bg-muted"
-              }
-            `}
+        <TooltipTrigger asChild>
+          <button
+            type="button"
+            aria-label={item.title}
+            onClick={() => onActivate(item.id)}
+            className="group flex flex-col items-center gap-1 w-full py-1 focus-visible:outline-none"
           >
-            <Icon
-              size={20}
-              className={`transition-colors duration-200 ${
-                pressed
-                  ? "text-primary"
-                  : "text-muted-foreground group-hover:text-foreground"
+            {/* MD3 Nav Rail indicator pill */}
+            <div
+              className={`
+                relative flex h-8 w-14 items-center justify-center rounded-full
+                transition-all duration-300 ease-[cubic-bezier(0.2,0,0,1)]
+                active:scale-95
+                ${
+                  pressed
+                    ? "bg-secondary shadow-sm"
+                    : "bg-transparent hover:bg-muted"
+                }
+              `}
+            >
+              <Icon
+                size={20}
+                className={`transition-colors duration-200 ${
+                  pressed
+                    ? "text-primary"
+                    : "text-muted-foreground group-hover:text-foreground"
+                }`}
+              />
+            </div>
+            <span
+              className={`text-[10px] font-medium transition-colors duration-200 leading-none ${
+                pressed ? "text-primary" : "text-muted-foreground"
               }`}
-            />
-          </div>
-          <span
-            className={`text-[10px] font-medium transition-colors duration-200 leading-none ${
-              pressed ? "text-primary" : "text-muted-foreground"
-            }`}
-          >
-            {item.title.split(" ")[0]}
-          </span>
+            >
+              {item.title.split(" ")[0]}
+            </span>
+          </button>
         </TooltipTrigger>
         <TooltipContent
           side="right"
@@ -241,27 +243,30 @@ export function AppSidebar() {
                   {/* List Property — MD3 FAB style */}
                   <li className="pt-1">
                     <Tooltip>
-                      <TooltipTrigger
-                        aria-label="List Property"
-                        onClick={() => {
-                          if (!isAuthenticated) {
-                            openLoginModal();
-                            return;
-                          }
-                          setShowSellModal(true);
-                        }}
-                        className="group flex flex-col items-center gap-1 w-full py-1 focus-visible:outline-none"
-                      >
-                        <div className="relative flex h-8 w-14 items-center justify-center rounded-full bg-primary/10 hover:bg-primary/20 transition-all duration-300 active:scale-95">
-                          <Plus size={20} className="text-primary" />
-                        </div>
-                        <span className="text-[10px] font-medium text-primary leading-none">
-                          List
-                        </span>
+                      <TooltipTrigger asChild>
+                        <button
+                          type="button"
+                          aria-label="List Property"
+                          onClick={() => {
+                            if (!isAuthenticated) {
+                              openLoginModal();
+                              return;
+                            }
+                            setShowSellModal(true);
+                          }}
+                          className="group flex flex-col items-center gap-1 w-full py-1 focus-visible:outline-none"
+                        >
+                          <div className="relative flex h-8 w-14 items-center justify-center rounded-full bg-primary/10 hover:bg-primary/20 transition-all duration-300 active:scale-95">
+                            <Plus size={20} className="text-primary" />
+                          </div>
+                          <span className="text-[10px] font-medium text-primary leading-none">
+                            List
+                          </span>
+                        </button>
                       </TooltipTrigger>
                       <TooltipContent
                         side="right"
-                        className="bg-popover border border-border text-background text-xs font-medium px-3 py-1.5 rounded-xl shadow-md z-1100"
+                        className="bg-foreground border border-border text-background text-xs font-medium px-3 py-1.5 rounded-xl shadow-md z-1100"
                       >
                         List Property
                       </TooltipContent>
