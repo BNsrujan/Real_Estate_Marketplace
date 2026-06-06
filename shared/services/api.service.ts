@@ -1,4 +1,5 @@
 import { env } from '@/lib/env';
+import { clearClientAuthData } from '@/shared/services/auth_session.service';
 
 function getStore() {
   // eslint-disable-next-line @typescript-eslint/no-require-imports
@@ -33,6 +34,19 @@ function createAbortError(): Error {
 
 function shouldQueueAuthFailure(endpoint: string): boolean {
   return !endpoint.startsWith('/api/v1/auth/');
+}
+
+function clearStaleAuthState(): void {
+  clearClientAuthData();
+
+  const store = getStore();
+  const { setAuth, setWatchlist } = store.getState();
+  setAuth({
+    isAuthenticated: false,
+    user: null,
+    token: null,
+  });
+  setWatchlist({ saved: [], isSaving: false });
 }
 
 function flushQueue(success: boolean) {
@@ -91,6 +105,7 @@ async function request<T>(
   if (response.status === 401 && !options._isRetry && shouldQueueAuthFailure(endpoint)) {
     const store = getStore();
     const { openLoginModal } = store.getState();
+    clearStaleAuthState();
 
     return new Promise<T>((resolve, reject) => {
       if (options.signal?.aborted) {
@@ -132,6 +147,11 @@ async function request<T>(
         openLoginModal();
       }
     });
+  }
+
+  if (response.status === 403 && shouldQueueAuthFailure(endpoint)) {
+    clearStaleAuthState();
+    notifyAuthAborted();
   }
 
   if (!response.ok) {

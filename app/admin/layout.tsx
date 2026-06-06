@@ -1,23 +1,54 @@
 'use client';
 
 import { useEffect } from 'react';
+import { useState } from 'react';
 import { useStore } from '@/shared/store';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { LayoutDashboard, Users, Building2, LogOut } from 'lucide-react';
+import { getProfile } from '@/features/profile/api/auth_api';
+import { clearClientAuthData } from '@/shared/services/auth_session.service';
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const isAuthenticated = useStore((s) => s.auth.isAuthenticated);
   const user = useStore((s) => s.auth.user);
+  const loginSuccess = useStore((s) => s.loginSuccess);
+  const setAuth = useStore((s) => s.setAuth);
   const router = useRouter();
+  const [isCheckingSession, setIsCheckingSession] = useState(true);
 
   useEffect(() => {
-    if (!isAuthenticated || user?.role !== 'admin') {
+    let cancelled = false;
+
+    getProfile()
+      .then((profile) => {
+        if (cancelled) return;
+        if (profile.role !== 'admin') {
+          router.replace('/');
+          return;
+        }
+        loginSuccess(profile, '');
+        setIsCheckingSession(false);
+      })
+      .catch(() => {
+        if (cancelled) return;
+        clearClientAuthData();
+        setAuth({ isAuthenticated: false, user: null, token: null });
+        router.replace('/');
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [loginSuccess, router, setAuth]);
+
+  useEffect(() => {
+    if (!isCheckingSession && (!isAuthenticated || user?.role !== 'admin')) {
       router.replace('/');
     }
-  }, [isAuthenticated, user, router]);
+  }, [isAuthenticated, isCheckingSession, user, router]);
 
-  if (!isAuthenticated || user?.role !== 'admin') return null;
+  if (isCheckingSession || !isAuthenticated || user?.role !== 'admin') return null;
 
   return (
     <div className="min-h-screen bg-zinc-950 text-white flex">
