@@ -11,8 +11,7 @@ const isDev = process.env.NODE_ENV !== "production";
 export const env = {
   // Backend API base URL — automatically switches between local and production
   apiUrl:
-    process.env.NEXT_PUBLIC_API_URL ??
-    (isDev ? "http://localhost:8000" : ""),
+    process.env.NEXT_PUBLIC_API_URL ?? (isDev ? "http://localhost:8000" : ""),
 
   // Map tile base URL override (optional)
   mapStyleUrl: process.env.NEXT_PUBLIC_MAP_STYLE_URL ?? "",

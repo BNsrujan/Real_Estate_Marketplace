@@ -20,6 +20,7 @@ function normalizePropertyType(type: string): Property['type'] {
   return map[type] ?? 'house';
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function mapProperty(p: any): Property {
   return {
     id: p.id,
@@ -89,9 +90,16 @@ export interface PropertyFilters {
   limit?: number;
 }
 
+interface PropertyRequestOptions {
+  signal?: AbortSignal;
+}
+
 // ─── API calls ────────────────────────────────────────────────────────────────
 
-export async function getProperties(filters: PropertyFilters = {}): Promise<Property[]> {
+export async function getProperties(
+  filters: PropertyFilters = {},
+  options: PropertyRequestOptions = {},
+): Promise<Property[]> {
   const params = new URLSearchParams();
   if (filters.type) params.set('type', filters.type);
   if (filters.district) params.set('district', filters.district);
@@ -106,6 +114,7 @@ export async function getProperties(filters: PropertyFilters = {}): Promise<Prop
   const query = params.toString();
   const result = await apiService.get<ApiResponse<{ data: unknown[] }>>(
     `/api/v1/properties${query ? `?${query}` : ''}`,
+    { signal: options.signal },
   );
   return result.data.data.map(mapProperty);
 }
