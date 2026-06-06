@@ -23,6 +23,7 @@ interface QueuedRequest {
 }
 
 const MAX_RETRY_QUEUE_SIZE = 50;
+const RETRY_QUEUE_LIMIT_ERROR_MESSAGE = 'Retry queue limit exceeded';
 const retryQueue: QueuedRequest[] = [];
 let isRefreshing = false;
 
@@ -65,6 +66,26 @@ function flushQueue(success: boolean) {
       item.reject(new Error('Session expired'));
     }
   });
+}
+
+function removeQueuedRequest(queuedRequest: QueuedRequest): boolean {
+  const index = retryQueue.indexOf(queuedRequest);
+  if (index === -1) return false;
+
+  retryQueue.splice(index, 1);
+  queuedRequest.cleanup?.();
+  if (retryQueue.length === 0) isRefreshing = false;
+  return true;
+}
+
+function enqueueQueuedRequest(queuedRequest: QueuedRequest): void {
+  while (retryQueue.length >= MAX_RETRY_QUEUE_SIZE) {
+    const dropped = retryQueue.shift();
+    dropped?.cleanup?.();
+    dropped?.reject(new Error(RETRY_QUEUE_LIMIT_ERROR_MESSAGE));
+  }
+
+  retryQueue.push(queuedRequest);
 }
 
 export function notifyAuthRestored() {
@@ -122,10 +143,7 @@ async function request<T>(
 
       if (options.signal) {
         const handleAbort = () => {
-          const index = retryQueue.indexOf(queuedRequest);
-          if (index !== -1) retryQueue.splice(index, 1);
-          if (retryQueue.length === 0) isRefreshing = false;
-          queuedRequest.cleanup?.();
+          removeQueuedRequest(queuedRequest);
           reject(createAbortError());
         };
         options.signal.addEventListener('abort', handleAbort, { once: true });
@@ -134,13 +152,7 @@ async function request<T>(
         };
       }
 
-      while (retryQueue.length >= MAX_RETRY_QUEUE_SIZE) {
-        const dropped = retryQueue.shift();
-        dropped?.cleanup?.();
-        dropped?.reject(new Error('Retry queue limit exceeded'));
-      }
-
-      retryQueue.push(queuedRequest);
+      enqueueQueuedRequest(queuedRequest);
 
       if (!isRefreshing) {
         isRefreshing = true;
