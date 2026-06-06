@@ -20,6 +20,7 @@ import {
   clearLogoutMarker,
   logoutAuthSession,
 } from "@/shared/services/auth_session.service";
+import { notifyAuthAborted } from "@/shared/services/api.service";
 
 // ─── Geo types (local, avoids maplibre-gl SSR issues) ────────────────────────
 
@@ -215,6 +216,7 @@ export const useStore = create<NammaDharaniStore>()(
         } catch (error) {
           logoutError = error;
         } finally {
+          notifyAuthAborted();
           set(
             (s) => ({
               auth: {
