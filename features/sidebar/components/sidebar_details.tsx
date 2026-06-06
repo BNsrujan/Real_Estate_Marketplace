@@ -102,6 +102,16 @@ export function AuthGate({
 
 const BROWSE_PROPERTY_LIMIT = 200;
 
+type BrowseCriteria = {
+  search: string;
+  selectedTypes: PropertyType[];
+  listingType: 'all' | 'sale' | 'rent';
+};
+
+function isAbortError(error: unknown): boolean {
+  return error instanceof Error && error.name === 'AbortError';
+}
+
 function matchesBrowseSearch(property: Property, query: string): boolean {
   const normalizedQuery = query.trim().toLowerCase();
   if (!normalizedQuery) return true;
@@ -127,28 +137,78 @@ export function BrowsePanel({ onOpen }: { onOpen: (p: Property) => void }) {
   const [selectedTypes, setSelectedTypes] = useState<PropertyType[]>([]);
   const [listingType, setListingType]     = useState<'all' | 'sale' | 'rent'>('all');
   const [showFilters, setShowFilters]     = useState(false);
+  const [appliedCriteria, setAppliedCriteria] = useState<BrowseCriteria>({
+    search: '',
+    selectedTypes: [],
+    listingType: 'all',
+  });
+  const requestIdRef = React.useRef(0);
 
-  const load = useCallback(async () => {
-    setIsLoading(true);
-    try {
-      const params: Parameters<typeof getProperties>[0] = { limit: BROWSE_PROPERTY_LIMIT };
-      if (selectedTypes.length === 1) params.type    = selectedTypes[0];
-      if (listingType !== 'all')      params.listing = listingType;
-      const properties = await getProperties(params);
-      setResults(properties.filter((property) => matchesBrowseSearch(property, search)));
-    } catch {
-      setResults([]);
-    } finally {
-      setIsLoading(false);
-    }
+  const applyCurrentCriteria = useCallback(() => {
+    setAppliedCriteria({
+      search,
+      selectedTypes: [...selectedTypes],
+      listingType,
+    });
   }, [search, selectedTypes, listingType]);
 
-  useEffect(() => {
-    const timer = window.setTimeout(() => { void load(); }, 0);
-    return () => window.clearTimeout(timer);
-    // BrowsePanel intentionally loads once on mount; user actions apply later filter changes.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+  const clearFilters = useCallback(() => {
+    const next: BrowseCriteria = { search: '', selectedTypes: [], listingType: 'all' };
+    setSearch(next.search);
+    setSelectedTypes(next.selectedTypes);
+    setListingType(next.listingType);
+    setAppliedCriteria(next);
   }, []);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    const requestId = ++requestIdRef.current;
+
+    queueMicrotask(() => {
+      if (requestIdRef.current !== requestId || controller.signal.aborted) return;
+      setIsLoading(true);
+    });
+
+    async function load() {
+      try {
+        const params: Parameters<typeof getProperties>[0] = { limit: BROWSE_PROPERTY_LIMIT };
+        if (appliedCriteria.selectedTypes.length === 1) params.type = appliedCriteria.selectedTypes[0];
+        if (appliedCriteria.listingType !== 'all') params.listing = appliedCriteria.listingType;
+
+        const properties = await getProperties(params, { signal: controller.signal });
+        const filtered = properties.filter(
+          (property) =>
+            (appliedCriteria.selectedTypes.length === 0 ||
+              appliedCriteria.selectedTypes.includes(property.type)) &&
+            matchesBrowseSearch(property, appliedCriteria.search),
+        );
+
+        if (requestIdRef.current === requestId && !controller.signal.aborted) {
+          setResults(filtered);
+        }
+      } catch (error) {
+        if (isAbortError(error)) return;
+        if (requestIdRef.current === requestId && !controller.signal.aborted) {
+          setResults([]);
+        }
+      } finally {
+        if (requestIdRef.current === requestId && !controller.signal.aborted) {
+          setIsLoading(false);
+        }
+      }
+    }
+
+    void load();
+
+    return () => {
+      controller.abort();
+    };
+  }, [appliedCriteria]);
+
+  function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    applyCurrentCriteria();
+  }
 
   function toggleType(type: PropertyType) {
     setSelectedTypes((prev) =>
@@ -162,7 +222,7 @@ export function BrowsePanel({ onOpen }: { onOpen: (p: Property) => void }) {
     <div className="flex flex-col h-full">
       {/* MD3 filled search bar */}
       <form
-        onSubmit={(e) => { e.preventDefault(); load(); }}
+        onSubmit={handleSubmit}
         className="shrink-0 px-4 pt-4 pb-2"
       >
         <div className="group flex items-center gap-2 rounded-t-xl rounded-b-none border-b-2 border-border bg-input px-4 py-3 transition-colors duration-200 focus-within:border-primary">
@@ -212,7 +272,7 @@ export function BrowsePanel({ onOpen }: { onOpen: (p: Property) => void }) {
             {hasFilters && (
               <button
                 type="button"
-                onClick={() => { setSelectedTypes([]); setListingType('all'); }}
+                onClick={clearFilters}
                 className="ml-auto flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
               >
                 <RotateCcw size={10} /> Reset
@@ -242,7 +302,7 @@ export function BrowsePanel({ onOpen }: { onOpen: (p: Property) => void }) {
 
           <button
             type="button"
-            onClick={load}
+            onClick={applyCurrentCriteria}
             className="w-full rounded-full bg-primary py-2.5 text-sm font-semibold text-primary-foreground shadow-sm transition-all duration-200 hover:bg-primary/90 active:scale-95"
           >
             Apply Filters
@@ -274,7 +334,7 @@ export function BrowsePanel({ onOpen }: { onOpen: (p: Property) => void }) {
             <p className="text-sm">No properties found</p>
             <button
               type="button"
-              onClick={() => { setSearch(''); setSelectedTypes([]); setListingType('all'); load(); }}
+              onClick={clearFilters}
               className="mt-2 text-xs text-muted-foreground hover:text-foreground transition-colors"
             >
               Clear filters
