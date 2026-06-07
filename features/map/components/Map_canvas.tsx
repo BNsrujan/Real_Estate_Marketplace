@@ -23,12 +23,17 @@ interface Props {
   setIsLoaded: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
+function isMobileViewport(): boolean {
+  return typeof window !== "undefined" && window.innerWidth < 768;
+}
+
 export function MapCanvas({ setIsLoaded }: Props) {
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const titleRef = useRef<HTMLDivElement>(null);
 
   const [showButton, setShowButton] = useState(true);
   const [hoveredProperty, setHoveredProperty] = useState<Property | null>(null);
+  const [isHydrated, setIsHydrated] = useState(false);
   const hoverTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const setSelectedProperty = useStore((s) => s.setSelectedProperty);
@@ -42,7 +47,16 @@ export function MapCanvas({ setIsLoaded }: Props) {
   }, []);
 
   useEffect(() => {
-    return () => clearHoverTimeout();
+    let disposed = false;
+
+    queueMicrotask(() => {
+      if (!disposed) setIsHydrated(true);
+    });
+
+    return () => {
+      disposed = true;
+      clearHoverTimeout();
+    };
   }, [clearHoverTimeout]);
 
   const showPropertyPreview = useCallback(
@@ -65,7 +79,7 @@ export function MapCanvas({ setIsLoaded }: Props) {
 
   const handleMarkerClick = useCallback(
     (prop: Property) => {
-      if (window.innerWidth < 768) {
+      if (isMobileViewport()) {
         clearHoverTimeout();
         setHoveredProperty(null);
         setSelectedProperty(prop);
@@ -79,14 +93,14 @@ export function MapCanvas({ setIsLoaded }: Props) {
 
   const handleMarkerHover = useCallback(
     (prop: Property) => {
-      if (window.innerWidth < 768) return;
+      if (isMobileViewport()) return;
       showPropertyPreview(prop);
     },
     [showPropertyPreview],
   );
 
   const handleMarkerLeave = useCallback(() => {
-    if (window.innerWidth < 768) return;
+    if (isMobileViewport()) return;
     clearHoverTimeout();
     hoverTimeoutRef.current = setTimeout(() => {
       setHoveredProperty(null);
@@ -265,7 +279,8 @@ export function MapCanvas({ setIsLoaded }: Props) {
       )}
 
       {/* Property preview — hover on desktop, tap on mobile */}
-      {typeof document !== "undefined" &&
+      {isHydrated &&
+        typeof document !== "undefined" &&
         hoveredProperty &&
         hoverScreenPos &&
         createPortal(
@@ -273,14 +288,14 @@ export function MapCanvas({ setIsLoaded }: Props) {
             className="fixed pointer-events-auto transition-all duration-200"
             style={{
               left:
-                window.innerWidth >= 768
+                !isMobileViewport()
                   ? hoverScreenPos.x + 24
                   : Math.max(
                       12,
                       Math.min(hoverScreenPos.x - 144, window.innerWidth - 300),
                     ),
               top:
-                window.innerWidth >= 768
+                !isMobileViewport()
                   ? hoverScreenPos.y - 120
                   : Math.max(12, hoverScreenPos.y - 220),
               zIndex: 99999,
@@ -288,10 +303,10 @@ export function MapCanvas({ setIsLoaded }: Props) {
             onMouseEnter={clearHoverTimeout}
             onMouseLeave={handleMarkerLeave}
             onPointerDown={(e) => {
-              if (window.innerWidth < 768) e.stopPropagation();
+              if (isMobileViewport()) e.stopPropagation();
             }}
             onClick={(e) => {
-              if (window.innerWidth < 768) e.stopPropagation();
+              if (isMobileViewport()) e.stopPropagation();
             }}
           >
             <PropertyHoverCard
