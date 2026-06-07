@@ -18,6 +18,7 @@ import Profile from "@/features/profile/components/Profile";
 import { usePropertyStore } from "@/features/properties/hooks/use_property_store";
 import PropertyHoverCard from "@/features/properties/components/property_card";
 import { useStore } from "@/shared/store";
+import { ErrorBoundary } from "@/shared/components/common/error_boundary";
 
 interface Props {
   setIsLoaded: React.Dispatch<React.SetStateAction<boolean>>;
@@ -122,6 +123,7 @@ export function MapCanvas({ setIsLoaded }: Props) {
     mapRef: mapInstance,
     isStyleLoaded,
     styleLoadCount,
+    runtimeError: mapRuntimeError,
   } = useMapInstance({
     containerRef: mapContainerRef,
     onLoad: () => {
@@ -132,6 +134,10 @@ export function MapCanvas({ setIsLoaded }: Props) {
       filterByDistrictRef.current(name);
     },
   });
+
+  useEffect(() => {
+    if (mapRuntimeError) setIsLoaded(true);
+  }, [mapRuntimeError, setIsLoaded]);
 
   // Load all properties into global store + maintain filtered list
   usePropertyStore();
@@ -226,8 +232,21 @@ export function MapCanvas({ setIsLoaded }: Props) {
         className="absolute inset-0 z-0 pointer-events-none"
         style={{ mixBlendMode: "screen" }}
       >
-        <StarField />
+        <ErrorBoundary fallback={null}>
+          <StarField />
+        </ErrorBoundary>
       </div>
+
+      {mapRuntimeError && (
+        <div className="absolute inset-0 z-[5] flex items-center justify-center bg-black text-white">
+          <div className="max-w-sm px-6 text-center">
+            <h2 className="text-lg font-semibold">Map unavailable</h2>
+            <p className="mt-2 text-sm text-zinc-400">
+              The map failed to initialize. Refresh the page to try again.
+            </p>
+          </div>
+        </div>
+      )}
 
       <div className="absolute inset-0 z-2 pointer-events-none">
         {showButton && (
