@@ -4,8 +4,6 @@ import { useEffect, useRef, useState } from "react";
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 
-mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_API_KEY || "";
-
 import { TILE_SOURCES, getResponsiveMapConfig } from "@/lib/globe/map_config";
 import { addMapLayers, addMapboxAdminBoundaries } from "../services/map_layer_service";
 import { useStore } from "@/shared/store";
@@ -44,6 +42,8 @@ export function useMapInstance({
 
   useEffect(() => {
     if (!containerRef.current || mapRef.current) return;
+
+    mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_API_KEY || "";
 
     const loadStart = Date.now();
     const cfg = getResponsiveMapConfig();

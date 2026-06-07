@@ -1,30 +1,45 @@
 "use client";
-import { useRef, useMemo, useEffect, useState } from "react";
+import { useRef, useEffect, useState } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 
-function Stars3D() {
+function createStarGeometry(count: number): THREE.BufferGeometry {
+  const positions = new Float32Array(count * 3);
+
+  for (let i = 0; i < count; i++) {
+    const theta = Math.random() * Math.PI * 2;
+    const phi = Math.acos(2 * Math.random() - 1);
+    const r = 160 + Math.random() * 200;
+
+    positions[i * 3] = r * Math.sin(phi) * Math.cos(theta);
+    positions[i * 3 + 1] = r * Math.sin(phi) * Math.sin(theta);
+    positions[i * 3 + 2] = r * Math.cos(phi);
+  }
+
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute("position", new THREE.BufferAttribute(positions, 3));
+  return geo;
+}
+
+function Stars3D({ count }: { count: number }) {
   const pointsRef = useRef<THREE.Points>(null);
   const mouseRef = useRef({ x: 0, y: 0 });
+  const [geometry, setGeometry] = useState<THREE.BufferGeometry | null>(null);
 
-  const geometry = useMemo(() => {
-    const count = window.innerWidth < 768 ? 2500 : 6000;
-    const positions = new Float32Array(count * 3);
+  useEffect(() => {
+    const nextGeometry = createStarGeometry(count);
+    let disposed = false;
 
-    for (let i = 0; i < count; i++) {
-      const theta = Math.random() * Math.PI * 2;
-      const phi = Math.acos(2 * Math.random() - 1);
-      const r = 160 + Math.random() * 200;
+    queueMicrotask(() => {
+      if (disposed) return;
+      setGeometry(nextGeometry);
+    });
 
-      positions[i * 3] = r * Math.sin(phi) * Math.cos(theta);
-      positions[i * 3 + 1] = r * Math.sin(phi) * Math.sin(theta);
-      positions[i * 3 + 2] = r * Math.cos(phi);
-    }
-
-    const geo = new THREE.BufferGeometry();
-    geo.setAttribute("position", new THREE.BufferAttribute(positions, 3));
-    return geo;
-  }, []);
+    return () => {
+      disposed = true;
+      nextGeometry.dispose();
+    };
+  }, [count]);
 
   useEffect(() => {
     const onMouseMove = (e: MouseEvent) => {
@@ -54,23 +69,35 @@ function Stars3D() {
     pointsRef.current.position.y = clamp(nextY, -6, 6);
   });
 
-  return (
+  return geometry ? (
     <>
       <color attach="background" args={["#000000"]} />
       <points ref={pointsRef} geometry={geometry}>
         <pointsMaterial size={1.2} color="#9ddcff" transparent opacity={1} sizeAttenuation />
       </points>
     </>
-  );
+  ) : null;
 }
 
 export default function StarField() {
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasWrapperRef = useRef<HTMLDivElement | null>(null);
-  const [isMounted, setIsMounted] = useState(false);
+  const [canvasConfig, setCanvasConfig] = useState<{ dpr: number; starCount: number } | null>(null);
 
   useEffect(() => {
-    setIsMounted(true);
+    let disposed = false;
+
+    queueMicrotask(() => {
+      if (disposed) return;
+      setCanvasConfig({
+        dpr: window.devicePixelRatio || 1,
+        starCount: window.innerWidth < 768 ? 2500 : 6000,
+      });
+    });
+
+    return () => {
+      disposed = true;
+    };
   }, []);
 
   // After mount, forcibly kill pointer-events on R3F's internal wrapper div
@@ -89,9 +116,9 @@ export default function StarField() {
       attributeFilter: ["style"],
     });
     return () => observer.disconnect();
-  }, [isMounted]);
+  }, [canvasConfig]);
 
-  if (!isMounted) return null;
+  if (!canvasConfig) return null;
 
   return (
     <div
@@ -102,7 +129,7 @@ export default function StarField() {
         ref={canvasWrapperRef as React.Ref<HTMLCanvasElement>}
         camera={{ position: [0, 0, 100], fov: 75, far: 10000 }}
         style={{ width: "100%", height: "100%", display: "block", pointerEvents: "none" }}
-        dpr={typeof window !== "undefined" ? window.devicePixelRatio : 1}
+        dpr={canvasConfig.dpr}
         gl={{ antialias: true, alpha: false, stencil: false }}
         resize={{ scroll: false, debounce: { scroll: 50, resize: 0 } }}
         onCreated={({ gl }) => {
@@ -112,7 +139,7 @@ export default function StarField() {
           }
         }}
       >
-        <Stars3D />
+        <Stars3D count={canvasConfig.starCount} />
       </Canvas>
     </div>
   );
