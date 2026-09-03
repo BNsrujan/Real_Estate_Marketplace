@@ -5,6 +5,7 @@ node_modules/
 .env
 .env.*
 !.env.sample
+!.env.example
 !.env.*.sample
 
 # Build output

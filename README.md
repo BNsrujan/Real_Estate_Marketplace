@@ -16,7 +16,7 @@ separately.
 ```bash
 cd frontend
 npm install
-cp .env.example .env.local   # see "Environment" below
+cp .env.example .env.local   # fill in real values
 npm run dev                  # http://localhost:3000
 ```
 
