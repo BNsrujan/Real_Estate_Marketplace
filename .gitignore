@@ -1,0 +1,24 @@
+# Dependencies
+node_modules/
+
+# Environment files - never commit these, use the .sample files as templates
+.env
+.env.*
+!.env.sample
+!.env.*.sample
+
+# Build output
+.next/
+out/
+build/
+dist/
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+
+# Editor / OS
+.DS_Store
+.vscode/
+.idea/
