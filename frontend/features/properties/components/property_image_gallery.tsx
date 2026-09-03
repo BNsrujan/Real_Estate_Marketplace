@@ -2,10 +2,8 @@
 
 import { useState } from 'react';
 import Image from 'next/image';
-import { ChevronLeft, ChevronRight, X, Maximize2 } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Maximize2 } from 'lucide-react';
 import { Dialog, DialogContent } from '@/shared/components/ui/dialog';
-import { Button } from '@/shared/components/ui/button';
-import { cn } from '@/lib/utils';
 import type { PropertyImage } from '@/shared/types';
 
 interface PropertyImageGalleryProps {
@@ -31,7 +29,7 @@ export function PropertyImageGallery({ images, coverFirst = true }: PropertyImag
       <div className="space-y-2">
         {/* Main image */}
         <div
-          className="relative aspect-video w-full cursor-zoom-in overflow-hidden rounded-xl"
+          className="relative aspect-video w-full cursor-zoom-in overflow-hidden rounded-none"
           onClick={() => { setActiveIdx(0); setLightboxOpen(true); }}
         >
           <Image
@@ -44,7 +42,7 @@ export function PropertyImageGallery({ images, coverFirst = true }: PropertyImag
           {sorted.length > 1 && (
             <button
               type="button"
-              className="absolute bottom-2 right-2 flex items-center gap-1 rounded-lg bg-black/60 px-2 py-1 text-xs text-white backdrop-blur-sm"
+              className="absolute bottom-2 right-2 flex items-center gap-1 rounded-none bg-parchment/95 px-2 py-1 text-xs text-ink backdrop-blur-sm"
             >
               <Maximize2 className="h-3 w-3" />
               {sorted.length} photos
@@ -58,12 +56,12 @@ export function PropertyImageGallery({ images, coverFirst = true }: PropertyImag
             {sorted.slice(1, 5).map((img, idx) => (
               <div
                 key={img.id}
-                className="relative h-16 w-24 shrink-0 cursor-pointer overflow-hidden rounded-lg"
+                className="relative h-16 w-24 shrink-0 cursor-pointer overflow-hidden rounded-none"
                 onClick={() => { setActiveIdx(idx + 1); setLightboxOpen(true); }}
               >
                 <Image src={img.url} alt={img.alt || ''} fill className="object-cover" />
                 {idx === 3 && sorted.length > 5 && (
-                  <div className="absolute inset-0 flex items-center justify-center bg-black/60 text-sm font-medium text-white">
+                  <div className="absolute inset-0 flex items-center justify-center bg-parchment/95 text-sm font-medium text-ink">
                     +{sorted.length - 5}
                   </div>
                 )}
@@ -75,8 +73,8 @@ export function PropertyImageGallery({ images, coverFirst = true }: PropertyImag
 
       {/* Lightbox */}
       <Dialog open={lightboxOpen} onOpenChange={setLightboxOpen}>
-        <DialogContent className="max-w-4xl border-white/10 bg-black/95 p-2">
-          <div className="relative aspect-video w-full overflow-hidden rounded-lg">
+        <DialogContent className="max-w-4xl border-hairline bg-terrain/95 p-2">
+          <div className="relative aspect-video w-full overflow-hidden rounded-none">
             <Image
               src={sorted[activeIdx].url}
               alt={sorted[activeIdx].alt || ''}
@@ -88,20 +86,20 @@ export function PropertyImageGallery({ images, coverFirst = true }: PropertyImag
                 <button
                   type="button"
                   onClick={prev}
-                  className="absolute left-2 top-1/2 -translate-y-1/2 rounded-full bg-black/60 p-2 text-white hover:bg-black/80"
+                  className="absolute left-2 top-1/2 -translate-y-1/2 rounded-none bg-parchment/95 p-2 text-ink hover:bg-parchment/95"
                 >
                   <ChevronLeft className="h-5 w-5" />
                 </button>
                 <button
                   type="button"
                   onClick={next}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full bg-black/60 p-2 text-white hover:bg-black/80"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 rounded-none bg-parchment/95 p-2 text-ink hover:bg-parchment/95"
                 >
                   <ChevronRight className="h-5 w-5" />
                 </button>
               </>
             )}
-            <p className="absolute bottom-2 left-1/2 -translate-x-1/2 rounded-full bg-black/60 px-3 py-1 text-xs text-white">
+            <p className="absolute bottom-2 left-1/2 -translate-x-1/2 rounded-none bg-parchment/95 px-3 py-1 text-xs text-ink">
               {activeIdx + 1} / {sorted.length}
             </p>
           </div>

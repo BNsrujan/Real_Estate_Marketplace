@@ -14,7 +14,7 @@ export default function StartExploreButton({ onClick }: Props) {
         className="
           group relative overflow-hidden
           flex items-center gap-3
-          rounded-full
+          rounded-none
           bg-primary px-6 py-3.5 md:px-8 md:py-4
           shadow-lg hover:shadow-xl
           transition-all duration-300 ease-[cubic-bezier(0.2,0,0,1)]
@@ -24,7 +24,7 @@ export default function StartExploreButton({ onClick }: Props) {
         {/* Atmospheric glow behind button */}
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute inset-0 rounded-full bg-primary/40 blur-xl opacity-0 group-hover:opacity-60 transition-opacity duration-300"
+          className="pointer-events-none absolute inset-0 rounded-none bg-primary/40 blur-xl opacity-0 group-hover:opacity-60 transition-opacity duration-300"
         />
 
         <Compass

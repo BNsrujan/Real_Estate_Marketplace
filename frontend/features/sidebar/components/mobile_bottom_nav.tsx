@@ -72,7 +72,7 @@ export default function MobileBottomNav() {
               {/* MD3 Nav Bar pill indicator */}
               <div
                 className={`
-                  flex items-center justify-center w-14 h-8 rounded-full
+                  flex items-center justify-center w-14 h-8 rounded-none
                   transition-all duration-300 ease-[cubic-bezier(0.2,0,0,1)]
                   active:scale-95
                   ${active ? "bg-secondary" : "bg-transparent"}
@@ -107,7 +107,7 @@ export default function MobileBottomNav() {
           aria-label="List Property"
           className="flex flex-col items-center justify-center gap-0.5 flex-1 py-1.5 focus-visible:outline-none"
         >
-          <div className="flex h-8 w-14 items-center justify-center rounded-full bg-primary/10 transition-all duration-300 ease-[cubic-bezier(0.2,0,0,1)] active:scale-95">
+          <div className="flex h-8 w-14 items-center justify-center rounded-none bg-primary/10 transition-all duration-300 ease-[cubic-bezier(0.2,0,0,1)] active:scale-95">
             <Plus size={22} className="text-primary" />
           </div>
           <span className="text-[10px] font-medium text-primary transition-colors duration-200">

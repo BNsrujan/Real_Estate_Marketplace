@@ -40,7 +40,7 @@ export default function HomePage() {
   }, []);
 
   return (
-    <main className="w-screen h-screen bg-black flex">
+    <main className="w-screen h-screen bg-terrain flex">
       <AppSidebar />
       <DetailPanel />
 

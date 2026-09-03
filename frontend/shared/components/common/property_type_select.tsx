@@ -47,10 +47,10 @@ export function PropertyTypeSelect(props: Props) {
           type="button"
           onClick={() => handleClick(type)}
           className={cn(
-            'flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-sm transition-colors',
+            'flex items-center gap-1.5 rounded-none border px-3 py-1.5 text-sm transition-colors',
             isSelected(type)
-              ? 'border-white/30 bg-white/15 text-white'
-              : 'border-white/10 bg-white/5 text-zinc-400 hover:border-white/20 hover:text-white',
+              ? 'border-hairline-strong bg-parchment-deep text-ink'
+              : 'border-hairline bg-parchment-deep/60 text-ink-muted hover:border-hairline-strong hover:text-ink',
           )}
         >
           <span>{PROPERTY_TYPE_ICONS[type]}</span>

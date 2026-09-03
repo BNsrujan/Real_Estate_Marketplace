@@ -1,9 +1,9 @@
 'use client';
 
 import { useRef, useState, DragEvent } from 'react';
-import { Upload, X, Image as ImageIcon } from 'lucide-react';
-import { Button } from '@/shared/components/ui/button';
+import { Upload, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { uploadImage } from '@/shared/services/cloudinary.service';
 
 export interface UploadedImage {
   url: string;
@@ -18,22 +18,8 @@ interface ImageUploaderProps {
   existing?: UploadedImage[];
 }
 
-const CLOUDINARY_CLOUD = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME ?? '';
-const CLOUDINARY_PRESET = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET ?? '';
-
 async function uploadToCloudinary(file: File): Promise<UploadedImage> {
-  const form = new FormData();
-  form.append('file', file);
-  form.append('upload_preset', CLOUDINARY_PRESET);
-
-  const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD}/image/upload`, {
-    method: 'POST',
-    body: form,
-  });
-
-  if (!res.ok) throw new Error('Upload failed');
-  const data = await res.json();
-  return { url: data.secure_url, width: data.width, height: data.height };
+  return uploadImage(file);
 }
 
 export function ImageUploader({ max = 10, onUpload, existing = [] }: ImageUploaderProps) {
@@ -90,19 +76,19 @@ export function ImageUploader({ max = 10, onUpload, existing = [] }: ImageUpload
       {images.length < max && (
         <div
           className={cn(
-            'flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed p-8 transition-colors',
-            isDragging ? 'border-white/40 bg-white/10' : 'border-white/20 hover:border-white/30',
+            'flex cursor-pointer flex-col items-center justify-center rounded-none border-2 border-dashed p-8 transition-colors',
+            isDragging ? 'border-white/40 bg-parchment-deep' : 'border-hairline-strong hover:border-hairline-strong',
           )}
           onClick={() => inputRef.current?.click()}
           onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
           onDragLeave={() => setIsDragging(false)}
           onDrop={onDrop}
         >
-          <Upload className="mb-2 h-8 w-8 text-zinc-400" />
-          <p className="text-sm text-zinc-300">
+          <Upload className="mb-2 h-8 w-8 text-ink-muted" />
+          <p className="text-sm text-ink-muted">
             {uploading ? 'Uploading…' : 'Drop images here or click to upload'}
           </p>
-          <p className="mt-1 text-xs text-zinc-500">
+          <p className="mt-1 text-xs text-ink-muted">
             {images.length}/{max} images
           </p>
           <input
@@ -119,11 +105,11 @@ export function ImageUploader({ max = 10, onUpload, existing = [] }: ImageUpload
       {images.length > 0 && (
         <div className="grid grid-cols-3 gap-2 sm:grid-cols-4">
           {images.map((img, idx) => (
-            <div key={idx} className="group relative aspect-square overflow-hidden rounded-lg">
+            <div key={idx} className="group relative aspect-square overflow-hidden rounded-none">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={img.url} alt="" className="h-full w-full object-cover" />
               {img.isCover && (
-                <span className="absolute left-1 top-1 rounded bg-white/90 px-1 text-[10px] font-medium text-black">
+                <span className="absolute left-1 top-1 rounded bg-parchment/90 px-1 text-[10px] font-medium text-parchment">
                   Cover
                 </span>
               )}
@@ -131,14 +117,14 @@ export function ImageUploader({ max = 10, onUpload, existing = [] }: ImageUpload
                 <button
                   type="button"
                   onClick={() => setCover(idx)}
-                  className="rounded bg-white/20 px-1.5 py-0.5 text-[10px] text-white hover:bg-white/30"
+                  className="rounded bg-parchment-deep px-1.5 py-0.5 text-[10px] text-ink hover:bg-parchment-deep"
                 >
                   {img.isCover ? 'Cover' : 'Set cover'}
                 </button>
                 <button
                   type="button"
                   onClick={() => remove(idx)}
-                  className="rounded bg-red-500/80 p-0.5 text-white hover:bg-red-500"
+                  className="rounded bg-red-500/80 p-0.5 text-ink hover:bg-red-500"
                 >
                   <X className="h-3 w-3" />
                 </button>

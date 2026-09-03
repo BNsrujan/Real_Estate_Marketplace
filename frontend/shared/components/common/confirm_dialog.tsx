@@ -41,21 +41,21 @@ export function ConfirmDialog({
     <>
       <span onClick={() => setOpen(true)}>{trigger}</span>
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="relative max-w-sm overflow-hidden rounded-3xl border-border bg-background p-6 shadow-xl">
+        <DialogContent className="relative max-w-sm overflow-hidden rounded-none border-border bg-background p-6 shadow-xl">
           {/* Atmospheric blur shapes */}
           <div
             aria-hidden="true"
-            className="pointer-events-none absolute -top-16 -right-16 h-48 w-48 rounded-full bg-primary/10 blur-3xl"
+            className="pointer-events-none absolute -top-16 -right-16 h-48 w-48 rounded-none bg-primary/10 blur-3xl"
           />
           <div
             aria-hidden="true"
-            className="pointer-events-none absolute -bottom-12 -left-12 h-36 w-36 rounded-full bg-secondary/60 blur-3xl"
+            className="pointer-events-none absolute -bottom-12 -left-12 h-36 w-36 rounded-none bg-secondary/60 blur-3xl"
           />
 
           <DialogHeader className="relative">
             <DialogTitle className="flex items-center gap-2.5 text-base font-semibold text-foreground">
               <span
-                className={`flex h-8 w-8 items-center justify-center rounded-full ${
+                className={`flex h-8 w-8 items-center justify-center rounded-none ${
                   destructive
                     ? 'bg-destructive/10 text-destructive'
                     : 'bg-primary/10 text-primary'
@@ -77,7 +77,7 @@ export function ConfirmDialog({
           <DialogFooter className="relative mt-6 flex gap-2 sm:justify-end">
             <Button
               variant="outline"
-              className="rounded-full border-border"
+              className="rounded-none border-border"
               onClick={() => setOpen(false)}
               disabled={loading}
             >
@@ -85,7 +85,7 @@ export function ConfirmDialog({
             </Button>
             <Button
               variant={destructive ? 'destructive' : 'default'}
-              className="rounded-full"
+              className="rounded-none"
               onClick={handleConfirm}
               disabled={loading}
             >

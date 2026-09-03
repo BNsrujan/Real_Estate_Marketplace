@@ -118,10 +118,10 @@ export default function AppSettingsDialog({ children }: Props) {
         {children}
       </div>
 
-      <DialogContent className="sm:max-w-md overflow-hidden rounded-3xl border-border bg-background p-6 shadow-xl">
+      <DialogContent className="sm:max-w-md overflow-hidden rounded-none border-border bg-background p-6 shadow-xl">
         {/* Atmospheric blurs */}
-        <div aria-hidden="true" className="pointer-events-none absolute -top-20 -right-20 h-56 w-56 rounded-full bg-primary/10 blur-3xl" />
-        <div aria-hidden="true" className="pointer-events-none absolute -bottom-16 -left-16 h-44 w-44 rounded-full bg-secondary/60 blur-3xl" />
+        <div aria-hidden="true" className="pointer-events-none absolute -top-20 -right-20 h-56 w-56 rounded-none bg-primary/10 blur-3xl" />
+        <div aria-hidden="true" className="pointer-events-none absolute -bottom-16 -left-16 h-44 w-44 rounded-none bg-secondary/60 blur-3xl" />
 
         <DialogHeader className="relative mb-1 flex-col gap-1 pr-10">
           <DialogTitle className="text-xl font-bold tracking-tight text-foreground">
@@ -145,7 +145,7 @@ export default function AppSettingsDialog({ children }: Props) {
                     type="button"
                     onClick={() => commitLanguage(lang.value)}
                     className={cn(
-                      "flex flex-col items-center gap-1 rounded-2xl border py-3 px-2 text-center transition-all duration-200 ease-[cubic-bezier(0.2,0,0,1)] active:scale-95",
+                      "flex flex-col items-center gap-1 rounded-none border py-3 px-2 text-center transition-all duration-200 ease-[cubic-bezier(0.2,0,0,1)] active:scale-95",
                       language === lang.value
                         ? "border-primary/40 bg-secondary text-primary"
                         : "border-border bg-card text-muted-foreground hover:border-border hover:bg-muted hover:text-foreground",
@@ -154,7 +154,7 @@ export default function AppSettingsDialog({ children }: Props) {
                     <span className="text-sm font-semibold">{lang.native}</span>
                     <span className="text-[10px] text-muted-foreground">{lang.label}</span>
                     {language === lang.value && (
-                      <div className="flex h-4 w-4 items-center justify-center rounded-full bg-primary mt-0.5">
+                      <div className="flex h-4 w-4 items-center justify-center rounded-none bg-primary mt-0.5">
                         <Check size={9} className="text-primary-foreground" strokeWidth={3} />
                       </div>
                     )}
@@ -182,7 +182,7 @@ export default function AppSettingsDialog({ children }: Props) {
                       commitSettings(nextSettings);
                     }}
                     className={cn(
-                      "flex flex-col items-center gap-2 rounded-2xl border py-3.5 transition-all duration-200 ease-[cubic-bezier(0.2,0,0,1)] active:scale-95",
+                      "flex flex-col items-center gap-2 rounded-none border py-3.5 transition-all duration-200 ease-[cubic-bezier(0.2,0,0,1)] active:scale-95",
                       theme === value
                         ? "border-primary/40 bg-secondary text-primary"
                         : "border-border bg-card text-muted-foreground hover:bg-muted hover:text-foreground",
@@ -236,7 +236,7 @@ export default function AppSettingsDialog({ children }: Props) {
             <button
               type="submit"
               disabled={saving || saved}
-              className="w-full h-11 rounded-full bg-primary text-primary-foreground font-semibold text-sm shadow-sm hover:bg-primary/90 active:scale-95 transition-all duration-200 ease-[cubic-bezier(0.2,0,0,1)] disabled:opacity-70 mt-1"
+              className="w-full h-11 rounded-none bg-primary text-primary-foreground font-semibold text-sm shadow-sm hover:bg-primary/90 active:scale-95 transition-all duration-200 ease-[cubic-bezier(0.2,0,0,1)] disabled:opacity-70 mt-1"
             >
               {saved ? (
                 <span className="flex items-center justify-center gap-2">
@@ -268,7 +268,7 @@ function ToggleRow({
   onChange: (v: boolean) => void;
 }) {
   return (
-    <div className="flex items-center justify-between rounded-2xl border border-border bg-card px-4 py-3 gap-4">
+    <div className="flex items-center justify-between rounded-none border border-border bg-card px-4 py-3 gap-4">
       <div className="min-w-0">
         <p className="text-sm font-medium text-foreground">{label}</p>
         <p className="text-xs text-muted-foreground mt-0.5 leading-snug">{description}</p>

@@ -11,6 +11,7 @@ import type { UserProfile } from "@/shared/types";
 import { updateProfile } from "@/features/profile/api/auth_api";
 import { uploadToCloudinary } from "@/features/sell/api/sell_api";
 import { useStore } from "@/shared/store";
+import { UserAvatar } from '@/shared/ui/user_avatar';
 
 interface Props {
   user?: { name?: string; email?: string; avatar?: string };
@@ -114,9 +115,6 @@ export default function ProfileDetailsDialog({ user, fullUser, children }: Props
     }
   }
 
-  const initials = (user?.name ?? "U")
-    .split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2);
-
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <div
@@ -130,11 +128,11 @@ export default function ProfileDetailsDialog({ user, fullUser, children }: Props
       </div>
 
       <DialogContent className={cn(
-        "sm:max-w-md overflow-hidden rounded-3xl border-border bg-background p-6 shadow-xl z-[10000]",
+        "sm:max-w-md overflow-hidden rounded-none border-border bg-background p-6 shadow-xl z-[10000]",
       )}>
         {/* Atmospheric blurs */}
-        <div aria-hidden="true" className="pointer-events-none absolute -top-20 -right-20 h-56 w-56 rounded-full bg-primary/10 blur-3xl" />
-        <div aria-hidden="true" className="pointer-events-none absolute -bottom-16 -left-16 h-44 w-44 rounded-full bg-secondary/60 blur-3xl" />
+        <div aria-hidden="true" className="pointer-events-none absolute -top-20 -right-20 h-56 w-56 rounded-none bg-primary/10 blur-3xl" />
+        <div aria-hidden="true" className="pointer-events-none absolute -bottom-16 -left-16 h-44 w-44 rounded-none bg-secondary/60 blur-3xl" />
 
         <DialogHeader className="relative mb-1 flex-col gap-1 pr-10">
           <DialogTitle className="text-xl font-bold tracking-tight text-foreground">
@@ -150,20 +148,19 @@ export default function ProfileDetailsDialog({ user, fullUser, children }: Props
 
             {/* General error */}
             {generalError && (
-              <div className="flex items-center gap-2 p-3 rounded-2xl bg-destructive/10 border border-destructive/20 text-destructive text-sm">
+              <div className="flex items-center gap-2 p-3 rounded-none bg-destructive/10 border border-destructive/20 text-destructive text-sm">
                 <AlertCircle size={15} className="shrink-0" />
                 <span>{generalError}</span>
               </div>
             )}
 
-            {/* Avatar row */}
             <div className="flex items-center gap-4 py-1">
               <div className="relative shrink-0">
-                <div className="flex h-14 w-14 items-center justify-center rounded-full bg-secondary text-primary text-lg font-bold overflow-hidden ring-2 ring-primary/20">
-                  {avatarPreview || avatarUrl
-                    ? <img src={avatarPreview ?? avatarUrl ?? ""} alt="" className="h-full w-full object-cover" />
-                    : initials}
-                </div>
+                <UserAvatar
+                  src={avatarPreview ?? avatarUrl}
+                  name={values.name}
+                  size={56}
+                />
                 <input
                   ref={fileInputRef}
                   type="file"
@@ -176,7 +173,7 @@ export default function ProfileDetailsDialog({ user, fullUser, children }: Props
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
                   disabled={uploadingAvatar || saving}
-                  className="absolute -bottom-2 -right-1 flex p-2 h-3 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-sm hover:bg-primary/90 active:scale-95 transition-all duration-200"
+                  className="absolute -bottom-2 -right-1 flex p-2 h-3 items-center justify-center rounded-none bg-primary text-primary-foreground shadow-sm hover:bg-primary/90 active:scale-95 transition-all duration-200"
                   aria-label="Upload profile image"
                 >
                   {uploadingAvatar ? (
@@ -196,12 +193,12 @@ export default function ProfileDetailsDialog({ user, fullUser, children }: Props
             </div>
 
             {/* Email — read only */}
-            <div className="flex items-center h-12 rounded-2xl border border-border bg-muted px-3 gap-2">
+            <div className="flex items-center h-12 rounded-none border border-border bg-muted px-3 gap-2">
               <Mail size={14} className="text-muted-foreground shrink-0" />
               <span className="flex-1 text-sm text-muted-foreground truncate">
                 {user?.email ?? "—"}
               </span>
-              <span className="shrink-0 text-[10px] text-muted-foreground border border-border rounded-md px-1.5 py-0.5">
+              <span className="shrink-0 text-[10px] text-muted-foreground border border-border rounded-none px-1.5 py-0.5">
                 read-only
               </span>
             </div>
@@ -236,7 +233,7 @@ export default function ProfileDetailsDialog({ user, fullUser, children }: Props
             <button
               type="submit"
               disabled={saving || saved || uploadingAvatar}
-              className="w-full h-11 rounded-full bg-primary text-primary-foreground font-semibold text-sm shadow-sm hover:bg-primary/90 active:scale-95 transition-all duration-200 ease-[cubic-bezier(0.2,0,0,1)] disabled:opacity-70 mt-1"
+              className="w-full h-11 rounded-none bg-primary text-primary-foreground font-semibold text-sm shadow-sm hover:bg-primary/90 active:scale-95 transition-all duration-200 ease-[cubic-bezier(0.2,0,0,1)] disabled:opacity-70 mt-1"
             >
               {saved ? (
                 <span className="flex items-center justify-center gap-2">

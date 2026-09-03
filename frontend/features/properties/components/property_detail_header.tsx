@@ -42,8 +42,8 @@ export function PropertyDetailHeader({ property }: PropertyDetailHeaderProps) {
     <div className="space-y-4">
       <div className="flex items-start justify-between gap-4">
         <div className="flex-1 min-w-0">
-          <h1 className="text-2xl font-bold text-white leading-tight">{property.title}</h1>
-          <div className="mt-1 flex items-center gap-1.5 text-sm text-zinc-400">
+          <h1 className="text-2xl font-bold text-ink leading-tight">{property.title}</h1>
+          <div className="mt-1 flex items-center gap-1.5 text-sm text-ink-muted">
             <MapPin className="h-3.5 w-3.5 shrink-0" />
             <span className="truncate">
               {[property.city, property.districtName].filter(Boolean).join(', ')}
@@ -57,12 +57,12 @@ export function PropertyDetailHeader({ property }: PropertyDetailHeaderProps) {
 
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-xs text-zinc-500 uppercase tracking-wider">Price</p>
-          <p className="text-2xl font-bold text-white">{property.priceLabel}</p>
+          <p className="text-xs text-ink-muted uppercase tracking-wider">Price</p>
+          <p className="text-2xl font-bold text-ink">{property.priceLabel}</p>
         </div>
         <div className="text-right">
-          <p className="text-xs text-zinc-500 uppercase tracking-wider">Area</p>
-          <p className="text-lg font-semibold text-white">{property.sizeLabel}</p>
+          <p className="text-xs text-ink-muted uppercase tracking-wider">Area</p>
+          <p className="text-lg font-semibold text-ink">{property.sizeLabel}</p>
         </div>
       </div>
 
@@ -75,15 +75,15 @@ export function PropertyDetailHeader({ property }: PropertyDetailHeaderProps) {
             </a>
           </Button>
         )}
-        <Button variant="outline" size="icon" onClick={toggleSave} className="border-white/20 bg-white/5">
-          {isSaved ? <BookmarkCheck className="h-4 w-4 text-yellow-400" /> : <Bookmark className="h-4 w-4" />}
+        <Button variant="outline" size="icon" onClick={toggleSave} className="border-hairline-strong bg-parchment-deep/60">
+          {isSaved ? <BookmarkCheck className="h-4 w-4 text-vermilion" /> : <Bookmark className="h-4 w-4" />}
         </Button>
-        <Button variant="outline" size="icon" onClick={handleShare} className="border-white/20 bg-white/5">
+        <Button variant="outline" size="icon" onClick={handleShare} className="border-hairline-strong bg-parchment-deep/60">
           <Share2 className="h-4 w-4" />
         </Button>
       </div>
 
-      <Separator className="bg-white/10" />
+      <Separator className="bg-parchment-deep" />
     </div>
   );
 }

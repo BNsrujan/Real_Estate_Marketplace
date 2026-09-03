@@ -15,7 +15,7 @@ function Switch({
       type="button"
       className={cn(
         // MD3 pill track: 52×32dp scale → 44×24px at 0.75 ratio
-        "peer relative inline-flex max-h-7 w-12 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent",
+        "peer relative inline-flex max-h-7 w-12 shrink-0 cursor-pointer items-center rounded-none border-2 border-transparent",
         "outline-none transition-all duration-200 ease-[cubic-bezier(0.2,0,0,1)]",
         "after:absolute after:-inset-x-3 after:-inset-y-2",
         // unchecked: surface-variant track + outline
@@ -35,7 +35,7 @@ function Switch({
       <SwitchPrimitive.Thumb
         data-slot="switch-thumb"
         className={cn(
-          "pointer-events-none block rounded-full shadow-sm ring-0",
+          "pointer-events-none block rounded-none shadow-sm ring-0",
           "transition-all duration-200 ease-[cubic-bezier(0.2,0,0,1)]",
           // unchecked: smaller thumb, muted color
           "data-[state=unchecked]:size-4 data-[state=unchecked]:translate-x-0.5 data-[state=unchecked]:bg-muted-foreground",

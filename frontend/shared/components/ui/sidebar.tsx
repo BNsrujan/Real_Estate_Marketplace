@@ -5,7 +5,6 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { Slot } from "radix-ui";
 
 import { cn } from "@/lib/utils";
-import { Button } from "@/shared/components/ui/button";
 import { Input } from "@/shared/components/ui/input";
 import { Separator } from "@/shared/components/ui/separator";
 import { Skeleton } from "@/shared/components/ui/skeleton";
@@ -49,7 +48,7 @@ function SidebarProvider({
             ...style,
           } as React.CSSProperties
         }
-        className={cn("group/sidebar-wrapper flex min-h-svh w-full bg-black", className)}
+        className={cn("group/sidebar-wrapper flex min-h-svh w-full bg-terrain", className)}
         {...props}
       >
         {children}
@@ -228,7 +227,7 @@ function SidebarMenuItem({ className, ...props }: React.ComponentProps<"li">) {
 }
 
 const sidebarMenuButtonVariants = cva(
-  "peer/menu-button flex w-full items-center justify-center gap-2 overflow-hidden rounded-md p-2 text-left text-sm ring-sidebar-ring outline-hidden transition-[width,height,padding] hover:text-sidebar-accent-foreground focus-visible:ring-2 active:text-sidebar-accent-foreground disabled:pointer-events-none disabled:opacity-50 data-active:font-medium data-active:text-sidebar-accent-foreground [&_svg]:size-4 [&_svg]:shrink-0 size-8! p-2!",
+  "peer/menu-button flex w-full items-center justify-center gap-2 overflow-hidden rounded-none p-2 text-left text-sm ring-sidebar-ring outline-hidden transition-[width,height,padding] hover:text-sidebar-accent-foreground focus-visible:ring-2 active:text-sidebar-accent-foreground disabled:pointer-events-none disabled:opacity-50 data-active:font-medium data-active:text-sidebar-accent-foreground [&_svg]:size-4 [&_svg]:shrink-0 size-8! p-2!",
   {
     variants: {
       variant: {
@@ -293,7 +292,7 @@ function SidebarMenuBadge({ className, ...props }: React.ComponentProps<"div">) 
       data-slot="sidebar-menu-badge"
       data-sidebar="menu-badge"
       className={cn(
-        "pointer-events-none absolute right-1 flex h-5 min-w-5 items-center justify-center rounded-md px-1 text-xs font-medium tabular-nums select-none hidden",
+        "pointer-events-none absolute right-1 flex h-5 min-w-5 items-center justify-center rounded-none px-1 text-xs font-medium tabular-nums select-none hidden",
         className,
       )}
       {...props}
@@ -310,10 +309,10 @@ function SidebarMenuSkeleton({
     <div
       data-slot="sidebar-menu-skeleton"
       data-sidebar="menu-skeleton"
-      className={cn("flex h-8 items-center justify-center rounded-md px-2", className)}
+      className={cn("flex h-8 items-center justify-center rounded-none px-2", className)}
       {...props}
     >
-      {showIcon && <Skeleton className="size-4 rounded-md" />}
+      {showIcon && <Skeleton className="size-4 rounded-none" />}
     </div>
   );
 }

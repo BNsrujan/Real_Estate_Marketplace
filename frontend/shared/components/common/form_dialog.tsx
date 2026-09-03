@@ -51,23 +51,23 @@ export default function FormDialog({ title, description, fields, onSubmit, trigg
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>{trigger}</DialogTrigger>
-      <DialogContent className="bg-[#0a0a0a] border border-white/10 text-white">
+      <DialogContent className="bg-[#0a0a0a] border border-hairline text-ink">
         <DialogHeader>
-          <DialogTitle className="text-white">{title}</DialogTitle>
-          {description && <DialogDescription className="text-white/50">{description}</DialogDescription>}
+          <DialogTitle className="text-ink">{title}</DialogTitle>
+          {description && <DialogDescription className="text-ink-muted">{description}</DialogDescription>}
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-3 mt-2">
           {fields.map((field) => (
             <div key={field.name} className="space-y-1">
-              <label className="text-xs font-medium text-white/70">{field.label}</label>
+              <label className="text-xs font-medium text-ink-muted">{field.label}</label>
               {field.type === "select" ? (
                 <select
                   value={values[field.name] as string}
                   onChange={(e) => setValues((v) => ({ ...v, [field.name]: e.target.value }))}
-                  className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-white focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                  className="w-full rounded-none border border-hairline bg-parchment-deep/60 px-3 py-2 text-sm text-ink focus:outline-none focus:ring-1 focus:ring-survey"
                 >
                   {field.options?.map((o) => (
-                    <option key={o.value} value={o.value} className="bg-zinc-900">
+                    <option key={o.value} value={o.value} className="bg-parchment-deep">
                       {o.label}
                     </option>
                   ))}
@@ -80,12 +80,12 @@ export default function FormDialog({ title, description, fields, onSubmit, trigg
                     onChange={(e) => setValues((v) => ({ ...v, [field.name]: e.target.checked }))}
                     className="accent-emerald-500"
                   />
-                  {field.description && <span className="text-xs text-white/40">{field.description}</span>}
+                  {field.description && <span className="text-xs text-ink-muted">{field.description}</span>}
                 </div>
               ) : field.type === "radio" ? (
                 <div className="flex gap-3">
                   {field.options?.map((o) => (
-                    <label key={o.value} className="flex items-center gap-1.5 text-sm text-white/70 cursor-pointer">
+                    <label key={o.value} className="flex items-center gap-1.5 text-sm text-ink-muted cursor-pointer">
                       <input
                         type="radio"
                         name={field.name}
@@ -105,7 +105,7 @@ export default function FormDialog({ title, description, fields, onSubmit, trigg
                   onChange={(e) => setValues((v) => ({ ...v, [field.name]: e.target.value }))}
                   placeholder={field.placeholder}
                   required={field.required}
-                  className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder:text-white/30 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                  className="w-full rounded-none border border-hairline bg-parchment-deep/60 px-3 py-2 text-sm text-ink placeholder:text-ink-muted focus:outline-none focus:ring-1 focus:ring-survey"
                 />
               )}
             </div>
@@ -114,7 +114,7 @@ export default function FormDialog({ title, description, fields, onSubmit, trigg
             <button
               type="submit"
               disabled={submitting}
-              className="rounded-xl bg-emerald-500 px-5 py-2 text-sm font-semibold text-white hover:bg-emerald-600 disabled:opacity-50 transition"
+              className="rounded-none bg-survey px-5 py-2 text-sm font-semibold text-ink hover:bg-survey disabled:opacity-50 transition"
             >
               {submitting ? "Saving..." : "Save"}
             </button>

@@ -13,11 +13,7 @@ interface UseMarkerSyncOptions {
   onMarkerClick?: (property: Property) => void;
 }
 
-export function useMarkerSync({
-  mapRef,
-  isStyleLoaded: _isStyleLoaded,
-  onMarkerClick: _onMarkerClick,
-}: UseMarkerSyncOptions) {
+export function useMarkerSync({ mapRef }: UseMarkerSyncOptions) {
   const lastDistrictRef = useRef<string | null>(null);
 
   const activeDistrict = useStore((s) => s.filters.activeDistrict);

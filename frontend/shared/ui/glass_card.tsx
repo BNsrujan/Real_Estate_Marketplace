@@ -1,36 +1,24 @@
-"use client";
+import { cn } from '@/lib/utils';
 
-import React from "react";
-import { cn } from "@/lib/utils";
+interface SheetCardProps {
+  children: React.ReactNode;
+  className?: string;
+  onClick?: () => void;
+}
 
-export type GlassCardProps = React.HTMLAttributes<HTMLDivElement> & {
-  size?: "sm" | "md" | "lg";
-};
-
-export const GlassCard: React.FC<GlassCardProps> = ({
-  children,
-  className,
-  size = "md",
-  ...rest
-}) => {
-  const sizes: Record<string, string> = {
-    sm: "p-3",
-    md: "p-5",
-    lg: "p-8",
-  };
-
+export function GlassCard({ children, className, onClick }: SheetCardProps) {
   return (
     <div
-      {...rest}
+      onClick={onClick}
       className={cn(
-        "rounded-2xl bg-card border border-border shadow-sm transition-shadow duration-300 hover:shadow-md",
-        sizes[size],
+        'border border-hairline-strong bg-parchment/95 backdrop-blur-md',
+        'shadow-[0_18px_50px_-20px_rgba(14,13,11,0.55)]',
         className,
       )}
     >
       {children}
     </div>
   );
-};
+}
 
 export default GlassCard;

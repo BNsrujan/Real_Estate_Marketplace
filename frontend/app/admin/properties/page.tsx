@@ -1,13 +1,16 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { listAllProperties, setPropertyStatus, toggleFeatured } from '@/features/admin/api/admin_api';
-import { Skeleton } from '@/shared/components/ui/skeleton';
-import { cn } from '@/lib/utils';
 import { Star } from 'lucide-react';
+import { listAllProperties, setPropertyStatus, toggleFeatured } from '@/features/admin/api/admin_api';
+import { RecordPage, Register, RegisterRow, Cell, EmptyRecord } from '@/shared/ui/record';
+import { Skeleton } from '@/shared/components/ui/skeleton';
+import { toastService } from '@/shared/services/toast.service';
+import { cn } from '@/lib/utils';
 import type { Property } from '@/shared/types';
 
 const STATUSES = ['active', 'sold', 'rented'];
+const PAGE_SIZE = 50;
 
 export default function AdminPropertiesPage() {
   const [properties, setProperties] = useState<Property[]>([]);
@@ -15,9 +18,9 @@ export default function AdminPropertiesPage() {
   const [updating, setUpdating] = useState<string | null>(null);
 
   useEffect(() => {
-    listAllProperties({ limit: 50 })
-      .then((r) => setProperties(r.data))
-      .catch(() => {})
+    listAllProperties({ limit: PAGE_SIZE })
+      .then((result) => setProperties(result.data))
+      .catch(() => toastService.error('Could not load properties'))
       .finally(() => setLoading(false));
   }, []);
 
@@ -25,9 +28,13 @@ export default function AdminPropertiesPage() {
     setUpdating(id);
     try {
       await setPropertyStatus(id, status);
-      setProperties((prev) => prev.map((p) => p.id === id ? { ...p, status: status as Property['status'] } : p));
+      setProperties((prev) =>
+        prev.map((property) =>
+          property.id === id ? { ...property, status: status as Property['status'] } : property,
+        ),
+      );
     } catch {
-      //
+      toastService.error('Could not change the status');
     } finally {
       setUpdating(null);
     }
@@ -37,76 +44,80 @@ export default function AdminPropertiesPage() {
     setUpdating(id);
     try {
       await toggleFeatured(id, !isFeatured);
-      setProperties((prev) => prev.map((p) => p.id === id ? { ...p, isFeatured: !isFeatured } : p));
+      setProperties((prev) =>
+        prev.map((property) =>
+          property.id === id ? { ...property, isFeatured: !isFeatured } : property,
+        ),
+      );
     } catch {
-      //
+      toastService.error('Could not change the featured mark');
     } finally {
       setUpdating(null);
     }
   }
 
   return (
-    <div>
-      <h1 className="text-2xl font-bold text-white mb-6">All Properties</h1>
-      <div className="rounded-2xl border border-white/10 overflow-hidden">
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="border-b border-white/10 text-zinc-500 text-xs uppercase tracking-wider">
-              <th className="px-4 py-3 text-left">Property</th>
-              <th className="px-4 py-3 text-left">Type</th>
-              <th className="px-4 py-3 text-left">Price</th>
-              <th className="px-4 py-3 text-left">Status</th>
-              <th className="px-4 py-3 text-left">Featured</th>
-            </tr>
-          </thead>
-          <tbody>
-            {loading
-              ? Array.from({ length: 6 }).map((_, i) => (
-                  <tr key={i} className="border-b border-white/5">
-                    <td className="px-4 py-3"><Skeleton className="h-4 w-48" /></td>
-                    <td className="px-4 py-3"><Skeleton className="h-4 w-20" /></td>
-                    <td className="px-4 py-3"><Skeleton className="h-4 w-24" /></td>
-                    <td className="px-4 py-3"><Skeleton className="h-4 w-20" /></td>
-                    <td className="px-4 py-3"><Skeleton className="h-4 w-10" /></td>
-                  </tr>
-                ))
-              : properties.map((p) => (
-                  <tr key={p.id} className="border-b border-white/5 hover:bg-white/3 transition-colors">
-                    <td className="px-4 py-3">
-                      <p className="font-medium text-white line-clamp-1">{p.title}</p>
-                      <p className="text-xs text-zinc-500">{p.districtName}</p>
-                    </td>
-                    <td className="px-4 py-3">
-                      <span className="capitalize text-zinc-400 text-xs">{p.type.replace(/_/g, ' ')}</span>
-                    </td>
-                    <td className="px-4 py-3 text-zinc-300 text-xs">{p.priceLabel}</td>
-                    <td className="px-4 py-3">
-                      <select
-                        value={p.status}
-                        disabled={updating === p.id}
-                        onChange={(e) => handleStatus(p.id, e.target.value)}
-                        className="rounded-lg border border-white/10 bg-white/5 px-2 py-1 text-xs text-white focus:outline-none disabled:opacity-50"
-                      >
-                        {STATUSES.map((s) => <option key={s} value={s}>{s}</option>)}
-                      </select>
-                    </td>
-                    <td className="px-4 py-3">
-                      <button
-                        disabled={updating === p.id}
-                        onClick={() => handleFeatured(p.id, p.isFeatured)}
-                        className={cn(
-                          'flex items-center justify-center h-7 w-7 rounded-lg transition-colors disabled:opacity-50',
-                          p.isFeatured ? 'bg-yellow-500/20 text-yellow-400' : 'bg-white/10 text-zinc-600 hover:text-zinc-400',
-                        )}
-                      >
-                        <Star size={14} fill={p.isFeatured ? 'currentColor' : 'none'} />
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-          </tbody>
-        </table>
-      </div>
-    </div>
+    <RecordPage eyebrow="Registry Office" title="All Properties">
+      {loading ? (
+        <div className="space-y-px border border-hairline bg-hairline">
+          {Array.from({ length: 6 }).map((_, index) => (
+            <div key={index} className="bg-parchment px-4 py-5">
+              <Skeleton className="h-4 w-1/2" />
+            </div>
+          ))}
+        </div>
+      ) : (
+        <Register
+          columns={['Property', 'Type', 'Price', 'Status', 'Featured']}
+          empty={properties.length === 0 ? <EmptyRecord title="No properties filed" /> : undefined}
+        >
+          {properties.map((property) => (
+            <RegisterRow key={property.id}>
+              <Cell label="Property" className="sm:flex-[2]">
+                <p className="truncate font-medium text-ink">{property.title}</p>
+                <p className="label mt-1">{property.districtName}</p>
+              </Cell>
+              <Cell label="Type">
+                <p className="text-sm capitalize text-ink-muted">
+                  {property.type.replace(/_/g, ' ')}
+                </p>
+              </Cell>
+              <Cell label="Price">
+                <p className="figure text-sm text-ink">{property.priceLabel}</p>
+              </Cell>
+              <Cell label="Status">
+                <select
+                  value={property.status}
+                  disabled={updating === property.id}
+                  onChange={(event) => handleStatus(property.id, event.target.value)}
+                  className="border border-hairline-strong bg-parchment px-2 py-1 font-mono text-[11px] uppercase tracking-[0.1em] text-ink focus:outline-none focus-visible:ring-1 focus-visible:ring-vermilion disabled:opacity-50"
+                >
+                  {STATUSES.map((status) => (
+                    <option key={status} value={status}>
+                      {status}
+                    </option>
+                  ))}
+                </select>
+              </Cell>
+              <Cell label="Featured">
+                <button
+                  disabled={updating === property.id}
+                  onClick={() => handleFeatured(property.id, property.isFeatured)}
+                  aria-label={property.isFeatured ? 'Remove featured mark' : 'Mark as featured'}
+                  className={cn(
+                    'flex h-7 w-7 items-center justify-center border transition-colors duration-[120ms] disabled:opacity-50',
+                    property.isFeatured
+                      ? 'border-vermilion/40 bg-vermilion/8 text-vermilion'
+                      : 'border-hairline text-ink-muted hover:border-hairline-strong hover:text-ink',
+                  )}
+                >
+                  <Star size={13} fill={property.isFeatured ? 'currentColor' : 'none'} />
+                </button>
+              </Cell>
+            </RegisterRow>
+          ))}
+        </Register>
+      )}
+    </RecordPage>
   );
 }

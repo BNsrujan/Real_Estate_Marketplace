@@ -54,7 +54,7 @@ async function getSessionRole(request: NextRequest): Promise<string | null> {
   }
 }
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const role = await getSessionRole(request);
 
   if (!role) {
@@ -69,11 +69,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: [
-    '/profile/:path*',
-    '/saved/:path*',
-    '/list-property/:path*',
-    '/my-properties/:path*',
-    '/admin/:path*',
-  ],
+  matcher: ['/dashboard/:path*', '/admin/:path*'],
 };

@@ -8,20 +8,20 @@ import { getProfile } from '@/features/profile/api/auth_api';
 import { clearClientAuthData } from '@/shared/services/auth_session.service';
 import { cn } from '@/lib/utils';
 
+const SELLER_ROLES = ['seller', 'agent', 'admin'];
+
 const NAV = [
-  { href: '/admin', label: 'Overview' },
-  { href: '/admin/users', label: 'Users' },
-  { href: '/admin/properties', label: 'Properties' },
+  { href: '/dashboard', label: 'Overview' },
+  { href: '/dashboard/listings', label: 'My Listings' },
+  { href: '/dashboard/enquiries', label: 'Enquiries' },
 ];
 
-export default function AdminLayout({ children }: { children: React.ReactNode }) {
-  const isAuthenticated = useStore((s) => s.auth.isAuthenticated);
-  const user = useStore((s) => s.auth.user);
+export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const loginSuccess = useStore((s) => s.loginSuccess);
   const setAuth = useStore((s) => s.setAuth);
   const router = useRouter();
   const pathname = usePathname();
-  const [isCheckingSession, setIsCheckingSession] = useState(true);
+  const [allowed, setAllowed] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -29,12 +29,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     getProfile()
       .then((profile) => {
         if (cancelled) return;
-        if (profile.role !== 'admin') {
+        if (!SELLER_ROLES.includes(profile.role)) {
           router.replace('/');
           return;
         }
         loginSuccess(profile, '');
-        setIsCheckingSession(false);
+        setAllowed(true);
       })
       .catch(() => {
         if (cancelled) return;
@@ -48,37 +48,34 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     };
   }, [loginSuccess, router, setAuth]);
 
-  useEffect(() => {
-    if (!isCheckingSession && (!isAuthenticated || user?.role !== 'admin')) {
-      router.replace('/');
-    }
-  }, [isAuthenticated, isCheckingSession, user, router]);
-
-  if (isCheckingSession || !isAuthenticated || user?.role !== 'admin') return null;
+  if (!allowed) return null;
 
   return (
     <div className="paper relative min-h-screen bg-parchment">
       <header className="sticky top-0 z-20 border-b border-hairline-strong bg-parchment/95 backdrop-blur-sm">
         <div className="mx-auto flex w-full max-w-6xl items-center justify-between gap-6 px-6 py-4">
-          <Link href="/" className="flex items-baseline gap-3">
+          <Link href="/" className="group flex items-baseline gap-3">
             <span className="display text-lg text-ink">Namma Dharani</span>
-            <span className="label hidden sm:inline">Registry Office</span>
+            <span className="label hidden sm:inline">Seller Register</span>
           </Link>
           <nav className="flex items-center gap-1">
-            {NAV.map(({ href, label }) => (
-              <Link
-                key={href}
-                href={href}
-                className={cn(
-                  'px-3 py-2 font-mono text-[11px] uppercase tracking-[0.14em] transition-colors duration-[120ms]',
-                  pathname === href
-                    ? 'border-b-2 border-vermilion text-ink'
-                    : 'border-b-2 border-transparent text-ink-muted hover:text-ink',
-                )}
-              >
-                {label}
-              </Link>
-            ))}
+            {NAV.map(({ href, label }) => {
+              const active = pathname === href;
+              return (
+                <Link
+                  key={href}
+                  href={href}
+                  className={cn(
+                    'px-3 py-2 font-mono text-[11px] uppercase tracking-[0.14em] transition-colors duration-[120ms]',
+                    active
+                      ? 'border-b-2 border-vermilion text-ink'
+                      : 'border-b-2 border-transparent text-ink-muted hover:text-ink',
+                  )}
+                >
+                  {label}
+                </Link>
+              );
+            })}
           </nav>
         </div>
       </header>

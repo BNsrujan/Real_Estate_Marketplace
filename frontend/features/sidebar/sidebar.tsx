@@ -105,7 +105,7 @@ function SidebarMenuItem({
             {/* MD3 Nav Rail indicator pill */}
             <div
               className={`
-                relative flex h-8 w-14 items-center justify-center rounded-full
+                relative flex h-8 w-14 items-center justify-center rounded-none
                 transition-all duration-300 ease-[cubic-bezier(0.2,0,0,1)]
                 active:scale-95
                 ${
@@ -135,7 +135,7 @@ function SidebarMenuItem({
         </TooltipTrigger>
         <TooltipContent
           side="right"
-          className="bg-foreground border border-border text-background text-xs font-medium px-3 py-1.5 rounded-xl shadow-md z-1100"
+          className="bg-foreground border border-border text-background text-xs font-medium px-3 py-1.5 rounded-none shadow-md z-1100"
         >
           {item.title}
         </TooltipContent>
@@ -256,7 +256,7 @@ export function AppSidebar() {
                           }}
                           className="group flex flex-col items-center gap-1 w-full py-1 focus-visible:outline-none"
                         >
-                          <div className="relative flex h-8 w-14 items-center justify-center rounded-full bg-primary/10 hover:bg-primary/20 transition-all duration-300 active:scale-95">
+                          <div className="relative flex h-8 w-14 items-center justify-center rounded-none bg-primary/10 hover:bg-primary/20 transition-all duration-300 active:scale-95">
                             <Plus size={20} className="text-primary" />
                           </div>
                           <span className="text-[10px] font-medium text-primary leading-none">
@@ -266,7 +266,7 @@ export function AppSidebar() {
                       </TooltipTrigger>
                       <TooltipContent
                         side="right"
-                        className="bg-foreground border border-border text-background text-xs font-medium px-3 py-1.5 rounded-xl shadow-md z-1100"
+                        className="bg-foreground border border-border text-background text-xs font-medium px-3 py-1.5 rounded-none shadow-md z-1100"
                       >
                         List Property
                       </TooltipContent>
@@ -295,7 +295,7 @@ export function AppSidebar() {
             </div>
 
             {/* Logo */}
-            <div className="mt-auto rounded-xl overflow-hidden border border-border bg-background flex items-center justify-center">
+            <div className="mt-auto rounded-none overflow-hidden border border-border bg-background flex items-center justify-center">
               <Image
                 src="/pics/image.png"
                 alt="Logo"

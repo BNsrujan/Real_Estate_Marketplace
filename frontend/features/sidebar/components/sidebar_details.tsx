@@ -79,17 +79,17 @@ export function AuthGate({
 }) {
   return (
     <div className="p-5">
-      <div className="flex flex-col items-center gap-4 rounded-3xl border border-border bg-card p-8 text-center shadow-sm">
+      <div className="flex flex-col items-center gap-4 rounded-none border border-border bg-card p-8 text-center shadow-sm">
         <div className="relative">
-          <div aria-hidden="true" className="absolute inset-0 rounded-2xl bg-primary/15 blur-lg" />
-          <div className="relative flex h-14 w-14 items-center justify-center rounded-2xl border border-border bg-secondary">
+          <div aria-hidden="true" className="absolute inset-0 rounded-none bg-primary/15 blur-lg" />
+          <div className="relative flex h-14 w-14 items-center justify-center rounded-none border border-border bg-secondary">
             <Icon size={24} className="text-primary" />
           </div>
         </div>
         <p className="text-sm text-muted-foreground">{message}</p>
         <button
           onClick={onLogin}
-          className="rounded-full bg-primary px-6 py-2.5 text-sm font-semibold text-primary-foreground shadow-sm transition-all duration-200 hover:bg-primary/90 active:scale-95"
+          className="rounded-none bg-primary px-6 py-2.5 text-sm font-semibold text-primary-foreground shadow-sm transition-all duration-200 hover:bg-primary/90 active:scale-95"
         >
           Sign In
         </button>
@@ -225,7 +225,7 @@ export function BrowsePanel({ onOpen }: { onOpen: (p: Property) => void }) {
         onSubmit={handleSubmit}
         className="shrink-0 px-4 pt-4 pb-2"
       >
-        <div className="group flex items-center gap-2 rounded-t-xl rounded-b-none border-b-2 border-border bg-input px-4 py-3 transition-colors duration-200 focus-within:border-primary">
+        <div className="group flex items-center gap-2 rounded-none rounded-b-none border-b-2 border-border bg-input px-4 py-3 transition-colors duration-200 focus-within:border-primary">
           <Search size={15} className="shrink-0 text-muted-foreground transition-colors group-focus-within:text-primary" />
           <input
             value={search}
@@ -260,7 +260,7 @@ export function BrowsePanel({ onOpen }: { onOpen: (p: Property) => void }) {
                 type="button"
                 onClick={() => setListingType(lt)}
                 className={cn(
-                  'rounded-full border px-3 py-1 text-xs capitalize transition-all duration-200 active:scale-95',
+                  'rounded-none border px-3 py-1 text-xs capitalize transition-all duration-200 active:scale-95',
                   listingType === lt
                     ? 'border-primary bg-primary text-primary-foreground shadow-sm'
                     : 'border-border bg-muted text-foreground hover:bg-secondary hover:border-primary/20',
@@ -288,7 +288,7 @@ export function BrowsePanel({ onOpen }: { onOpen: (p: Property) => void }) {
                 type="button"
                 onClick={() => toggleType(type)}
                 className={cn(
-                  'flex items-center gap-1 rounded-full border px-2.5 py-1 text-xs transition-all duration-200 active:scale-95',
+                  'flex items-center gap-1 rounded-none border px-2.5 py-1 text-xs transition-all duration-200 active:scale-95',
                   selectedTypes.includes(type)
                     ? 'border-primary bg-primary text-primary-foreground shadow-sm'
                     : 'border-border bg-muted text-foreground hover:bg-secondary hover:border-primary/20',
@@ -303,7 +303,7 @@ export function BrowsePanel({ onOpen }: { onOpen: (p: Property) => void }) {
           <button
             type="button"
             onClick={applyCurrentCriteria}
-            className="w-full rounded-full bg-primary py-2.5 text-sm font-semibold text-primary-foreground shadow-sm transition-all duration-200 hover:bg-primary/90 active:scale-95"
+            className="w-full rounded-none bg-primary py-2.5 text-sm font-semibold text-primary-foreground shadow-sm transition-all duration-200 hover:bg-primary/90 active:scale-95"
           >
             Apply Filters
           </button>
@@ -322,8 +322,8 @@ export function BrowsePanel({ onOpen }: { onOpen: (p: Property) => void }) {
         {isLoading ? (
           <div className="grid grid-cols-1 gap-3 md:grid-cols-2 md:gap-2">
             {Array.from({ length: 6 }).map((_, i) => (
-              <div key={i} className="space-y-2 rounded-2xl border border-border bg-card p-2">
-                <Skeleton className="h-28 w-full rounded-xl" />
+              <div key={i} className="space-y-2 rounded-none border border-border bg-card p-2">
+                <Skeleton className="h-28 w-full rounded-none" />
                 <Skeleton className="h-3 w-3/4" />
                 <Skeleton className="h-3 w-1/2" />
               </div>
@@ -369,7 +369,7 @@ export function EnquiriesPanel() {
     return (
       <div className="space-y-3 p-4">
         {[1, 2, 3].map((i) => (
-          <div key={i} className="space-y-2 rounded-2xl border border-border bg-card p-4">
+          <div key={i} className="space-y-2 rounded-none border border-border bg-card p-4">
             <Skeleton className="h-4 w-3/4" />
             <Skeleton className="h-3 w-1/2" />
             <Skeleton className="h-3 w-full" />
@@ -382,7 +382,7 @@ export function EnquiriesPanel() {
   if (!enquiries.length) {
     return (
       <div className="flex flex-col items-center justify-center py-16 gap-3 text-muted-foreground">
-        <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-border bg-secondary">
+        <div className="flex h-14 w-14 items-center justify-center rounded-none border border-border bg-secondary">
           <MessageSquare size={24} className="text-primary opacity-60" />
         </div>
         <p className="text-sm">No enquiries yet.</p>
@@ -396,7 +396,7 @@ export function EnquiriesPanel() {
       {enquiries.map((eq) => (
         <div
           key={eq.id}
-          className="rounded-2xl border border-border bg-card p-4 space-y-2 shadow-sm"
+          className="rounded-none border border-border bg-card p-4 space-y-2 shadow-sm"
         >
           <div className="flex items-start justify-between gap-2">
             <p className="text-sm font-semibold text-foreground line-clamp-1">
@@ -443,7 +443,7 @@ export function BlogPanel() {
         </button>
         <div className="flex-1 min-h-0 overflow-y-auto p-5 space-y-4">
           {selected.coverImage && (
-            <div className="relative h-44 w-full rounded-2xl overflow-hidden border border-border">
+            <div className="relative h-44 w-full rounded-none overflow-hidden border border-border">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={selected.coverImage} alt={selected.title} className="w-full h-full object-cover" />
             </div>
@@ -464,7 +464,7 @@ export function BlogPanel() {
             <p className="text-sm text-muted-foreground leading-relaxed">{selected.excerpt}</p>
           )}
           {selected.categoryName && (
-            <span className="inline-block rounded-full bg-secondary border border-border px-3 py-1 text-xs font-medium text-primary">
+            <span className="inline-block rounded-none bg-secondary border border-border px-3 py-1 text-xs font-medium text-primary">
               {selected.categoryName}
             </span>
           )}
@@ -477,8 +477,8 @@ export function BlogPanel() {
     return (
       <div className="space-y-3 p-4">
         {[1, 2, 3, 4].map((i) => (
-          <div key={i} className="space-y-2 rounded-2xl border border-border bg-card p-4">
-            <Skeleton className="h-32 w-full rounded-xl" />
+          <div key={i} className="space-y-2 rounded-none border border-border bg-card p-4">
+            <Skeleton className="h-32 w-full rounded-none" />
             <Skeleton className="h-4 w-3/4" />
             <Skeleton className="h-3 w-1/2" />
           </div>
@@ -490,7 +490,7 @@ export function BlogPanel() {
   if (!posts.length) {
     return (
       <div className="flex flex-col items-center justify-center py-16 gap-3 text-muted-foreground">
-        <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-border bg-secondary">
+        <div className="flex h-14 w-14 items-center justify-center rounded-none border border-border bg-secondary">
           <BookOpen size={24} className="text-primary opacity-60" />
         </div>
         <p className="text-sm">No blog posts yet.</p>
@@ -506,7 +506,7 @@ export function BlogPanel() {
           type="button"
           onClick={() => setSelected(post)}
           className={cn(
-            'group w-full text-left rounded-2xl border border-border bg-card overflow-hidden',
+            'group w-full text-left rounded-none border border-border bg-card overflow-hidden',
             'shadow-sm hover:shadow-md hover:scale-[1.01] active:scale-[0.99]',
             'transition-all duration-300 ease-[cubic-bezier(0.2,0,0,1)]',
           )}
@@ -524,7 +524,7 @@ export function BlogPanel() {
           <div className="p-4 space-y-2">
             <div className="flex items-center gap-2">
               {post.categoryName && (
-                <span className="rounded-full bg-secondary px-2.5 py-0.5 text-[10px] font-semibold text-primary">
+                <span className="rounded-none bg-secondary px-2.5 py-0.5 text-[10px] font-semibold text-primary">
                   {post.categoryName}
                 </span>
               )}
@@ -685,9 +685,9 @@ export function DetailPanel() {
       onClick={(e) => e.stopPropagation()}
     >
       {/* Atmospheric blur shapes */}
-      <div aria-hidden="true" className="pointer-events-none absolute -top-24 -right-24 h-72 w-72 rounded-full bg-primary/10 blur-3xl" />
-      <div aria-hidden="true" className="pointer-events-none absolute top-1/2 -left-16 h-48 w-48 rounded-full bg-secondary/50 blur-3xl" />
-      <div aria-hidden="true" className="pointer-events-none absolute bottom-20 right-0 h-36 w-36 rounded-full bg-[#7D5260]/8 blur-3xl" />
+      <div aria-hidden="true" className="pointer-events-none absolute -top-24 -right-24 h-72 w-72 rounded-none bg-primary/10 blur-3xl" />
+      <div aria-hidden="true" className="pointer-events-none absolute top-1/2 -left-16 h-48 w-48 rounded-none bg-secondary/50 blur-3xl" />
+      <div aria-hidden="true" className="pointer-events-none absolute bottom-20 right-0 h-36 w-36 rounded-none bg-[#7D5260]/8 blur-3xl" />
 
       <div className="relative z-10 flex flex-col h-full">
 
@@ -706,23 +706,23 @@ export function DetailPanel() {
 
               <button
                 onClick={handleClose}
-                className="absolute top-3 right-3 flex items-center justify-center w-8 h-8 rounded-full bg-black/60 text-white hover:bg-black/80 transition-colors active:scale-95"
+                className="absolute top-3 right-3 flex items-center justify-center w-8 h-8 rounded-none bg-parchment/95 text-ink hover:bg-parchment/95 transition-colors active:scale-95"
               >
                 <X size={16} />
               </button>
 
               {/* Listing type badge — MD3 primary */}
-              <span className="absolute bottom-3 left-3 rounded-full bg-primary/90 px-3 py-1 text-xs font-semibold text-primary-foreground capitalize">
+              <span className="absolute bottom-3 left-3 rounded-none bg-primary/90 px-3 py-1 text-xs font-semibold text-primary-foreground capitalize">
                 For {selectedProperty.listingType}
               </span>
 
               <button
                 onClick={handleSave}
-                className="absolute bottom-3 right-3 flex items-center justify-center w-8 h-8 rounded-full bg-black/60 hover:bg-black/80 transition-colors active:scale-95"
+                className="absolute bottom-3 right-3 flex items-center justify-center w-8 h-8 rounded-none bg-parchment/95 hover:bg-parchment/95 transition-colors active:scale-95"
               >
                 {isSaved
                   ? <BookmarkCheck size={16} className="text-primary-foreground" />
-                  : <Bookmark size={16} className="text-white" />}
+                  : <Bookmark size={16} className="text-ink" />}
               </button>
             </div>
 
@@ -735,7 +735,7 @@ export function DetailPanel() {
                   const Icon = TYPE_ICON[selectedProperty.type] ?? Home;
                   return (
                     <div className="flex items-center gap-2 mb-2">
-                      <div className="flex items-center gap-1.5 rounded-full bg-secondary border border-border px-2.5 py-1">
+                      <div className="flex items-center gap-1.5 rounded-none bg-secondary border border-border px-2.5 py-1">
                         <Icon size={12} className="text-primary" />
                         <span className="text-[11px] text-muted-foreground capitalize">
                           {selectedProperty.type.replace(/_/g, ' ')}
@@ -757,11 +757,11 @@ export function DetailPanel() {
 
               {/* Price & Area */}
               <div className="grid grid-cols-2 gap-3">
-                <div className="rounded-2xl border border-border bg-card p-4 shadow-sm">
+                <div className="rounded-none border border-border bg-card p-4 shadow-sm">
                   <SectionLabel>Price</SectionLabel>
                   <p className="text-lg font-bold text-foreground">{selectedProperty.priceLabel}</p>
                 </div>
-                <div className="rounded-2xl border border-border bg-card p-4 shadow-sm">
+                <div className="rounded-none border border-border bg-card p-4 shadow-sm">
                   <SectionLabel>Area</SectionLabel>
                   <p className="text-lg font-bold text-foreground">{selectedProperty.sizeLabel}</p>
                 </div>
@@ -769,7 +769,7 @@ export function DetailPanel() {
 
               {/* Description */}
               {selectedProperty.description && (
-                <div className="rounded-2xl border border-border bg-card p-4 shadow-sm">
+                <div className="rounded-none border border-border bg-card p-4 shadow-sm">
                   <SectionLabel>About</SectionLabel>
                   <p className="text-sm text-muted-foreground leading-relaxed line-clamp-4">
                     {selectedProperty.description}
@@ -779,11 +779,11 @@ export function DetailPanel() {
 
               {/* Features */}
               {selectedProperty.features && selectedProperty.features.length > 0 && (
-                <div className="rounded-2xl border border-border bg-card p-4 shadow-sm">
+                <div className="rounded-none border border-border bg-card p-4 shadow-sm">
                   <SectionLabel>Features</SectionLabel>
                   <div className="flex flex-wrap gap-2">
                     {selectedProperty.features.map((f, i) => (
-                      <span key={i} className="rounded-full bg-secondary border border-border px-3 py-1 text-xs text-foreground">
+                      <span key={i} className="rounded-none bg-secondary border border-border px-3 py-1 text-xs text-foreground">
                         {f.key}: {f.value}
                       </span>
                     ))}
@@ -804,11 +804,11 @@ export function DetailPanel() {
                   r.floorNumber != null && `Floor ${r.floorNumber}`,
                 ].filter(Boolean) as string[];
                 return chips.length > 0 ? (
-                  <div className="rounded-2xl border border-border bg-card p-4 shadow-sm">
+                  <div className="rounded-none border border-border bg-card p-4 shadow-sm">
                     <SectionLabel>Residential Details</SectionLabel>
                     <div className="flex flex-wrap gap-2">
                       {chips.map((c) => (
-                        <span key={c} className="rounded-full bg-secondary border border-border px-3 py-1 text-xs text-foreground">{c}</span>
+                        <span key={c} className="rounded-none bg-secondary border border-border px-3 py-1 text-xs text-foreground">{c}</span>
                       ))}
                     </div>
                   </div>
@@ -824,7 +824,7 @@ export function DetailPanel() {
                   a.surveyNumber && ['Survey No.',   a.surveyNumber],
                 ].filter(Boolean) as [string, string][];
                 return rows.length > 0 ? (
-                  <div className="rounded-2xl border border-border bg-card p-4 shadow-sm">
+                  <div className="rounded-none border border-border bg-card p-4 shadow-sm">
                     <SectionLabel>Agriculture Details</SectionLabel>
                     <div className="space-y-2">
                       {rows.map(([label, val]) => (
@@ -847,7 +847,7 @@ export function DetailPanel() {
                   ri.roadFacing != null && ['Road Facing', ri.roadFacing ? 'Yes' : 'No'],
                 ].filter(Boolean) as [string, string][];
                 return (
-                  <div className="rounded-2xl border border-border bg-card p-4 shadow-sm">
+                  <div className="rounded-none border border-border bg-card p-4 shadow-sm">
                     <SectionLabel>Road Access</SectionLabel>
                     {rows.length > 0 ? (
                       <div className="space-y-2">
@@ -867,13 +867,13 @@ export function DetailPanel() {
 
               {/* Amenities */}
               {activePropertyDetail?.amenities && activePropertyDetail.amenities.length > 0 && (
-                <div className="rounded-2xl border border-border bg-card p-4 shadow-sm">
+                <div className="rounded-none border border-border bg-card p-4 shadow-sm">
                   <SectionLabel>Amenities</SectionLabel>
                   <div className="flex flex-wrap gap-2">
                     {activePropertyDetail.amenities.map((a) => (
                       <span
                         key={a.id}
-                        className="rounded-full bg-primary/10 border border-primary/20 px-3 py-1 text-xs font-medium text-primary"
+                        className="rounded-none bg-primary/10 border border-primary/20 px-3 py-1 text-xs font-medium text-primary"
                       >
                         {a.name}
                       </span>
@@ -894,7 +894,7 @@ export function DetailPanel() {
                   p.address        && ['Address',     p.address],
                 ].filter(Boolean) as [string, string][];
                 return rows.length > 0 ? (
-                  <div className="rounded-2xl border border-border bg-card p-4 shadow-sm">
+                  <div className="rounded-none border border-border bg-card p-4 shadow-sm">
                     <SectionLabel>Property Info</SectionLabel>
                     <div className="space-y-2">
                       {rows.map(([label, val]) => (
@@ -910,14 +910,14 @@ export function DetailPanel() {
 
               {/* Contact */}
               {selectedProperty.contactNumber && (
-                <div className="rounded-2xl border border-border bg-card p-4 shadow-sm flex items-center justify-between">
+                <div className="rounded-none border border-border bg-card p-4 shadow-sm flex items-center justify-between">
                   <div>
                     <SectionLabel>Contact</SectionLabel>
                     <p className="text-sm font-semibold text-foreground">{selectedProperty.contactNumber}</p>
                   </div>
                   <a
                     href={`tel:${selectedProperty.contactNumber}`}
-                    className="flex items-center justify-center w-10 h-10 rounded-full bg-primary/10 border border-primary/20 text-primary hover:bg-primary/20 transition-colors active:scale-95"
+                    className="flex items-center justify-center w-10 h-10 rounded-none bg-primary/10 border border-primary/20 text-primary hover:bg-primary/20 transition-colors active:scale-95"
                   >
                     <Phone size={16} />
                   </a>
@@ -940,26 +940,26 @@ export function DetailPanel() {
                       onChange={(e) => setEnquiryMsg(e.target.value)}
                       placeholder="Hi, I'm interested in this property…"
                       rows={3}
-                      className="w-full rounded-t-xl rounded-b-none border-b-2 border-border bg-input px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground outline-none focus:border-primary transition-colors resize-none"
+                      className="w-full rounded-none rounded-b-none border-b-2 border-border bg-input px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground outline-none focus:border-primary transition-colors resize-none"
                     />
                     <input
                       value={enquiryPhone}
                       onChange={(e) => setEnquiryPhone(e.target.value)}
                       placeholder="Phone number (optional)"
                       type="tel"
-                      className="w-full rounded-t-xl rounded-b-none border-b-2 border-border bg-input px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground outline-none focus:border-primary transition-colors"
+                      className="w-full rounded-none rounded-b-none border-b-2 border-border bg-input px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground outline-none focus:border-primary transition-colors"
                     />
                     <div className="flex gap-2">
                       <button
                         onClick={() => setShowEnquiry(false)}
-                        className="flex-1 rounded-full border border-border py-2.5 text-sm text-muted-foreground hover:bg-muted transition-all duration-200 active:scale-95"
+                        className="flex-1 rounded-none border border-border py-2.5 text-sm text-muted-foreground hover:bg-muted transition-all duration-200 active:scale-95"
                       >
                         Cancel
                       </button>
                       <button
                         onClick={handleEnquirySubmit}
                         disabled={enquiryMsg.trim().length < 10 || enquirySubmitting}
-                        className="flex-1 flex items-center justify-center gap-1.5 rounded-full bg-primary py-2.5 text-sm font-semibold text-primary-foreground shadow-sm hover:bg-primary/90 disabled:opacity-50 transition-all duration-200 active:scale-95"
+                        className="flex-1 flex items-center justify-center gap-1.5 rounded-none bg-primary py-2.5 text-sm font-semibold text-primary-foreground shadow-sm hover:bg-primary/90 disabled:opacity-50 transition-all duration-200 active:scale-95"
                       >
                         <Send size={14} />
                         {enquirySubmitting ? 'Sending…' : 'Send Enquiry'}
@@ -975,7 +975,7 @@ export function DetailPanel() {
               {!showEnquiry && (
                 <button
                   onClick={handleContact}
-                  className="w-full flex items-center justify-center gap-2 rounded-full bg-primary py-3.5 font-semibold text-primary-foreground shadow-sm hover:bg-primary/90 transition-all duration-200 active:scale-95"
+                  className="w-full flex items-center justify-center gap-2 rounded-none bg-primary py-3.5 font-semibold text-primary-foreground shadow-sm hover:bg-primary/90 transition-all duration-200 active:scale-95"
                 >
                   <Phone size={16} />
                   {isAuthenticated ? 'Contact Seller' : 'Login to Contact'}
@@ -984,7 +984,7 @@ export function DetailPanel() {
               <button
                 onClick={handleSave}
                 className={cn(
-                  'w-full flex items-center justify-center gap-2 rounded-full border py-3.5 font-semibold transition-all duration-200 active:scale-95',
+                  'w-full flex items-center justify-center gap-2 rounded-none border py-3.5 font-semibold transition-all duration-200 active:scale-95',
                   isSaved
                     ? 'border-primary/30 bg-secondary text-primary hover:bg-primary/10'
                     : 'border-border bg-muted text-foreground hover:bg-secondary',
@@ -1005,15 +1005,15 @@ export function DetailPanel() {
                 type="button"
                 aria-label="Close panel"
                 onClick={handlePanelClose}
-                className="absolute top-3 right-3 flex items-center justify-center w-8 h-8 rounded-full bg-black/60 text-white hover:bg-black/80 transition-colors active:scale-95"
+                className="absolute top-3 right-3 flex items-center justify-center w-8 h-8 rounded-none bg-parchment/95 text-ink hover:bg-parchment/95 transition-colors active:scale-95"
               >
                 <X size={16} />
               </button>
 
               <div className="flex items-start gap-4">
                 <div className="relative shrink-0">
-                  <div aria-hidden="true" className="absolute inset-0 rounded-2xl bg-primary/20 blur-md opacity-60" />
-                  <div className="relative flex h-14 w-14 items-center justify-center rounded-2xl border border-border bg-secondary shadow-sm">
+                  <div aria-hidden="true" className="absolute inset-0 rounded-none bg-primary/20 blur-md opacity-60" />
+                  <div className="relative flex h-14 w-14 items-center justify-center rounded-none border border-border bg-secondary shadow-sm">
                     {menuContent && <menuContent.Icon size={26} className="text-primary" />}
                   </div>
                 </div>
@@ -1032,7 +1032,7 @@ export function DetailPanel() {
             {activeMenu === 'map' && (
               <div className="flex-1 min-h-0 overflow-y-auto p-5">
                 <SidebarCard className="flex flex-col items-center gap-3 py-10 text-center">
-                  <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-border bg-secondary">
+                  <div className="flex h-14 w-14 items-center justify-center rounded-none border border-border bg-secondary">
                     <Map size={24} className="text-primary opacity-60" />
                   </div>
                   <p className="text-sm text-muted-foreground leading-relaxed max-w-52">
@@ -1060,7 +1060,7 @@ export function DetailPanel() {
                   />
                 ) : savedProperties.length === 0 ? (
                   <SidebarCard className="flex flex-col items-center gap-3 py-10 text-center">
-                    <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-border bg-secondary">
+                    <div className="flex h-14 w-14 items-center justify-center rounded-none border border-border bg-secondary">
                       <Bookmark size={24} className="text-primary opacity-60" />
                     </div>
                     <p className="text-sm text-muted-foreground">
@@ -1069,7 +1069,7 @@ export function DetailPanel() {
                   </SidebarCard>
                 ) : visibleSavedProperties.length === 0 ? (
                   <SidebarCard className="flex flex-col items-center gap-3 py-10 text-center">
-                    <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-border bg-secondary">
+                    <div className="flex h-14 w-14 items-center justify-center rounded-none border border-border bg-secondary">
                       <Bookmark size={24} className="text-primary opacity-60" />
                     </div>
                     <p className="text-sm text-muted-foreground">
@@ -1079,7 +1079,7 @@ export function DetailPanel() {
                 ) : (
                   <div className="space-y-3">
                     {activeSavedDistrict && (
-                      <div className="flex items-center justify-between rounded-2xl border border-border bg-secondary px-3 py-2">
+                      <div className="flex items-center justify-between rounded-none border border-border bg-secondary px-3 py-2">
                         <span className="text-xs font-medium text-muted-foreground">
                           {activeSavedDistrict} (+{visibleSavedProperties.length})
                         </span>

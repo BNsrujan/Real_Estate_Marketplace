@@ -16,10 +16,10 @@ interface Props {
 
 function MapCanvasFallback() {
   return (
-    <div className="absolute inset-0 flex items-center justify-center bg-black text-white">
+    <div className="absolute inset-0 flex items-center justify-center bg-terrain text-ink">
       <div className="max-w-sm px-6 text-center">
         <h2 className="text-lg font-semibold">Map unavailable</h2>
-        <p className="mt-2 text-sm text-zinc-400">
+        <p className="mt-2 text-sm text-ink-muted">
           The map failed to load. Refresh the page to try again.
         </p>
       </div>

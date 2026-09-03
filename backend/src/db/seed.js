@@ -1,367 +1,546 @@
-import dotenv from 'dotenv';
-dotenv.config();
+import 'dotenv/config';
 
-import { db } from './db.js';
-import { districts, properties, propertyImages, amenities, blogCategories, blogTags } from './schema.js';
+import bcrypt from 'bcrypt';
+import { sql } from 'drizzle-orm';
+import { db, pool } from './db.js';
+import {
+    districts, amenities, blogCategories, blogTags, users,
+    properties, propertyResidentialDetails, propertyRoadInfo,
+    propertyAgricultureDetails, propertyImages, propertyGeometries,
+    propertyAmenities, savedProperties, enquiries, blogPosts, blogPostTags,
+} from './schema.js';
 
-function slugify(title) {
-    return title
-        .toLowerCase()
-        .replace(/[^a-z0-9]+/g, '-')
-        .replace(/(^-|-$)/g, '');
-}
+const DEMO_PASSWORD = 'Password@123';
+const SALT_ROUNDS = 10;
 
-const DISTRICTS_DATA = [
-    { name: 'Bangalore',   state: 'Karnataka', lat: '12.9716', lng: '77.5946' },
-    { name: 'Dharwad',     state: 'Karnataka', lat: '15.4589', lng: '75.0078' },
-    { name: 'Davanagere',  state: 'Karnataka', lat: '14.4663', lng: '75.9238' },
-    { name: 'Bellary',     state: 'Karnataka', lat: '15.1394', lng: '76.9214' },
+const TABLES_IN_TRUNCATION_ORDER = [
+    'blog_post_tags', 'blog_posts', 'blog_tags', 'blog_categories',
+    'enquiries', 'saved_properties', 'property_amenities', 'property_geometries',
+    'property_images', 'property_agriculture_details', 'property_road_info',
+    'property_residential_details', 'properties', 'amenities', 'districts', 'users',
+];
+
+const slugify = (value) =>
+    value.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+
+const propertyRef = (index) => `ND-${String(index + 1).padStart(5, '0')}`;
+
+const DISTRICTS = [
+    { name: 'Bangalore Urban', state: 'Karnataka', lat: '12.9716', lng: '77.5946' },
+    { name: 'Mysuru', state: 'Karnataka', lat: '12.2958', lng: '76.6394' },
+    { name: 'Dharwad', state: 'Karnataka', lat: '15.4589', lng: '75.0078' },
+    { name: 'Davanagere', state: 'Karnataka', lat: '14.4663', lng: '75.9238' },
+    { name: 'Ballari', state: 'Karnataka', lat: '15.1394', lng: '76.9214' },
     { name: 'Chitradurga', state: 'Karnataka', lat: '14.2251', lng: '76.3980' },
+    { name: 'Mangaluru', state: 'Karnataka', lat: '12.9141', lng: '74.8560' },
+    { name: 'Belagavi', state: 'Karnataka', lat: '15.8497', lng: '74.4977' },
 ];
 
-const PROPERTIES_DATA = [
+const AMENITIES = [
+    { name: 'Borewell', icon: 'droplet', category: 'infrastructure' },
+    { name: 'Compound Wall', icon: 'brick-wall', category: 'infrastructure' },
+    { name: 'Three Phase Power', icon: 'zap', category: 'infrastructure' },
+    { name: 'Tar Road Access', icon: 'route', category: 'infrastructure' },
+    { name: 'Covered Parking', icon: 'car', category: 'convenience' },
+    { name: 'Lift', icon: 'move-vertical', category: 'convenience' },
+    { name: 'Power Backup', icon: 'battery-charging', category: 'convenience' },
+    { name: 'Piped Water', icon: 'pipette', category: 'convenience' },
+    { name: 'Gated Security', icon: 'shield', category: 'safety' },
+    { name: 'CCTV Surveillance', icon: 'cctv', category: 'safety' },
+    { name: 'Fire Safety', icon: 'flame', category: 'safety' },
+    { name: 'Rainwater Harvesting', icon: 'cloud-rain', category: 'nature' },
+    { name: 'Landscaped Garden', icon: 'trees', category: 'nature' },
+    { name: 'Lake View', icon: 'waves', category: 'nature' },
+    { name: 'Near School', icon: 'graduation-cap', category: 'nearby' },
+    { name: 'Near Hospital', icon: 'cross', category: 'nearby' },
+    { name: 'Near Metro', icon: 'train-front', category: 'nearby' },
+    { name: 'Near Highway', icon: 'milestone', category: 'nearby' },
+];
+
+const BLOG_CATEGORIES = [
+    { name: 'Buying Guides', slug: 'buying-guides' },
+    { name: 'Land & Legal', slug: 'land-and-legal' },
+    { name: 'Market Trends', slug: 'market-trends' },
+    { name: 'Agriculture', slug: 'agriculture' },
+];
+
+const BLOG_TAGS = [
+    { name: 'RTC', slug: 'rtc' },
+    { name: 'Khata', slug: 'khata' },
+    { name: 'Home Loan', slug: 'home-loan' },
+    { name: 'Site Purchase', slug: 'site-purchase' },
+    { name: 'Bangalore', slug: 'bangalore' },
+    { name: 'Farmland', slug: 'farmland' },
+];
+
+const USERS = [
+    { username: 'admin_nd', name: 'Registry Admin', email: 'admin@nammadharani.test', role: 'admin', phone: '+919845000001', isVerified: true, isPro: true },
+    { username: 'lakshmi_agent', name: 'Lakshmi Rao', email: 'lakshmi@nammadharani.test', role: 'agent', phone: '+919845000002', isVerified: true, isPro: true },
+    { username: 'imran_agent', name: 'Imran Sheikh', email: 'imran@nammadharani.test', role: 'agent', phone: '+919845000003', isVerified: true },
+    { username: 'ravi_seller', name: 'Ravi Gowda', email: 'ravi@nammadharani.test', role: 'seller', phone: '+919845000004', isVerified: true },
+    { username: 'sunitha_seller', name: 'Sunitha Hegde', email: 'sunitha@nammadharani.test', role: 'seller', phone: '+919845000005' },
+    { username: 'mahesh_seller', name: 'Mahesh Patil', email: 'mahesh@nammadharani.test', role: 'seller', phone: '+919845000006', isVerified: true },
+    { username: 'anita_buyer', name: 'Anita Desai', email: 'anita@nammadharani.test', role: 'buyer', phone: '+919845000007', isVerified: true },
+    { username: 'kiran_buyer', name: 'Kiran Kumar', email: 'kiran@nammadharani.test', role: 'buyer', phone: '+919845000008' },
+    { username: 'farah_buyer', name: 'Farah Noor', email: 'farah@nammadharani.test', role: 'buyer', phone: '+919845000009' },
+];
+
+const PROPERTIES = [
     {
-        title: 'Luxury Villa in Whitefield', type: 'house',
-        priceLabel: '2.4 Cr', priceValue: '24000000',
-        sizeLabel: '3200 sqft', sizeValue: '3200', areaUnit: 'sqft',
-        listingType: 'sale', city: 'Bangalore', taluk: 'Bangalore East',
-        lat: '12.9698', lng: '77.7500', districtName: 'Bangalore',
-        description: 'Spacious 4BHK villa in a gated community with pool and landscaped garden.',
+        title: 'Four Bedroom Villa in Whitefield', type: 'house', listingType: 'sale', status: 'active',
+        priceLabel: '2.4 Cr', priceValue: '24000000.00', expectedPrice: '25000000.00',
+        sizeLabel: '3200 sqft', sizeValue: '3200.00', areaUnit: 'sqft',
+        district: 'Bangalore Urban', city: 'Bengaluru', taluk: 'Bangalore East',
+        address: 'Palm Meadows Road, Whitefield', lat: '12.9698000', lng: '77.7500000',
+        facing: 'East', condition: 'Ready to move', documentStatus: 'A-Khata, clear title',
+        landUse: 'Residential', roadAccess: true, isFeatured: true, seller: 'ravi_seller',
+        description: 'A four bedroom villa inside a gated community with a private garden, covered parking for two cars and a rooftop terrace. Walking distance to two international schools.',
+        features: ['Modular kitchen', 'Rooftop terrace', 'Servant quarters'],
+        residential: { bhkLabel: '4 BHK', bedrooms: 4, bathrooms: 4, balconies: 3, floors: 2, floorNumber: 0, furnishedStatus: 'Semi-furnished' },
+        road: { roadWidth: '40 ft', roadType: 'Tar', roadFacing: true },
+        amenities: ['Covered Parking', 'Gated Security', 'Power Backup', 'Landscaped Garden', 'Near School'],
+        images: ['whitefield-villa-front', 'whitefield-villa-living', 'whitefield-villa-garden'],
     },
     {
-        title: '3BHK Apartment in Koramangala', type: 'apartment',
-        priceLabel: '1.1 Cr', priceValue: '11000000',
-        sizeLabel: '1750 sqft', sizeValue: '1750', areaUnit: 'sqft',
-        listingType: 'sale', city: 'Bangalore', taluk: 'Bangalore South',
-        lat: '12.9352', lng: '77.6245', districtName: 'Bangalore',
-        description: 'Modern 3BHK in the heart of Koramangala with premium finishes.',
+        title: 'Three Bedroom Apartment in Koramangala', type: 'apartment', listingType: 'sale', status: 'active',
+        priceLabel: '1.1 Cr', priceValue: '11000000.00',
+        sizeLabel: '1750 sqft', sizeValue: '1750.00', areaUnit: 'sqft',
+        district: 'Bangalore Urban', city: 'Bengaluru', taluk: 'Bangalore South',
+        address: '5th Block, Koramangala', lat: '12.9352000', lng: '77.6245000',
+        facing: 'North East', condition: 'Ready to move', documentStatus: 'A-Khata',
+        landUse: 'Residential', roadAccess: true, isFeatured: true, seller: 'sunitha_seller',
+        description: 'Corner apartment on the ninth floor with cross ventilation on three sides, covered parking and a clubhouse shared across two towers.',
+        features: ['Corner unit', 'Clubhouse access', 'Vaastu compliant'],
+        residential: { bhkLabel: '3 BHK', bedrooms: 3, bathrooms: 3, balconies: 2, floors: 14, floorNumber: 9, furnishedStatus: 'Unfurnished' },
+        road: { roadWidth: '60 ft', roadType: 'Tar', roadFacing: true },
+        amenities: ['Lift', 'Power Backup', 'Gated Security', 'CCTV Surveillance', 'Near Metro'],
+        images: ['koramangala-apartment-hall', 'koramangala-apartment-balcony'],
     },
     {
-        title: 'Commercial Office Space in MG Road', type: 'commercial_space',
-        priceLabel: '2.8 Cr', priceValue: '28000000',
-        sizeLabel: '4000 sqft', sizeValue: '4000', areaUnit: 'sqft',
-        listingType: 'rent', city: 'Bangalore', taluk: 'Bangalore Central',
-        lat: '12.9757', lng: '77.6011', districtName: 'Bangalore',
-        description: 'Grade-A office space with glass façade and 24x7 security on MG Road.',
+        title: 'Grade A Office Floor on MG Road', type: 'commercial_space', listingType: 'rent', status: 'active',
+        priceLabel: '4.2 L / month', priceValue: '420000.00',
+        sizeLabel: '4000 sqft', sizeValue: '4000.00', areaUnit: 'sqft',
+        district: 'Bangalore Urban', city: 'Bengaluru', taluk: 'Bangalore Central',
+        address: 'Trinity Circle, MG Road', lat: '12.9757000', lng: '77.6011000',
+        facing: 'West', condition: 'Warm shell', documentStatus: 'Commercial occupancy certificate',
+        landUse: 'Commercial', roadAccess: true, seller: 'lakshmi_agent',
+        description: 'Full floor plate with a glass facade, dedicated service lift and twenty four hour building security. Metro entrance is ninety metres from the lobby.',
+        features: ['Full floor plate', 'Service lift', '24x7 access'],
+        road: { roadWidth: '80 ft', roadType: 'Tar', roadFacing: true },
+        amenities: ['Lift', 'Power Backup', 'Fire Safety', 'CCTV Surveillance', 'Near Metro'],
+        images: ['mg-road-office-floor', 'mg-road-office-lobby'],
     },
     {
-        title: 'Residential Site in Sarjapur', type: 'site',
-        priceLabel: '85 Lakhs', priceValue: '8500000',
-        sizeLabel: '1200 sqft', sizeValue: '1200', areaUnit: 'sqft',
-        listingType: 'sale', city: 'Bangalore', taluk: 'Anekal',
-        lat: '12.8598', lng: '77.7878', districtName: 'Bangalore',
-        description: 'North-facing BDA-approved site in a fast-developing Sarjapur layout.',
+        title: 'BDA Approved Site in Sarjapur', type: 'site', listingType: 'sale', status: 'active',
+        priceLabel: '85 L', priceValue: '8500000.00',
+        sizeLabel: '1200 sqft', sizeValue: '1200.00', areaUnit: 'sqft',
+        district: 'Bangalore Urban', city: 'Bengaluru', taluk: 'Anekal',
+        address: 'Sompura Gate, Sarjapur Road', lat: '12.8598000', lng: '77.7878000',
+        facing: 'North', documentStatus: 'BDA approved, A-Khata', landUse: 'Residential',
+        siteDimensions: '30 x 40', roadAccess: true, seller: 'ravi_seller',
+        description: 'North facing corner site in a layout with underground drainage and street lighting already laid. Two sides open with a thirty foot road on the front.',
+        features: ['Corner site', 'Underground drainage', 'Street lighting'],
+        road: { roadWidth: '30 ft', roadType: 'Concrete', roadFacing: true },
+        amenities: ['Compound Wall', 'Tar Road Access', 'Three Phase Power', 'Near School'],
+        images: ['sarjapur-site-plot'],
     },
     {
-        title: 'Independent House in Jayanagar', type: 'house',
-        priceLabel: '3.5 Cr', priceValue: '35000000',
-        sizeLabel: '2800 sqft', sizeValue: '2800', areaUnit: 'sqft',
-        listingType: 'sale', city: 'Bangalore', taluk: 'Bangalore South',
-        lat: '12.9258', lng: '77.5830', districtName: 'Bangalore',
-        description: 'Well-maintained G+1 independent house on a 30×40 site in Jayanagar 4th Block.',
+        title: 'Irrigated Farmland near Kanakapura', type: 'agriculture', listingType: 'sale', status: 'active',
+        priceLabel: '1.6 Cr', priceValue: '16000000.00',
+        sizeLabel: '4 acres', sizeValue: '4.00', areaUnit: 'acres',
+        district: 'Bangalore Urban', city: 'Kanakapura', taluk: 'Kanakapura',
+        address: 'Harohalli Hobli', lat: '12.5460000', lng: '77.4200000',
+        facing: 'South', documentStatus: 'RTC in seller name, no encumbrance',
+        landUse: 'Agriculture', roadAccess: true, seller: 'mahesh_seller',
+        description: 'Four acres of level farmland with a working borewell, drip irrigation across three acres and an existing coconut plantation of about two hundred trees.',
+        features: ['Coconut plantation', 'Drip irrigation', 'Farm shed'],
+        agriculture: { waterSource: 'Borewell, 6 inch, 480 ft', soilType: 'Red loamy', surveyNumber: '142/3B' },
+        road: { roadWidth: '20 ft', roadType: 'Mud', roadFacing: false },
+        amenities: ['Borewell', 'Three Phase Power', 'Rainwater Harvesting'],
+        images: ['kanakapura-farmland-wide', 'kanakapura-farmland-borewell'],
     },
     {
-        title: 'Studio Apartment in Electronic City', type: 'apartment',
-        priceLabel: '38 Lakhs', priceValue: '3800000',
-        sizeLabel: '580 sqft', sizeValue: '580', areaUnit: 'sqft',
-        listingType: 'sale', city: 'Bangalore', taluk: 'Anekal',
-        lat: '12.8458', lng: '77.6603', districtName: 'Bangalore',
-        description: 'Compact studio close to IT parks in Electronic City Phase 1.',
+        title: 'Independent House in Jayanagar', type: 'house', listingType: 'sale', status: 'sold',
+        priceLabel: '3.5 Cr', priceValue: '35000000.00',
+        sizeLabel: '2800 sqft', sizeValue: '2800.00', areaUnit: 'sqft',
+        district: 'Bangalore Urban', city: 'Bengaluru', taluk: 'Bangalore South',
+        address: '4th Block, Jayanagar', lat: '12.9258000', lng: '77.5830000',
+        facing: 'East', condition: 'Ready to move', documentStatus: 'A-Khata',
+        landUse: 'Residential', roadAccess: true, seller: 'sunitha_seller',
+        description: 'Two storey independent house on a thirty by fifty site with a mature garden, rented ground floor and an independent staircase to the first floor.',
+        features: ['Rental income', 'Mature garden', 'Independent staircase'],
+        residential: { bhkLabel: '5 BHK', bedrooms: 5, bathrooms: 4, balconies: 2, floors: 2, floorNumber: 0, furnishedStatus: 'Semi-furnished' },
+        road: { roadWidth: '40 ft', roadType: 'Tar', roadFacing: true },
+        amenities: ['Covered Parking', 'Landscaped Garden', 'Near Hospital', 'Piped Water'],
+        images: ['jayanagar-house-front'],
     },
     {
-        title: 'Commercial Plot in Hebbal', type: 'commercial_plot',
-        priceLabel: '1.9 Cr', priceValue: '19000000',
-        sizeLabel: '2400 sqft', sizeValue: '2400', areaUnit: 'sqft',
-        listingType: 'sale', city: 'Bangalore', taluk: 'Bangalore North',
-        lat: '13.0358', lng: '77.5970', districtName: 'Bangalore',
-        description: 'Corner commercial plot on Outer Ring Road near Hebbal flyover.',
+        title: 'Two Bedroom Flat near Infosys Campus', type: 'apartment', listingType: 'rent', status: 'rented',
+        priceLabel: '32 K / month', priceValue: '32000.00',
+        sizeLabel: '1150 sqft', sizeValue: '1150.00', areaUnit: 'sqft',
+        district: 'Mysuru', city: 'Mysuru', taluk: 'Mysuru',
+        address: 'Hebbal Industrial Area', lat: '12.3510000', lng: '76.6100000',
+        facing: 'North', condition: 'Ready to move', documentStatus: 'E-Khata',
+        landUse: 'Residential', roadAccess: true, seller: 'imran_agent',
+        description: 'Two bedroom flat on the fourth floor of a lift building, five minutes from the Infosys Mysuru campus gate. Rent includes one covered parking slot.',
+        features: ['Near IT campus', 'Covered parking', 'Piped gas'],
+        residential: { bhkLabel: '2 BHK', bedrooms: 2, bathrooms: 2, balconies: 1, floors: 6, floorNumber: 4, furnishedStatus: 'Fully furnished' },
+        road: { roadWidth: '40 ft', roadType: 'Tar', roadFacing: true },
+        amenities: ['Lift', 'Power Backup', 'Gated Security', 'Near Hospital'],
+        images: ['mysuru-flat-hall'],
     },
     {
-        title: 'Agriculture Land in Devanahalli', type: 'agriculture',
-        priceLabel: '65 Lakhs', priceValue: '6500000',
-        sizeLabel: '2 Acres', sizeValue: '2', areaUnit: 'acres',
-        listingType: 'sale', city: 'Devanahalli', taluk: 'Devanahalli',
-        lat: '13.2479', lng: '77.7173', districtName: 'Bangalore',
-        description: 'Fertile red-soil agricultural land near BIAL with borewell.',
+        title: 'Heritage Bungalow Plot in Mysuru', type: 'plot', listingType: 'sale', status: 'active',
+        priceLabel: '2.9 Cr', priceValue: '29000000.00',
+        sizeLabel: '9600 sqft', sizeValue: '9600.00', areaUnit: 'sqft',
+        district: 'Mysuru', city: 'Mysuru', taluk: 'Mysuru',
+        address: 'Nazarbad Main Road', lat: '12.3050000', lng: '76.6600000',
+        facing: 'West', documentStatus: 'Clear title, MUDA approved', landUse: 'Residential',
+        siteDimensions: '80 x 120', roadAccess: true, isFeatured: true, seller: 'lakshmi_agent',
+        description: 'Large plot in an established residential quarter with mature rain trees on the boundary. Suitable for a single bungalow or a boutique guest house.',
+        features: ['Mature trees', 'Wide frontage', 'Heritage quarter'],
+        road: { roadWidth: '60 ft', roadType: 'Tar', roadFacing: true },
+        amenities: ['Compound Wall', 'Piped Water', 'Near Hospital'],
+        images: ['mysuru-plot-frontage'],
     },
     {
-        title: 'Independent House in Hubli', type: 'house',
-        priceLabel: '72 Lakhs', priceValue: '7200000',
-        sizeLabel: '1800 sqft', sizeValue: '1800', areaUnit: 'sqft',
-        listingType: 'sale', city: 'Hubli', taluk: 'Hubli',
-        lat: '15.3647', lng: '75.1240', districtName: 'Dharwad',
-        description: 'G+1 house with car parking and terrace in a prime Hubli locality.',
+        title: 'Warehouse Land on Tumkur Highway', type: 'commercial_plot', listingType: 'sale', status: 'active',
+        priceLabel: '5.4 Cr', priceValue: '54000000.00',
+        sizeLabel: '2 acres', sizeValue: '2.00', areaUnit: 'acres',
+        district: 'Bangalore Urban', city: 'Nelamangala', taluk: 'Nelamangala',
+        address: 'NH-48 Service Road', lat: '13.0990000', lng: '77.3940000',
+        facing: 'North', documentStatus: 'Converted, industrial use permitted',
+        landUse: 'Industrial', roadAccess: true, seller: 'mahesh_seller',
+        description: 'Two acres of converted land abutting the Tumkur highway service road, suitable for warehousing or a logistics yard. Container trailers can turn on site.',
+        features: ['Highway frontage', 'Converted land', 'Trailer access'],
+        road: { roadWidth: '100 ft', roadType: 'Concrete', roadFacing: true },
+        amenities: ['Three Phase Power', 'Tar Road Access', 'Near Highway'],
+        images: ['tumkur-warehouse-land'],
     },
     {
-        title: '2BHK Apartment in Dharwad City', type: 'apartment',
-        priceLabel: '48 Lakhs', priceValue: '4800000',
-        sizeLabel: '1100 sqft', sizeValue: '1100', areaUnit: 'sqft',
-        listingType: 'sale', city: 'Dharwad', taluk: 'Dharwad',
-        lat: '15.4546', lng: '75.0135', districtName: 'Dharwad',
-        description: 'Ready-to-move 2BHK near Karnataka University campus.',
+        title: 'Riverside Farm Plot in Dharwad', type: 'agriculture', listingType: 'sale', status: 'active',
+        priceLabel: '48 L', priceValue: '4800000.00',
+        sizeLabel: '30 guntas', sizeValue: '30.00', areaUnit: 'guntas',
+        district: 'Dharwad', city: 'Dharwad', taluk: 'Kalghatgi',
+        address: 'Bennihalla Bank', lat: '15.3400000', lng: '74.9700000',
+        facing: 'East', documentStatus: 'RTC clear, Form 9 available',
+        landUse: 'Agriculture', roadAccess: false, seller: 'ravi_seller',
+        description: 'Thirty guntas on the bank of the Bennihalla with black cotton soil and an open well. Currently under a single season cotton crop.',
+        features: ['River frontage', 'Open well', 'Black cotton soil'],
+        agriculture: { waterSource: 'Open well and canal', soilType: 'Black cotton', surveyNumber: '77/2' },
+        road: { roadWidth: '12 ft', roadType: 'Mud', roadFacing: false },
+        amenities: ['Rainwater Harvesting', 'Lake View'],
+        images: ['dharwad-farm-riverside'],
     },
     {
-        title: 'Commercial Space in Hubli CBD', type: 'commercial_space',
-        priceLabel: '55 Lakhs', priceValue: '5500000',
-        sizeLabel: '1400 sqft', sizeValue: '1400', areaUnit: 'sqft',
-        listingType: 'rent', city: 'Hubli', taluk: 'Hubli',
-        lat: '15.3600', lng: '75.1200', districtName: 'Dharwad',
-        description: 'Ground-floor commercial space on the main Hubli CBD road.',
+        title: 'Sea Facing Apartment in Mangaluru', type: 'apartment', listingType: 'sale', status: 'active',
+        priceLabel: '1.85 Cr', priceValue: '18500000.00',
+        sizeLabel: '2100 sqft', sizeValue: '2100.00', areaUnit: 'sqft',
+        district: 'Mangaluru', city: 'Mangaluru', taluk: 'Mangaluru',
+        address: 'Ullal Beach Road', lat: '12.8200000', lng: '74.8400000',
+        facing: 'West', condition: 'Ready to move', documentStatus: 'Occupancy certificate issued',
+        landUse: 'Residential', roadAccess: true, isFeatured: true, seller: 'imran_agent',
+        description: 'Twelfth floor apartment with an unobstructed view of the Arabian Sea from the living room and both bedrooms. Sunset visible year round from the balcony.',
+        features: ['Sea view', 'Corner unit', 'Two covered parkings'],
+        residential: { bhkLabel: '3 BHK', bedrooms: 3, bathrooms: 3, balconies: 2, floors: 16, floorNumber: 12, furnishedStatus: 'Semi-furnished' },
+        road: { roadWidth: '40 ft', roadType: 'Tar', roadFacing: true },
+        amenities: ['Lift', 'Power Backup', 'Gated Security', 'Lake View', 'Fire Safety'],
+        images: ['mangaluru-sea-apartment', 'mangaluru-sea-balcony'],
     },
     {
-        title: 'Agriculture Land in Kundgol', type: 'agriculture',
-        priceLabel: '28 Lakhs', priceValue: '2800000',
-        sizeLabel: '3 Acres', sizeValue: '3', areaUnit: 'acres',
-        listingType: 'sale', city: 'Kundgol', taluk: 'Kundgol',
-        lat: '15.2564', lng: '75.2440', districtName: 'Dharwad',
-        description: 'Black-soil farmland with canal irrigation and kutcha road access.',
-    },
-    {
-        title: 'Residential Site near NTTF Hubli', type: 'site',
-        priceLabel: '32 Lakhs', priceValue: '3200000',
-        sizeLabel: '1000 sqft', sizeValue: '1000', areaUnit: 'sqft',
-        listingType: 'sale', city: 'Hubli', taluk: 'Hubli',
-        lat: '15.3720', lng: '75.1350', districtName: 'Dharwad',
-        description: 'HDMC-approved residential plot in a new layout near NTTF.',
-    },
-    {
-        title: 'Warehouse Plot on Gokul Road', type: 'commercial_plot',
-        priceLabel: '90 Lakhs', priceValue: '9000000',
-        sizeLabel: '5000 sqft', sizeValue: '5000', areaUnit: 'sqft',
-        listingType: 'sale', city: 'Hubli', taluk: 'Hubli',
-        lat: '15.3800', lng: '75.1430', districtName: 'Dharwad',
-        description: 'Large industrial plot on Gokul Road, suitable for warehouse or showroom.',
-    },
-    {
-        title: 'House in Davanagere City', type: 'house',
-        priceLabel: '58 Lakhs', priceValue: '5800000',
-        sizeLabel: '1600 sqft', sizeValue: '1600', areaUnit: 'sqft',
-        listingType: 'sale', city: 'Davanagere', taluk: 'Davanagere',
-        lat: '14.4671', lng: '75.9227', districtName: 'Davanagere',
-        description: 'Neat 3BHK house with open yard in a well-connected Davanagere locality.',
-    },
-    {
-        title: '2BHK Apartment near P.J. Extension', type: 'apartment',
-        priceLabel: '42 Lakhs', priceValue: '4200000',
-        sizeLabel: '980 sqft', sizeValue: '980', areaUnit: 'sqft',
-        listingType: 'sale', city: 'Davanagere', taluk: 'Davanagere',
-        lat: '14.4700', lng: '75.9195', districtName: 'Davanagere',
-        description: 'Affordable 2BHK in a gated complex close to P.J. Extension market.',
-    },
-    {
-        title: 'Agriculture Land in Harihar', type: 'agriculture',
-        priceLabel: '20 Lakhs', priceValue: '2000000',
-        sizeLabel: '2.5 Acres', sizeValue: '2.5', areaUnit: 'acres',
-        listingType: 'sale', city: 'Harihar', taluk: 'Harihar',
-        lat: '14.5173', lng: '75.8007', districtName: 'Davanagere',
-        description: 'Productive farmland near Tungabhadra river with drip-irrigation setup.',
-    },
-    {
-        title: 'Commercial Space on NH-48', type: 'commercial_space',
-        priceLabel: '68 Lakhs', priceValue: '6800000',
-        sizeLabel: '2000 sqft', sizeValue: '2000', areaUnit: 'sqft',
-        listingType: 'both', city: 'Davanagere', taluk: 'Davanagere',
-        lat: '14.4750', lng: '75.9350', districtName: 'Davanagere',
-        description: 'Prominent roadside commercial space on NH-48 with high footfall.',
-    },
-    {
-        title: 'Residential Site in Shivaganga Layout', type: 'site',
-        priceLabel: '18 Lakhs', priceValue: '1800000',
-        sizeLabel: '800 sqft', sizeValue: '800', areaUnit: 'sqft',
-        listingType: 'sale', city: 'Davanagere', taluk: 'Davanagere',
-        lat: '14.4620', lng: '75.9280', districtName: 'Davanagere',
-        description: 'CMC-approved east-facing site in Shivaganga Layout with road and drainage.',
-    },
-    {
-        title: 'Independent House in Bellary City', type: 'house',
-        priceLabel: '62 Lakhs', priceValue: '6200000',
-        sizeLabel: '1700 sqft', sizeValue: '1700', areaUnit: 'sqft',
-        listingType: 'sale', city: 'Bellary', taluk: 'Bellary',
-        lat: '15.1492', lng: '76.9218', districtName: 'Bellary',
-        description: 'Well-maintained house with tiled roof and large compound near city centre.',
-    },
-    {
-        title: 'Iron Ore Belt Commercial Plot', type: 'commercial_plot',
-        priceLabel: '1.2 Cr', priceValue: '12000000',
-        sizeLabel: '6000 sqft', sizeValue: '6000', areaUnit: 'sqft',
-        listingType: 'sale', city: 'Bellary', taluk: 'Bellary',
-        lat: '15.1600', lng: '76.9300', districtName: 'Bellary',
-        description: 'Strategic commercial plot near the mining belt; ideal for logistics or trade.',
-    },
-    {
-        title: 'Agriculture Land in Sandur', type: 'agriculture',
-        priceLabel: '35 Lakhs', priceValue: '3500000',
-        sizeLabel: '4 Acres', sizeValue: '4', areaUnit: 'acres',
-        listingType: 'sale', city: 'Sandur', taluk: 'Sandur',
-        lat: '15.0814', lng: '76.5574', districtName: 'Bellary',
-        description: 'Red loamy soil land close to Sandur town with borewell and fencing.',
-    },
-    {
-        title: '3BHK Apartment in Bellary', type: 'apartment',
-        priceLabel: '55 Lakhs', priceValue: '5500000',
-        sizeLabel: '1400 sqft', sizeValue: '1400', areaUnit: 'sqft',
-        listingType: 'sale', city: 'Bellary', taluk: 'Bellary',
-        lat: '15.1380', lng: '76.9180', districtName: 'Bellary',
-        description: 'Newly constructed 3BHK apartment with modular kitchen and balcony.',
-    },
-    {
-        title: 'Residential Site in Hospet', type: 'site',
-        priceLabel: '22 Lakhs', priceValue: '2200000',
-        sizeLabel: '1200 sqft', sizeValue: '1200', areaUnit: 'sqft',
-        listingType: 'sale', city: 'Hospet', taluk: 'Hospet',
-        lat: '15.2689', lng: '76.3877', districtName: 'Bellary',
-        description: 'CMC-approved plot near Hospet town bus stand with clear title.',
-    },
-    {
-        title: 'House in Chitradurga Town', type: 'house',
-        priceLabel: '45 Lakhs', priceValue: '4500000',
-        sizeLabel: '1500 sqft', sizeValue: '1500', areaUnit: 'sqft',
-        listingType: 'sale', city: 'Chitradurga', taluk: 'Chitradurga',
-        lat: '14.2299', lng: '76.3973', districtName: 'Chitradurga',
-        description: 'Comfortable 3BHK house with bore water and UDS document near fort road.',
-    },
-    {
-        title: 'Agriculture Land in Hiriyur', type: 'agriculture',
-        priceLabel: '25 Lakhs', priceValue: '2500000',
-        sizeLabel: '3 Acres', sizeValue: '3', areaUnit: 'acres',
-        listingType: 'sale', city: 'Hiriyur', taluk: 'Hiriyur',
-        lat: '13.9441', lng: '76.6173', districtName: 'Chitradurga',
-        description: 'Dry-land converted to irrigation with drip-farming setup for groundnut.',
-    },
-    {
-        title: '2BHK Apartment in Chitradurga', type: 'apartment',
-        priceLabel: '32 Lakhs', priceValue: '3200000',
-        sizeLabel: '950 sqft', sizeValue: '950', areaUnit: 'sqft',
-        listingType: 'sale', city: 'Chitradurga', taluk: 'Chitradurga',
-        lat: '14.2250', lng: '76.3950', districtName: 'Chitradurga',
-        description: 'Affordable 2BHK in a newly developed apartment complex off NH-150.',
-    },
-    {
-        title: 'Commercial Plot on NH-150', type: 'commercial_plot',
-        priceLabel: '75 Lakhs', priceValue: '7500000',
-        sizeLabel: '3600 sqft', sizeValue: '3600', areaUnit: 'sqft',
-        listingType: 'sale', city: 'Chitradurga', taluk: 'Chitradurga',
-        lat: '14.2350', lng: '76.4050', districtName: 'Chitradurga',
-        description: 'Highway-facing commercial plot with high visibility on NH-150.',
-    },
-    {
-        title: 'Residential Site in Holalkere', type: 'site',
-        priceLabel: '12 Lakhs', priceValue: '1200000',
-        sizeLabel: '900 sqft', sizeValue: '900', areaUnit: 'sqft',
-        listingType: 'sale', city: 'Holalkere', taluk: 'Holalkere',
-        lat: '14.0468', lng: '76.1843', districtName: 'Chitradurga',
-        description: 'Town-panchayat approved site with water connection in Holalkere town.',
+        title: 'Row House in Belagavi Cantonment', type: 'villa', listingType: 'both', status: 'active',
+        priceLabel: '1.15 Cr', priceValue: '11500000.00',
+        sizeLabel: '1900 sqft', sizeValue: '1900.00', areaUnit: 'sqft',
+        district: 'Belagavi', city: 'Belagavi', taluk: 'Belagavi',
+        address: 'Camp Road, Cantonment', lat: '15.8600000', lng: '74.5000000',
+        facing: 'South East', condition: 'Ready to move', documentStatus: 'Clear title',
+        landUse: 'Residential', roadAccess: true, seller: 'sunitha_seller',
+        description: 'End unit row house in a nine house enclave with a private rear courtyard, solar water heating and a dedicated visitor parking bay.',
+        features: ['End unit', 'Private courtyard', 'Solar water heating'],
+        residential: { bhkLabel: '3 BHK', bedrooms: 3, bathrooms: 3, balconies: 2, floors: 2, floorNumber: 0, furnishedStatus: 'Unfurnished' },
+        road: { roadWidth: '30 ft', roadType: 'Tar', roadFacing: true },
+        amenities: ['Covered Parking', 'Gated Security', 'Landscaped Garden', 'Near School'],
+        images: ['belagavi-rowhouse-front'],
     },
 ];
 
-const AMENITIES_DATA = [
-    { name: 'Electricity',    icon: 'zap',          category: 'infrastructure', isCustom: false },
-    { name: 'Water Supply',   icon: 'droplets',      category: 'infrastructure', isCustom: false },
-    { name: 'Bore Well',      icon: 'circle-dot',    category: 'infrastructure', isCustom: false },
-    { name: 'Good Drainage',  icon: 'waves',         category: 'infrastructure', isCustom: false },
-    { name: 'Wide Road',      icon: 'road',          category: 'infrastructure', isCustom: false },
-    { name: 'Power Backup',   icon: 'battery-charging', category: 'infrastructure', isCustom: false },
-    { name: 'Parking',        icon: 'car',           category: 'convenience',    isCustom: false },
-    { name: 'Lift',           icon: 'arrow-up-down', category: 'convenience',    isCustom: false },
-    { name: 'Gymnasium',      icon: 'dumbbell',      category: 'convenience',    isCustom: false },
-    { name: 'Swimming Pool',  icon: 'waves',         category: 'convenience',    isCustom: false },
-    { name: 'CCTV',           icon: 'camera',        category: 'safety',         isCustom: false },
-    { name: 'Security Guard', icon: 'shield',        category: 'safety',         isCustom: false },
-    { name: 'Gated Community',icon: 'lock',          category: 'safety',         isCustom: false },
-    { name: 'Garden',         icon: 'flower-2',      category: 'nature',         isCustom: false },
-    { name: 'Park Nearby',    icon: 'trees',         category: 'nature',         isCustom: false },
-    { name: 'School Nearby',  icon: 'school',        category: 'nearby',         isCustom: false },
-    { name: 'Hospital Nearby',icon: 'cross',         category: 'nearby',         isCustom: false },
-    { name: 'Market Nearby',  icon: 'shopping-bag',  category: 'nearby',         isCustom: false },
+const BLOG_POSTS = [
+    {
+        title: 'How to read an RTC before buying farmland',
+        category: 'land-and-legal', author: 'admin_nd', status: 'published',
+        tags: ['rtc', 'farmland'],
+        excerpt: 'The Record of Rights, Tenancy and Crops tells you who owns the land, what grows on it and whether anyone else has a claim. Here is how to read one line by line.',
+        body: 'Every agricultural survey number in Karnataka carries an RTC. The first block names the owner and the extent held. The second block records the crop for each season. The third block, the one most buyers skip, lists encumbrances and tenancy claims. Read the third block first. A clean extent with a pending tenancy entry is not a clean purchase, and the mutation register at the village accountant office will tell you when the entry was last changed.',
+    },
+    {
+        title: 'A-Khata and B-Khata, explained without the jargon',
+        category: 'land-and-legal', author: 'lakshmi_agent', status: 'published',
+        tags: ['khata', 'bangalore'],
+        excerpt: 'A Khata is a municipal account, not a title document. Knowing which kind you hold decides whether you can build, borrow or sell without friction.',
+        body: 'An A-Khata property sits fully within the municipal record: property tax is assessed, building plans can be sanctioned and most banks will lend against it. A B-Khata property is recorded separately for tax collection but is not recognised for plan sanction. Converting from B to A requires the underlying land to be converted from agricultural use and all betterment charges to be cleared. Buyers routinely underestimate how long that takes.',
+    },
+    {
+        title: 'What a site visit should actually cover',
+        category: 'buying-guides', author: 'imran_agent', status: 'published',
+        tags: ['site-purchase'],
+        excerpt: 'Ten minutes on the plot tells you more than ten listings online. A short checklist for the visit itself.',
+        body: 'Walk the boundary and count your paces against the stated dimensions. Look for the survey stones at each corner. Check which direction the water drains after rain, and whether the neighbouring plots are built up or vacant. Ask who maintains the approach road. Photograph the electricity pole nearest the plot and note its number. These details are cheap to collect on the day and expensive to discover later.',
+    },
+    {
+        title: 'Where Bengaluru prices moved this quarter',
+        category: 'market-trends', author: 'admin_nd', status: 'published',
+        tags: ['bangalore', 'home-loan'],
+        excerpt: 'Movement concentrated along the eastern corridor while the north held flat. A short read of the quarter.',
+        body: 'Transaction volumes along Sarjapur and Whitefield rose against the previous quarter, driven mostly by ready to move inventory rather than new launches. The northern corridor towards the airport held flat on price while absorbing more supply. Rental yields stayed in the familiar three to three and a half per cent band across both corridors.',
+    },
+    {
+        title: 'Drip irrigation subsidies for small holdings',
+        category: 'agriculture', author: 'mahesh_seller', status: 'draft',
+        tags: ['farmland'],
+        excerpt: 'State horticulture subsidies can cover a meaningful share of drip installation for holdings under five acres.',
+        body: 'Applications run through the taluk horticulture office and are assessed on holding size and existing water source. Keep the borewell yield certificate and the RTC extract ready before applying; incomplete applications are the most common reason for delay.',
+    },
 ];
 
-const BLOG_CATEGORIES_DATA = [
-    { name: 'Market Trends',    slug: 'market-trends' },
-    { name: 'Legal Guide',      slug: 'legal-guide' },
-    { name: 'Investment Tips',  slug: 'investment-tips' },
-    { name: 'Home Buying',      slug: 'home-buying' },
-    { name: 'Agriculture Land', slug: 'agriculture-land' },
-    { name: 'Commercial Real Estate', slug: 'commercial-real-estate' },
-    { name: 'Interior Design',  slug: 'interior-design' },
-    { name: 'NRI Corner',       slug: 'nri-corner' },
+const ENQUIRIES = [
+    { property: 0, buyer: 'anita_buyer', status: 'pending', phone: '+919845000007', message: 'Is the villa still available for a site visit this weekend? I can come Saturday morning.' },
+    { property: 0, buyer: 'kiran_buyer', status: 'replied', phone: '+919845000008', message: 'What is the maintenance charge per month in this community, and is the corpus fund already paid?' },
+    { property: 1, buyer: 'farah_buyer', status: 'pending', phone: '+919845000009', message: 'Could you share the floor plan and the exact carpet area? Also is the parking covered?' },
+    { property: 3, buyer: 'anita_buyer', status: 'closed', phone: '+919845000007', message: 'Has the layout received the final BDA release order? I would like to see the approval copy.' },
+    { property: 4, buyer: 'kiran_buyer', status: 'pending', phone: '+919845000008', message: 'What is the current borewell yield in inches, and does the drip system cover the coconut plantation?' },
+    { property: 10, buyer: 'farah_buyer', status: 'replied', phone: '+919845000009', message: 'Is the sea view protected by any building restriction on the plot in front?' },
+    { property: 7, buyer: 'anita_buyer', status: 'pending', phone: '+919845000007', message: 'Are the rain trees on the boundary protected? I would want to retain them.' },
 ];
 
-const BLOG_TAGS_DATA = [
-    { name: 'Bangalore',      slug: 'bangalore' },
-    { name: 'Karnataka',      slug: 'karnataka' },
-    { name: 'RERA',           slug: 'rera' },
-    { name: 'Property Tax',   slug: 'property-tax' },
-    { name: 'Home Loan',      slug: 'home-loan' },
-    { name: 'Stamp Duty',     slug: 'stamp-duty' },
-    { name: 'Villa',          slug: 'villa' },
-    { name: 'Apartment',      slug: 'apartment' },
-    { name: 'Plot',           slug: 'plot' },
-    { name: 'Agriculture',    slug: 'agriculture' },
-    { name: 'First Time Buyer', slug: 'first-time-buyer' },
-    { name: 'Resale',         slug: 'resale' },
+const SAVED = [
+    { buyer: 'anita_buyer', properties: [0, 3, 10] },
+    { buyer: 'kiran_buyer', properties: [1, 4] },
+    { buyer: 'farah_buyer', properties: [0, 7, 10, 1] },
 ];
+
+const imageUrl = (name, width = 1200, height = 800) =>
+    `https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=${width}&h=${height}&q=70&ixid=${encodeURIComponent(name)}`;
+
+async function truncateAll() {
+    await db.execute(
+        sql.raw(`TRUNCATE TABLE ${TABLES_IN_TRUNCATION_ORDER.join(', ')} RESTART IDENTITY CASCADE`),
+    );
+}
 
 async function seed() {
-    console.log('Seeding amenities...');
-    await db.insert(amenities).values(AMENITIES_DATA).onConflictDoNothing();
-    console.log(`Amenities ready: ${AMENITIES_DATA.length}`);
+    console.log('Clearing existing rows...');
+    await truncateAll();
 
-    console.log('Seeding blog categories...');
-    await db.insert(blogCategories).values(BLOG_CATEGORIES_DATA).onConflictDoNothing();
-    console.log(`Blog categories ready: ${BLOG_CATEGORIES_DATA.length}`);
+    console.log('Seeding districts, amenities and taxonomy...');
+    const districtRows = await db.insert(districts).values(DISTRICTS).returning();
+    const districtByName = new Map(districtRows.map((row) => [row.name, row]));
 
-    console.log('Seeding blog tags...');
-    await db.insert(blogTags).values(BLOG_TAGS_DATA).onConflictDoNothing();
-    console.log(`Blog tags ready: ${BLOG_TAGS_DATA.length}`);
+    const amenityRows = await db.insert(amenities)
+        .values(AMENITIES.map((item) => ({ ...item, isCustom: false })))
+        .returning();
+    const amenityByName = new Map(amenityRows.map((row) => [row.name, row]));
 
-    console.log('Seeding districts...');
-    await db.insert(districts).values(DISTRICTS_DATA).onConflictDoNothing();
+    const categoryRows = await db.insert(blogCategories).values(BLOG_CATEGORIES).returning();
+    const categoryBySlug = new Map(categoryRows.map((row) => [row.slug, row]));
 
-    const allDistricts = await db.select().from(districts);
-    const districtMap = Object.fromEntries(allDistricts.map((d) => [d.name, d.id]));
-    console.log(`Districts ready: ${allDistricts.length}`);
+    const tagRows = await db.insert(blogTags).values(BLOG_TAGS).returning();
+    const tagBySlug = new Map(tagRows.map((row) => [row.slug, row]));
 
-    console.log('Clearing existing properties and images...');
-    await db.delete(propertyImages);
-    await db.delete(properties);
+    console.log('Seeding users...');
+    const passwordHash = await bcrypt.hash(DEMO_PASSWORD, SALT_ROUNDS);
+    const userRows = await db.insert(users)
+        .values(USERS.map((user) => ({
+            username: user.username,
+            name: user.name,
+            email: user.email,
+            passwordHash,
+            phone: user.phone,
+            role: user.role,
+            isVerified: user.isVerified ?? false,
+            isPro: user.isPro ?? false,
+            provider: 'local',
+        })))
+        .returning();
+    const userByUsername = new Map(userRows.map((row) => [row.username, row]));
 
-    console.log('Seeding properties...');
+    console.log('Seeding properties and their detail tables...');
+    const propertyRows = await db.insert(properties)
+        .values(PROPERTIES.map((item, index) => ({
+            propertyRef: propertyRef(index),
+            slug: slugify(`${item.title}-${propertyRef(index)}`),
+            title: item.title,
+            type: item.type,
+            priceLabel: item.priceLabel,
+            priceValue: item.priceValue,
+            expectedPrice: item.expectedPrice ?? null,
+            sizeLabel: item.sizeLabel,
+            sizeValue: item.sizeValue,
+            areaUnit: item.areaUnit,
+            lat: item.lat,
+            lng: item.lng,
+            districtId: districtByName.get(item.district).id,
+            city: item.city,
+            taluk: item.taluk,
+            address: item.address,
+            listingType: item.listingType,
+            status: item.status,
+            thumbnailUrl: imageUrl(item.images[0]),
+            description: item.description,
+            features: item.features ?? [],
+            facing: item.facing ?? null,
+            siteDimensions: item.siteDimensions ?? null,
+            landUse: item.landUse ?? null,
+            documentStatus: item.documentStatus ?? null,
+            condition: item.condition ?? null,
+            contactNumber: userByUsername.get(item.seller).phone,
+            roadAccess: item.roadAccess ?? false,
+            isFeatured: item.isFeatured ?? false,
+            sellerId: userByUsername.get(item.seller).id,
+        })))
+        .returning();
 
-    const usedSlugs = new Set();
-    const propertyValues = PROPERTIES_DATA.map(({ districtName, ...p }) => {
-        let base = slugify(p.title);
-        let slug = base;
-        let n = 1;
-        while (usedSlugs.has(slug)) slug = `${base}-${n++}`;
-        usedSlugs.add(slug);
+    const residentialValues = [];
+    const roadValues = [];
+    const agricultureValues = [];
+    const imageValues = [];
+    const geometryValues = [];
+    const amenityLinks = [];
 
-        return {
-            ...p,
-            slug,
-            districtId: districtMap[districtName] ?? null,
-            features: [],
-        };
+    PROPERTIES.forEach((item, index) => {
+        const property = propertyRows[index];
+
+        if (item.residential) {
+            residentialValues.push({ propertyId: property.id, ...item.residential });
+        }
+        if (item.road) {
+            roadValues.push({ propertyId: property.id, ...item.road });
+        }
+        if (item.agriculture) {
+            agricultureValues.push({ propertyId: property.id, ...item.agriculture });
+        }
+
+        item.images.forEach((name, imageIndex) => {
+            imageValues.push({
+                propertyId: property.id,
+                url: imageUrl(name),
+                alt: `${item.title} photograph ${imageIndex + 1}`,
+                displayOrder: imageIndex,
+                isCover: imageIndex === 0,
+                width: 1200,
+                height: 800,
+            });
+        });
+
+        const lat = Number(item.lat);
+        const lng = Number(item.lng);
+        const delta = 0.0016;
+
+        geometryValues.push({
+            propertyId: property.id,
+            type: 'point',
+            geojson: { type: 'Point', coordinates: [lng, lat] },
+        });
+        geometryValues.push({
+            propertyId: property.id,
+            type: 'polygon',
+            geojson: {
+                type: 'Polygon',
+                coordinates: [[
+                    [lng - delta, lat - delta],
+                    [lng + delta, lat - delta],
+                    [lng + delta, lat + delta],
+                    [lng - delta, lat + delta],
+                    [lng - delta, lat - delta],
+                ]],
+            },
+        });
+
+        (item.amenities ?? []).forEach((amenityName) => {
+            amenityLinks.push({
+                propertyId: property.id,
+                amenityId: amenityByName.get(amenityName).id,
+            });
+        });
     });
 
-    const insertedProperties = await db
-        .insert(properties)
-        .values(propertyValues)
-        .returning({ id: properties.id });
+    if (residentialValues.length) await db.insert(propertyResidentialDetails).values(residentialValues);
+    if (roadValues.length) await db.insert(propertyRoadInfo).values(roadValues);
+    if (agricultureValues.length) await db.insert(propertyAgricultureDetails).values(agricultureValues);
+    if (imageValues.length) await db.insert(propertyImages).values(imageValues);
+    if (geometryValues.length) await db.insert(propertyGeometries).values(geometryValues);
+    if (amenityLinks.length) await db.insert(propertyAmenities).values(amenityLinks);
 
-    console.log(`Properties inserted: ${insertedProperties.length}`);
+    console.log('Seeding watchlists and enquiries...');
+    const savedValues = SAVED.flatMap((entry) =>
+        entry.properties.map((propertyIndex) => ({
+            userId: userByUsername.get(entry.buyer).id,
+            propertyId: propertyRows[propertyIndex].id,
+        })),
+    );
+    if (savedValues.length) await db.insert(savedProperties).values(savedValues);
 
-    console.log('Seeding placeholder images...');
-    const imageValues = insertedProperties.flatMap((p) => [
-        { propertyId: p.id, url: '/property/image.png', alt: 'Property image 1', displayOrder: 0, isCover: true },
-        { propertyId: p.id, url: '/property/image.png', alt: 'Property image 2', displayOrder: 1, isCover: false },
-    ]);
-    await db.insert(propertyImages).values(imageValues);
+    const enquiryValues = ENQUIRIES.map((entry) => ({
+        propertyId: propertyRows[entry.property].id,
+        buyerId: userByUsername.get(entry.buyer).id,
+        message: entry.message,
+        phone: entry.phone,
+        status: entry.status,
+    }));
+    if (enquiryValues.length) await db.insert(enquiries).values(enquiryValues);
 
-    console.log('Seed complete.');
-    process.exit(0);
+    console.log('Seeding blog posts...');
+    const postRows = await db.insert(blogPosts)
+        .values(BLOG_POSTS.map((post) => ({
+            slug: slugify(post.title),
+            title: post.title,
+            excerpt: post.excerpt,
+            body: post.body,
+            coverImage: imageUrl(slugify(post.title)),
+            status: post.status,
+            authorId: userByUsername.get(post.author).id,
+            categoryId: categoryBySlug.get(post.category).id,
+            publishedAt: post.status === 'published' ? new Date() : null,
+        })))
+        .returning();
+
+    const postTagValues = BLOG_POSTS.flatMap((post, index) =>
+        post.tags.map((tagSlug) => ({
+            postId: postRows[index].id,
+            tagId: tagBySlug.get(tagSlug).id,
+        })),
+    );
+    if (postTagValues.length) await db.insert(blogPostTags).values(postTagValues);
+
+    console.log('');
+    console.log('Seed complete:');
+    console.log(`  districts                     ${districtRows.length}`);
+    console.log(`  amenities                     ${amenityRows.length}`);
+    console.log(`  blog_categories               ${categoryRows.length}`);
+    console.log(`  blog_tags                     ${tagRows.length}`);
+    console.log(`  users                         ${userRows.length}`);
+    console.log(`  properties                    ${propertyRows.length}`);
+    console.log(`  property_residential_details  ${residentialValues.length}`);
+    console.log(`  property_road_info            ${roadValues.length}`);
+    console.log(`  property_agriculture_details  ${agricultureValues.length}`);
+    console.log(`  property_images               ${imageValues.length}`);
+    console.log(`  property_geometries           ${geometryValues.length}`);
+    console.log(`  property_amenities            ${amenityLinks.length}`);
+    console.log(`  saved_properties              ${savedValues.length}`);
+    console.log(`  enquiries                     ${enquiryValues.length}`);
+    console.log(`  blog_posts                    ${postRows.length}`);
+    console.log(`  blog_post_tags                ${postTagValues.length}`);
+    console.log('');
+    console.log(`Every seeded account uses the password: ${DEMO_PASSWORD}`);
+    console.log('Admin sign-in: admin@nammadharani.test');
 }
 
-seed().catch((err) => {
-    console.error('Seed failed:', err);
-    process.exit(1);
-});
+seed()
+    .then(async () => {
+        await pool.end();
+        process.exit(0);
+    })
+    .catch(async (error) => {
+        console.error('Seed failed:', error);
+        await pool.end();
+        process.exit(1);
+    });

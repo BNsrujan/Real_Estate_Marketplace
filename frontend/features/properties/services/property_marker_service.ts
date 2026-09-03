@@ -1,59 +1,35 @@
 import mapboxgl from "mapbox-gl";
 import type { Property } from "@/shared/types";
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Constants & Config
-// ─────────────────────────────────────────────────────────────────────────────
-
 const SOURCE_ID = "properties-source";
 const LAYER_ID = "properties-symbol-layer";
 const ACTIVE_LAYER_ID = "properties-active-symbol-layer";
 
-const TYPE_CONFIG: Record<
-  Property["type"],
-  { color: string; iconPath: string }
-> = {
-  house: {
-    color: "#10B981",
-    iconPath:
-      "m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z M9 22 9 12 15 12 15 22",
-  },
-  apartment: {
-    color: "#3B82F6",
-    iconPath:
-      "M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2 M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2 M10 6h4 M10 10h4 M10 14h4 M10 18h4",
-  },
-  agriculture: {
-    color: "#6FCF97",
-    iconPath:
-      "M7 20h10 M10 20c5.5-2.5.8-6.4 3-10 M9.5 9.4c1.1.9 1.8 2.5 1.8 4.1 0 .4-.3.8-.7.8-1.5 0-3-1.2-3.9-2.3-.3-.3-.3-.8 0-1.1 1.2-1.2 2.8-1.5 4.3-1.5Z M14.1 6a7 7 0 0 0-1.1 4c0 .2.2.3.4.3a4.6 4.6 0 0 0 4-2.4c.3-.4.1-1.1-.3-1.3A6.5 6.5 0 0 0 14.1 6Z",
-  },
-  commercial_space: {
-    color: "#F59E0B",
-    iconPath:
-      "M2 20a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8l-7 5V8l-7 5V4a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z M17 18h1 M12 18h1 M7 18h1",
-  },
-  commercial_plot: {
-    color: "#EC4899",
-    iconPath:
-      "M3 5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5Z M3 9h18 M3 15h18 M9 3v18 M15 3v18",
-  },
-  site: {
-    color: "#8B5CF6",
-    iconPath:
-      "M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z M12 10a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z",
-  },
-  villa: {
-    color: "#A78BFA",
-    iconPath:
-      "m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z M9 22 9 12 15 12 15 22",
-  },
-  plot: {
-    color: "#FB923C",
-    iconPath:
-      "M3 5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5Z M3 9h18 M3 15h18 M9 3v18 M15 3v18",
-  },
+const INK = "#1a1814";
+const PARCHMENT = "#f4efe4";
+const VERMILION = "#c4442a";
+
+const TYPE_ICON_PATH: Record<Property["type"], string> = {
+  house: "m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z M9 22 9 12 15 12 15 22",
+  villa: "m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z M9 22 9 12 15 12 15 22",
+  apartment:
+    "M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2 M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2 M10 6h4 M10 10h4 M10 14h4 M10 18h4",
+  agriculture:
+    "M7 20h10 M10 20c5.5-2.5.8-6.4 3-10 M9.5 9.4c1.1.9 1.8 2.5 1.8 4.1 0 .4-.3.8-.7.8-1.5 0-3-1.2-3.9-2.3-.3-.3-.3-.8 0-1.1 1.2-1.2 2.8-1.5 4.3-1.5Z M14.1 6a7 7 0 0 0-1.1 4c0 .2.2.3.4.3a4.6 4.6 0 0 0 4-2.4c.3-.4.1-1.1-.3-1.3A6.5 6.5 0 0 0 14.1 6Z",
+  commercial_space:
+    "M2 20a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8l-7 5V8l-7 5V4a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z M17 18h1 M12 18h1 M7 18h1",
+  commercial_plot:
+    "M3 5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5Z M3 9h18 M3 15h18 M9 3v18 M15 3v18",
+  site: "M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z M12 10a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z",
+  plot: "M3 5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5Z M3 9h18 M3 15h18 M9 3v18 M15 3v18",
 };
+
+const TYPE_CONFIG = Object.fromEntries(
+  Object.entries(TYPE_ICON_PATH).map(([type, iconPath]) => [
+    type,
+    { color: INK, iconPath },
+  ]),
+) as Record<Property["type"], { color: string; iconPath: string }>;
 
 // ─────────────────────────────────────────────────────────────────────────────
 // PropertyMarkerService
@@ -73,7 +49,6 @@ export class PropertyMarkerService {
 
   private readonly handleClick = (e: mapboxgl.MapLayerMouseEvent) => {
     if (!e.features?.[0]) return;
-    // Stop the event from bubbling to the generic map click handler (district filter)
     e.originalEvent.stopPropagation();
     const props = e.features[0].properties;
     const property = this.properties.find((p) => p.id === props?.id);
@@ -127,7 +102,7 @@ export class PropertyMarkerService {
       const normalImg = await this.createPinImage(
         config.color,
         config.iconPath,
-        40,
+        34,
         40,
       );
       if (!isCurrentLoad()) return;
@@ -135,8 +110,8 @@ export class PropertyMarkerService {
       const activeImg = await this.createPinImage(
         config.color,
         config.iconPath,
-        52,
-        64,
+        44,
+        58,
         true,
       );
       if (!isCurrentLoad()) return;
@@ -181,52 +156,48 @@ export class PropertyMarkerService {
   ): Promise<HTMLImageElement | ImageBitmap> {
     return new Promise((resolve) => {
       const canvas = document.createElement("canvas");
-      const ratio = 2; // High DPI
+      const ratio = 2;
       canvas.width = width * ratio;
       canvas.height = height * ratio;
       const ctx = canvas.getContext("2d")!;
       ctx.scale(ratio, ratio);
 
       const cx = width / 2;
-      const headSize = isActive ? 48 : 33;
-      const r = headSize / 2;
-      const cy = r;
+      const head = isActive ? 30 : 22;
+      const stroke = isActive ? 1.75 : 1.25;
+      const headTop = 1;
+      const headBottom = headTop + head;
+      const fill = isActive ? VERMILION : PARCHMENT;
+      const mark = isActive ? PARCHMENT : color;
 
-      // 1. Draw Tail (Triangle)
-      ctx.fillStyle = color;
+      ctx.strokeStyle = isActive ? VERMILION : INK;
+      ctx.lineWidth = stroke;
       ctx.beginPath();
-      const tailWidth = isActive ? 16 : 12;
-      ctx.moveTo(cx - tailWidth, headSize * 0.7);
-      ctx.lineTo(cx + tailWidth, headSize * 0.7);
-      ctx.lineTo(cx, height);
-      ctx.closePath();
+      ctx.moveTo(cx, headBottom);
+      ctx.lineTo(cx, height - 1.5);
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.arc(cx, height - 1.5, isActive ? 2.4 : 1.8, 0, Math.PI * 2);
+      ctx.fillStyle = isActive ? VERMILION : INK;
       ctx.fill();
 
-      // 2. Draw Head Circle
-      ctx.beginPath();
-      ctx.arc(cx, cy, r, 0, Math.PI * 2);
-      ctx.fill();
+      ctx.fillStyle = fill;
+      ctx.fillRect(cx - head / 2, headTop, head, head);
+      ctx.strokeStyle = isActive ? VERMILION : INK;
+      ctx.lineWidth = stroke;
+      ctx.strokeRect(cx - head / 2, headTop, head, head);
 
-      // 3. Draw White Inner Circle
-      ctx.fillStyle = "#ffffff";
-      ctx.beginPath();
-      ctx.arc(cx, cy, r - 4, 0, Math.PI * 2);
-      ctx.fill();
-
-      // 4. Draw Icon
-      ctx.strokeStyle = color;
-      ctx.lineWidth = 2;
+      ctx.strokeStyle = mark;
+      ctx.lineWidth = 1.6;
       ctx.lineCap = "round";
       ctx.lineJoin = "round";
 
-      const iconSize = isActive ? 20 : 16;
-
+      const iconSize = isActive ? 16 : 12;
       ctx.save();
-      ctx.translate(cx - iconSize / 2, cy - iconSize / 2);
-      ctx.scale(iconSize / 24, iconSize / 24); // Scale from 24x24 base icon
-
-      const p = new Path2D(iconPath);
-      ctx.stroke(p);
+      ctx.translate(cx - iconSize / 2, headTop + head / 2 - iconSize / 2);
+      ctx.scale(iconSize / 24, iconSize / 24);
+      ctx.stroke(new Path2D(iconPath));
       ctx.restore();
 
       const img = new Image();

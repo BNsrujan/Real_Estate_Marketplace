@@ -9,6 +9,7 @@ import { useAuthStore } from "../store/auth_store";
 import { useStore } from "@/shared/store";
 import ProfileDetailsDialog from "./profile_details_dialog";
 import AppSettingsDialog from "./app_settings_dialog";
+import { UserAvatar } from '@/shared/ui/user_avatar';
 
 type ProfileModalProps = {
   user?: {
@@ -35,12 +36,6 @@ export default function ProfileModal({ user, onLogout }: ProfileModalProps) {
   const roleMeta = ROLE_META[role] ?? ROLE_META.buyer;
   const isPro = fullUser?.isPro;
   const isVerified = fullUser?.isVerified;
-  const initials = (user?.name ?? "U")
-    .split(" ")
-    .map((n) => n[0])
-    .join("")
-    .toUpperCase()
-    .slice(0, 2);
 
   const handleLogout = async () => {
     setIsLoggingOut(true);
@@ -55,20 +50,15 @@ export default function ProfileModal({ user, onLogout }: ProfileModalProps) {
   };
 
   return (
-    <div className="absolute right-0 top-14 z-50 w-72 overflow-hidden rounded-2xl border border-border bg-card shadow-lg shadow-black/10 animate-in fade-in zoom-in-95 duration-200 ease-[cubic-bezier(0.2,0,0,1)]">
+    <div className="absolute right-0 top-14 z-50 w-72 overflow-hidden rounded-none border border-border bg-card shadow-lg shadow-black/10 animate-in fade-in zoom-in-95 duration-200 ease-[cubic-bezier(0.2,0,0,1)]">
 
       {/* Header */}
       <div className="px-5 pt-5 pb-4">
         <div className="flex items-center gap-3.5">
-          {/* Avatar */}
-          <div className="relative shrink-0">
-            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-secondary text-primary text-base font-bold overflow-hidden ring-2 ring-primary/20">
-              {user?.avatar
-                ? <img src={user.avatar} alt="" className="h-full w-full object-cover" />
-                : initials}
-            </div>
+                    <div className="relative shrink-0">
+            <UserAvatar src={user?.avatar} name={user?.name} size={48} />
             {isVerified && (
-              <div className="absolute -bottom-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary border-2 border-card">
+              <div className="absolute -bottom-1 -right-1 flex h-4 w-4 items-center justify-center rounded-none bg-primary border-2 border-card">
                 <Shield size={8} className="text-primary-foreground" />
               </div>
             )}
@@ -80,11 +70,11 @@ export default function ProfileModal({ user, onLogout }: ProfileModalProps) {
               {user?.name ?? "User"}
             </p>
             <div className="mt-1 flex items-center gap-1.5 flex-wrap">
-              <span className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider ${roleMeta.color}`}>
+              <span className={`inline-flex items-center rounded-none border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider ${roleMeta.color}`}>
                 {roleMeta.label}
               </span>
               {isPro && (
-                <span className="inline-flex items-center gap-0.5 rounded-full border border-primary/30 bg-primary/10 px-2 py-0.5 text-[10px] font-semibold text-primary">
+                <span className="inline-flex items-center gap-0.5 rounded-none border border-primary/30 bg-primary/10 px-2 py-0.5 text-[10px] font-semibold text-primary">
                   <Star size={8} fill="currentColor" /> Pro
                 </span>
               )}
@@ -93,14 +83,14 @@ export default function ProfileModal({ user, onLogout }: ProfileModalProps) {
         </div>
 
         {/* Email */}
-        <div className="mt-3.5 flex items-center gap-2 rounded-xl border border-border bg-muted px-3 py-2">
+        <div className="mt-3.5 flex items-center gap-2 rounded-none border border-border bg-muted px-3 py-2">
           <Mail size={12} className="text-muted-foreground shrink-0" />
           <span className="text-xs text-muted-foreground truncate">{user?.email ?? "—"}</span>
         </div>
 
         {/* Phone */}
         {fullUser?.phone && (
-          <div className="mt-1.5 flex items-center gap-2 rounded-xl border border-border bg-muted px-3 py-2">
+          <div className="mt-1.5 flex items-center gap-2 rounded-none border border-border bg-muted px-3 py-2">
             <Phone size={12} className="text-muted-foreground shrink-0" />
             <span className="text-xs text-muted-foreground">{fullUser.phone}</span>
           </div>
@@ -123,9 +113,9 @@ export default function ProfileModal({ user, onLogout }: ProfileModalProps) {
         <button
           onClick={handleLogout}
           disabled={isLoggingOut}
-          className="group flex w-full items-center gap-3 rounded-xl px-3 py-2.5 transition-all duration-200 ease-[cubic-bezier(0.2,0,0,1)] hover:bg-destructive/8 active:scale-[0.98] disabled:opacity-50"
+          className="group flex w-full items-center gap-3 rounded-none px-3 py-2.5 transition-all duration-200 ease-[cubic-bezier(0.2,0,0,1)] hover:bg-destructive/8 active:scale-[0.98] disabled:opacity-50"
         >
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-destructive/10 text-destructive group-hover:bg-destructive/20 transition-colors duration-200">
+          <div className="flex h-8 w-8 items-center justify-center rounded-none bg-destructive/10 text-destructive group-hover:bg-destructive/20 transition-colors duration-200">
             <LogOut size={15} />
           </div>
           <span className="text-sm font-medium text-destructive">
@@ -145,8 +135,8 @@ function MenuItem({
   label: string;
 }) {
   return (
-    <div className="group flex w-full items-center gap-3 rounded-xl px-3 py-2.5 cursor-pointer transition-all duration-200 ease-[cubic-bezier(0.2,0,0,1)] hover:bg-primary/8 active:scale-[0.98]">
-      <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 text-primary group-hover:bg-primary/15 transition-colors duration-200">
+    <div className="group flex w-full items-center gap-3 rounded-none px-3 py-2.5 cursor-pointer transition-all duration-200 ease-[cubic-bezier(0.2,0,0,1)] hover:bg-primary/8 active:scale-[0.98]">
+      <div className="flex h-8 w-8 items-center justify-center rounded-none bg-primary/10 text-primary group-hover:bg-primary/15 transition-colors duration-200">
         <Icon size={15} />
       </div>
       <span className="flex-1 text-sm font-medium text-foreground">

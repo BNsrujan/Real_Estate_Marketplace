@@ -82,17 +82,17 @@ const MapLayerSelector = ({ onLayerChange }: MapLayerSelectorProps) => {
         <button
           onClick={toggleExpanded}
           className="
-            group relative overflow-hidden rounded-lg md:rounded-xl 
-            border border-white/15 bg-black/50 backdrop-blur-2xl
+            group relative overflow-hidden rounded-none md:rounded-none 
+            border border-white/15 bg-parchment/92 backdrop-blur-2xl
             shadow-[0_8px_32px_rgba(0,0,0,0.4)]
             transition-all duration-300 ease-[cubic-bezier(0.2,0,0,1)]
-            hover:scale-[1.03] hover:border-white/25 hover:shadow-[0_12px_40px_rgba(0,0,0,0.5)]
+            hover:scale-[1.03] hover:border-hairline-strong hover:shadow-[0_12px_40px_rgba(0,0,0,0.5)]
             active:scale-[0.98]
             shrink-0
           "
         >
           <div className="relative flex items-center gap-2 md:gap-4 p-0.5 md:p-1 ">
-            <div className="relative h-14 md:h-20 w-14 md:w-20 overflow-hidden rounded-md md:rounded-lg border border-white/10">
+            <div className="relative h-14 md:h-20 w-14 md:w-20 overflow-hidden rounded-none md:rounded-none border border-hairline">
               <Image
                 src={activeLayer.image}
                 alt={activeLayer.name}
@@ -102,7 +102,7 @@ const MapLayerSelector = ({ onLayerChange }: MapLayerSelectorProps) => {
               <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/20 to-transparent" />
             </div>
             <div className="hidden md:block absolute text-left bottom-2 left-1/2 -translate-x-1/2">
-              <h3 className="text-sm font-medium text-white/50 z-20">
+              <h3 className="text-sm font-medium text-ink-muted z-20">
                 {activeLayer.name}
               </h3>
             </div>
@@ -123,10 +123,10 @@ const MapLayerSelector = ({ onLayerChange }: MapLayerSelectorProps) => {
               key={layer.id}
               onClick={() => handleLayerChange(layer)}
               className="
-                group relative shrink-0 overflow-hidden rounded-lg md:rounded-xl
-                border border-white/10 bg-black/40 backdrop-blur-xl shadow-xl
+                group relative shrink-0 overflow-hidden rounded-none md:rounded-none
+                border border-hairline bg-parchment/90 backdrop-blur-xl shadow-xl
                 transition-all duration-300 ease-[cubic-bezier(0.2,0,0,1)]
-                hover:scale-[1.05] hover:border-white/20
+                hover:scale-[1.05] hover:border-hairline-strong
                 active:scale-95
               "
               style={{ transitionDelay: `${index * 80}ms` }}
@@ -140,7 +140,7 @@ const MapLayerSelector = ({ onLayerChange }: MapLayerSelectorProps) => {
                 />
                 <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/20 to-transparent" />
                 <div className="absolute bottom-1.5 inset-x-0 flex justify-center">
-                  <h3 className="text-[10px] font-semibold text-white/50">
+                  <h3 className="text-[10px] font-semibold text-ink-muted">
                     {layer.name}
                   </h3>
                 </div>

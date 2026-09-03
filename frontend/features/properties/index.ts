@@ -1,5 +1,4 @@
 export { default as PropertyCard } from "./components/property_card";
-export { addPropertyMarkers } from "./components/property_markers";
 export { getProperties } from "./api/property_api";
 export { useProperties } from "./hooks/use_properties";
 export { usePropertyMarkers } from "./hooks/use_property_markers";

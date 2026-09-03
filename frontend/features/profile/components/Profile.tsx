@@ -39,10 +39,10 @@ const Profile = () => {
         <>
           <button
             onClick={() => { closePanel(); setProfileMenuOpen((p) => !p); }}
-            className="flex h-11 w-11 md:h-auto md:w-auto items-center justify-center md:gap-2 rounded-full bg-background/90 md:bg-white/20 p-1 backdrop-blur-md border border-border/40 md:border-0 shadow-sm md:shadow-none hover:bg-background/95 md:hover:bg-white/30 transition"
+            className="flex h-11 w-11 md:h-auto md:w-auto items-center justify-center md:gap-2 rounded-none bg-background/90 md:bg-parchment-deep p-1 backdrop-blur-md border border-border/40 md:border-0 shadow-sm md:shadow-none hover:bg-background/95 md:hover:bg-parchment-deep transition"
           >
-            <div className="w-8 md:w-10 h-8 md:h-10 rounded-full bg-gray-300 flex items-center justify-center">
-              <span className="text-black font-bold text-xs md:text-sm">
+            <div className="w-8 md:w-10 h-8 md:h-10 rounded-none bg-gray-300 flex items-center justify-center">
+              <span className="text-parchment font-bold text-xs md:text-sm">
                 {user.name?.charAt(0)?.toUpperCase() ?? "U"}
               </span>
             </div>
@@ -52,7 +52,7 @@ const Profile = () => {
       ) : (
         <button
           onClick={() => openLoginModal()}
-          className="flex h-11 items-center gap-2 rounded-full md:rounded-lg bg-background/90 md:bg-white/20 px-4 py-2 backdrop-blur-md border border-border/40 md:border-0 shadow-sm md:shadow-none hover:bg-background/95 md:hover:bg-white/30 transition text-foreground md:text-white font-medium text-sm"
+          className="flex h-11 items-center gap-2 rounded-none md:rounded-none bg-background/90 md:bg-parchment-deep px-4 py-2 backdrop-blur-md border border-border/40 md:border-0 shadow-sm md:shadow-none hover:bg-background/95 md:hover:bg-parchment-deep transition text-foreground md:text-ink font-medium text-sm"
         >
           Login
         </button>

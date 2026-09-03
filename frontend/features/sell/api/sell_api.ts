@@ -1,6 +1,7 @@
 import { apiService } from '@/shared/services/api.service';
 import type { Property, ApiResponse, District, Amenity } from '@/shared/types';
 import type { SellFormValues } from '../schemas/sell_schemas';
+import { uploadImage } from '@/shared/services/cloudinary.service';
 
 export async function getDistricts(): Promise<District[]> {
   const res = await apiService.get<ApiResponse<{ data: District[] }>>('/api/v1/districts');
@@ -69,19 +70,6 @@ export async function createPropertyListing(values: SellFormValues): Promise<Pro
 }
 
 export async function uploadToCloudinary(file: File): Promise<string> {
-  const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
-  const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET;
-  if (!cloudName || !uploadPreset) throw new Error('Cloudinary not configured');
-
-  const form = new FormData();
-  form.append('file', file);
-  form.append('upload_preset', uploadPreset);
-
-  const res = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
-    method: 'POST',
-    body: form,
-  });
-  if (!res.ok) throw new Error('Image upload failed');
-  const data = await res.json();
-  return data.secure_url as string;
+  const asset = await uploadImage(file);
+  return asset.url;
 }

@@ -1,6 +1,6 @@
 export const dynamic = "force-static";
 
-import { Roboto } from "next/font/google";
+import { Newsreader, IBM_Plex_Sans, IBM_Plex_Mono } from "next/font/google";
 import Script from "next/script";
 import "./globals.css";
 import { cn } from "@/lib/utils";
@@ -11,22 +11,38 @@ import AuthInitializer from "@/shared/components/common/auth_initializer";
 import { Metadata } from "next";
 import { TooltipProvider } from "@/shared/components/ui/tooltip";
 
-const roboto = Roboto({
+const newsreader = Newsreader({
   subsets: ["latin"],
-  weight: ["400", "500", "700"],
-  variable: "--font-roboto",
+  weight: ["300", "400", "500", "600"],
+  style: ["normal", "italic"],
+  variable: "--font-newsreader",
   display: "swap",
-  preload: false,
+});
+
+const plexSans = IBM_Plex_Sans({
+  subsets: ["latin"],
+  weight: ["400", "500", "600"],
+  variable: "--font-plex-sans",
+  display: "swap",
+});
+
+const plexMono = IBM_Plex_Mono({
+  subsets: ["latin"],
+  weight: ["400", "500"],
+  variable: "--font-plex-mono",
+  display: "swap",
 });
 
 export const viewport = {
   width: "device-width",
   initialScale: 1,
+  themeColor: "#0e0d0b",
 };
 
 export const metadata: Metadata = {
-  title: "Namma Dharani — Real Estate Marketplace",
-  description: "Explore properties across Karnataka on an interactive globe.",
+  title: "Namma Dharani — Land & Property Register",
+  description:
+    "Survey, compare and enquire on land and property across Karnataka on an interactive map.",
 };
 
 export default function RootLayout({
@@ -35,7 +51,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={cn(roboto.variable)}>
+    <html
+      lang="en"
+      className={cn(newsreader.variable, plexSans.variable, plexMono.variable)}
+    >
       <body className="antialiased relative w-full h-screen">
         <TooltipProvider>
           <Script

@@ -2,11 +2,14 @@
 
 import { useEffect, useState } from 'react';
 import { listUsers, updateUserRole, toggleUserVerified } from '@/features/admin/api/admin_api';
+import { RecordPage, Register, RegisterRow, Cell, EmptyRecord } from '@/shared/ui/record';
 import { Skeleton } from '@/shared/components/ui/skeleton';
+import { toastService } from '@/shared/services/toast.service';
 import { cn } from '@/lib/utils';
 import type { UserProfile, UserRole } from '@/shared/types';
 
 const ROLES: UserRole[] = ['buyer', 'seller', 'agent', 'admin'];
+const PAGE_SIZE = 50;
 
 export default function AdminUsersPage() {
   const [users, setUsers] = useState<UserProfile[]>([]);
@@ -14,9 +17,9 @@ export default function AdminUsersPage() {
   const [updating, setUpdating] = useState<string | null>(null);
 
   useEffect(() => {
-    listUsers({ limit: 50 })
-      .then((r) => setUsers(r.data))
-      .catch(() => {})
+    listUsers({ limit: PAGE_SIZE })
+      .then((result) => setUsers(result.data))
+      .catch(() => toastService.error('Could not load users'))
       .finally(() => setLoading(false));
   }, []);
 
@@ -24,9 +27,12 @@ export default function AdminUsersPage() {
     setUpdating(userId);
     try {
       const updated = await updateUserRole(userId, role);
-      setUsers((prev) => prev.map((u) => (u.id === userId ? { ...u, role: updated.role } : u)));
+      setUsers((prev) =>
+        prev.map((user) => (user.id === userId ? { ...user, role: updated.role } : user)),
+      );
+      toastService.success(`Role set to ${role}`);
     } catch {
-      //
+      toastService.error('Could not change the role');
     } finally {
       setUpdating(null);
     }
@@ -36,75 +42,76 @@ export default function AdminUsersPage() {
     setUpdating(userId);
     try {
       const updated = await toggleUserVerified(userId, isVerified);
-      setUsers((prev) => prev.map((u) => (u.id === userId ? { ...u, isVerified: updated.isVerified } : u)));
+      setUsers((prev) =>
+        prev.map((user) =>
+          user.id === userId ? { ...user, isVerified: updated.isVerified } : user,
+        ),
+      );
     } catch {
-      //
+      toastService.error('Could not change verification');
     } finally {
       setUpdating(null);
     }
   }
 
   return (
-    <div>
-      <h1 className="text-2xl font-bold text-white mb-6">Users</h1>
-      <div className="rounded-2xl border border-white/10 overflow-hidden">
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="border-b border-white/10 text-zinc-500 text-xs uppercase tracking-wider">
-              <th className="px-4 py-3 text-left">User</th>
-              <th className="px-4 py-3 text-left">Role</th>
-              <th className="px-4 py-3 text-left">Verified</th>
-              <th className="px-4 py-3 text-left">Joined</th>
-            </tr>
-          </thead>
-          <tbody>
-            {loading
-              ? Array.from({ length: 5 }).map((_, i) => (
-                  <tr key={i} className="border-b border-white/5">
-                    <td className="px-4 py-3"><Skeleton className="h-4 w-40" /></td>
-                    <td className="px-4 py-3"><Skeleton className="h-4 w-20" /></td>
-                    <td className="px-4 py-3"><Skeleton className="h-4 w-16" /></td>
-                    <td className="px-4 py-3"><Skeleton className="h-4 w-24" /></td>
-                  </tr>
-                ))
-              : users.map((u) => (
-                  <tr key={u.id} className="border-b border-white/5 hover:bg-white/3 transition-colors">
-                    <td className="px-4 py-3">
-                      <p className="font-medium text-white">{u.name}</p>
-                      <p className="text-xs text-zinc-500">{u.email}</p>
-                    </td>
-                    <td className="px-4 py-3">
-                      <select
-                        value={u.role}
-                        disabled={updating === u.id}
-                        onChange={(e) => handleRoleChange(u.id, e.target.value)}
-                        className="rounded-lg border border-white/10 bg-white/5 px-2 py-1 text-xs text-white focus:outline-none disabled:opacity-50"
-                      >
-                        {ROLES.map((r) => <option key={r} value={r}>{r}</option>)}
-                      </select>
-                    </td>
-                    <td className="px-4 py-3">
-                      <button
-                        disabled={updating === u.id}
-                        onClick={() => handleVerify(u.id, !u.isVerified)}
-                        className={cn(
-                          'rounded-full px-3 py-1 text-xs font-medium transition-colors disabled:opacity-50',
-                          u.isVerified
-                            ? 'bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30'
-                            : 'bg-white/10 text-zinc-400 hover:bg-white/15',
-                        )}
-                      >
-                        {u.isVerified ? 'Verified' : 'Unverified'}
-                      </button>
-                    </td>
-                    <td className="px-4 py-3 text-zinc-500 text-xs">
-                      {u.createdAt ? new Date(u.createdAt).toLocaleDateString('en-IN') : '—'}
-                    </td>
-                  </tr>
-                ))}
-          </tbody>
-        </table>
-      </div>
-    </div>
+    <RecordPage eyebrow="Registry Office" title="Users">
+      {loading ? (
+        <div className="space-y-px border border-hairline bg-hairline">
+          {Array.from({ length: 6 }).map((_, index) => (
+            <div key={index} className="bg-parchment px-4 py-5">
+              <Skeleton className="h-4 w-1/3" />
+            </div>
+          ))}
+        </div>
+      ) : (
+        <Register
+          columns={['User', 'Role', 'Verified', 'Joined']}
+          empty={users.length === 0 ? <EmptyRecord title="No users registered" /> : undefined}
+        >
+          {users.map((user) => (
+            <RegisterRow key={user.id}>
+              <Cell label="User" className="sm:flex-[2]">
+                <p className="truncate font-medium text-ink">{user.name}</p>
+                <p className="figure truncate text-xs text-ink-muted">{user.email}</p>
+              </Cell>
+              <Cell label="Role">
+                <select
+                  value={user.role}
+                  disabled={updating === user.id}
+                  onChange={(event) => handleRoleChange(user.id, event.target.value)}
+                  className="border border-hairline-strong bg-parchment px-2 py-1 font-mono text-[11px] uppercase tracking-[0.1em] text-ink focus:outline-none focus-visible:ring-1 focus-visible:ring-vermilion disabled:opacity-50"
+                >
+                  {ROLES.map((role) => (
+                    <option key={role} value={role}>
+                      {role}
+                    </option>
+                  ))}
+                </select>
+              </Cell>
+              <Cell label="Verified">
+                <button
+                  disabled={updating === user.id}
+                  onClick={() => handleVerify(user.id, !user.isVerified)}
+                  className={cn(
+                    'border px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.14em] transition-colors duration-[120ms] disabled:opacity-50',
+                    user.isVerified
+                      ? 'border-survey/40 bg-survey/8 text-survey'
+                      : 'border-hairline text-ink-muted hover:border-hairline-strong hover:text-ink',
+                  )}
+                >
+                  {user.isVerified ? 'Verified' : 'Unverified'}
+                </button>
+              </Cell>
+              <Cell label="Joined">
+                <p className="figure text-xs text-ink-muted">
+                  {user.createdAt ? new Date(user.createdAt).toLocaleDateString('en-IN') : '—'}
+                </p>
+              </Cell>
+            </RegisterRow>
+          ))}
+        </Register>
+      )}
+    </RecordPage>
   );
 }

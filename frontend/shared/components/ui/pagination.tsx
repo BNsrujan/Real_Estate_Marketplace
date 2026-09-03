@@ -47,7 +47,7 @@ function PaginationLink({
       data-slot="pagination-link"
       data-active={isActive}
       className={cn(
-        "flex h-9 w-9 items-center justify-center rounded-full text-sm font-medium",
+        "flex h-9 w-9 items-center justify-center rounded-none text-sm font-medium",
         "transition-all duration-200 ease-[cubic-bezier(0.2,0,0,1)] active:scale-95",
         "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40",
         isActive
@@ -68,7 +68,7 @@ function PaginationPrevious({
     <PaginationLink
       aria-label="Go to previous page"
       className={cn(
-        "w-auto gap-1.5 rounded-full border border-border px-3 text-foreground hover:bg-muted",
+        "w-auto gap-1.5 rounded-none border border-border px-3 text-foreground hover:bg-muted",
         className
       )}
       {...props}
@@ -87,7 +87,7 @@ function PaginationNext({
     <PaginationLink
       aria-label="Go to next page"
       className={cn(
-        "w-auto gap-1.5 rounded-full border border-border px-3 text-foreground hover:bg-muted",
+        "w-auto gap-1.5 rounded-none border border-border px-3 text-foreground hover:bg-muted",
         className
       )}
       {...props}

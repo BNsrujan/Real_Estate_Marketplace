@@ -2,18 +2,21 @@
 
 import { cn } from '@/lib/utils';
 
-type StatusVariant = 'active' | 'sold' | 'rented' | 'pending' | 'draft' | 'published' | 'archived' | 'replied' | 'closed';
+type StatusVariant =
+  | 'active' | 'sold' | 'rented'
+  | 'pending' | 'replied' | 'closed'
+  | 'draft' | 'published' | 'archived';
 
-const variants: Record<StatusVariant, string> = {
-  active: 'bg-green-500/20 text-green-400 border-green-500/30',
-  sold: 'bg-red-500/20 text-red-400 border-red-500/30',
-  rented: 'bg-blue-500/20 text-blue-400 border-blue-500/30',
-  pending: 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30',
-  draft: 'bg-zinc-500/20 text-zinc-400 border-zinc-500/30',
-  published: 'bg-green-500/20 text-green-400 border-green-500/30',
-  archived: 'bg-zinc-500/20 text-zinc-400 border-zinc-500/30',
-  replied: 'bg-blue-500/20 text-blue-400 border-blue-500/30',
-  closed: 'bg-zinc-500/20 text-zinc-400 border-zinc-500/30',
+const marks: Record<StatusVariant, string> = {
+  active: 'border-survey/40 text-survey bg-survey/8',
+  published: 'border-survey/40 text-survey bg-survey/8',
+  replied: 'border-survey/40 text-survey bg-survey/8',
+  sold: 'border-vermilion/40 text-vermilion bg-vermilion/8',
+  rented: 'border-vermilion/40 text-vermilion bg-vermilion/8',
+  pending: 'border-hairline-strong text-ink bg-parchment-deep',
+  draft: 'border-hairline text-ink-muted bg-transparent',
+  archived: 'border-hairline text-ink-muted bg-transparent',
+  closed: 'border-hairline text-ink-muted bg-transparent',
 };
 
 const labels: Record<StatusVariant, string> = {
@@ -35,18 +38,16 @@ interface StatusBadgeProps {
 
 export function StatusBadge({ status, className }: StatusBadgeProps) {
   const key = status as StatusVariant;
-  const colorClass = variants[key] ?? 'bg-zinc-500/20 text-zinc-400 border-zinc-500/30';
-  const label = labels[key] ?? status;
 
   return (
     <span
       className={cn(
-        'inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-medium',
-        colorClass,
+        'inline-flex items-center border px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.14em]',
+        marks[key] ?? 'border-hairline text-ink-muted',
         className,
       )}
     >
-      {label}
+      {labels[key] ?? status}
     </span>
   );
 }

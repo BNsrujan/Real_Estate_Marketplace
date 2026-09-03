@@ -56,9 +56,9 @@ const Toaster = ({ ...props }: ToasterProps) => {
           toast:       "shadow-lg border text-sm font-medium",
           title:       "font-semibold",
           description: "text-xs opacity-80 mt-0.5",
-          actionButton: "rounded-full bg-primary text-primary-foreground text-xs px-3 py-1.5 font-semibold hover:bg-primary/90 active:scale-95 transition-all",
-          cancelButton: "rounded-full border border-border text-xs px-3 py-1.5 font-medium hover:bg-muted active:scale-95 transition-all",
-          closeButton:  "rounded-full",
+          actionButton: "rounded-none bg-primary text-primary-foreground text-xs px-3 py-1.5 font-semibold hover:bg-primary/90 active:scale-95 transition-all",
+          cancelButton: "rounded-none border border-border text-xs px-3 py-1.5 font-medium hover:bg-muted active:scale-95 transition-all",
+          closeButton:  "rounded-none",
         },
       }}
       {...props}

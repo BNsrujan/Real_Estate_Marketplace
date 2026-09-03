@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { listAllProperties, listAllEnquiries, listUsers } from '@/features/admin/api/admin_api';
+import { RecordPage, FigureRow, Figure } from '@/shared/ui/record';
 import { Skeleton } from '@/shared/components/ui/skeleton';
 
 export default function AdminPage() {
@@ -13,32 +14,36 @@ export default function AdminPage() {
       listUsers({ limit: 1 }),
       listAllProperties({ limit: 1 }),
       listAllEnquiries({ limit: 1 }),
-    ]).then(([u, p, e]) => {
-      setStats({ users: u.total, properties: p.total, enquiries: e.total });
-    }).catch(() => {}).finally(() => setLoading(false));
+    ])
+      .then(([users, properties, enquiries]) => {
+        setStats({
+          users: users.total,
+          properties: properties.total,
+          enquiries: enquiries.total,
+        });
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false));
   }, []);
 
-  const cards = [
-    { label: 'Total Users',      value: stats.users },
-    { label: 'Total Properties', value: stats.properties },
-    { label: 'Total Enquiries',  value: stats.enquiries },
-  ];
-
   return (
-    <div>
-      <h1 className="text-2xl font-bold text-white mb-8">Overview</h1>
-      <div className="grid grid-cols-3 gap-4">
-        {cards.map(({ label, value }) => (
-          <div key={label} className="rounded-2xl border border-white/10 bg-white/5 p-6">
-            <p className="text-xs uppercase tracking-widest text-zinc-500 mb-2">{label}</p>
-            {loading ? (
-              <Skeleton className="h-8 w-16" />
-            ) : (
-              <p className="text-3xl font-bold text-white">{value}</p>
-            )}
-          </div>
-        ))}
-      </div>
-    </div>
+    <RecordPage eyebrow="Registry Office" title="Overview">
+      {loading ? (
+        <div className="grid grid-cols-2 gap-px border border-hairline bg-hairline sm:grid-cols-3">
+          {Array.from({ length: 3 }).map((_, index) => (
+            <div key={index} className="bg-parchment px-5 py-6">
+              <Skeleton className="mb-3 h-3 w-24" />
+              <Skeleton className="h-8 w-14" />
+            </div>
+          ))}
+        </div>
+      ) : (
+        <FigureRow>
+          <Figure label="Registered Users" value={stats.users} />
+          <Figure label="Properties Filed" value={stats.properties} />
+          <Figure label="Enquiries Logged" value={stats.enquiries} accent />
+        </FigureRow>
+      )}
+    </RecordPage>
   );
 }

@@ -7,16 +7,17 @@ export default function AdminError({
   reset: () => void;
 }) {
   return (
-    <div className="flex min-h-[60vh] items-center justify-center text-white">
+    <div className="flex min-h-[60vh] items-center justify-center bg-parchment">
       <div className="max-w-sm text-center">
-        <h1 className="text-xl font-semibold">Admin panel error</h1>
-        <p className="mt-2 text-sm text-zinc-400">
-          This admin view failed to render. Retry to reload the section.
+        <p className="label mb-3">Registry Office</p>
+        <h1 className="display text-2xl text-ink">This view failed to render</h1>
+        <p className="mt-3 text-sm text-ink-muted">
+          Retry to reload the section. If it keeps failing, check that the API is reachable.
         </p>
         <button
           type="button"
           onClick={reset}
-          className="mt-5 rounded-full bg-white px-5 py-2 text-sm font-semibold text-black transition-colors hover:bg-zinc-200"
+          className="mt-6 border border-vermilion bg-vermilion px-5 py-2 font-mono text-[11px] uppercase tracking-[0.14em] text-primary-foreground transition-colors duration-[120ms] hover:bg-vermilion-deep"
         >
           Try again
         </button>

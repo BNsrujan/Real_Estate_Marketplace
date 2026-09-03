@@ -140,14 +140,14 @@ export default function MobileBottomDrawer() {
       direction="bottom"
     >
       <DrawerContent
-        className="bg-background border-t border-border rounded-t-3xl md:hidden max-h-[75vh] "
+        className="bg-background border-t border-border rounded-none md:hidden max-h-[75vh] "
         style={{ bottom: "2rem" }}
       >
         {selectedProperty ? (
           /* ── Property detail ── */
           <div className="overflow-y-auto flex-1 p-3">
             {/* Hero image */}
-            <div className="relative h-48 w-full shrink-0 mt-3 px-3 overflow-hidden rounded-t-2xl">
+            <div className="relative h-48 w-full shrink-0 mt-3 px-3 overflow-hidden rounded-none">
               <Image
                 src={selectedProperty.thumbnailUrl || selectedProperty.imageUrls?.[0] || "/property/image.png"}
                 alt={selectedProperty.title}
@@ -158,22 +158,22 @@ export default function MobileBottomDrawer() {
                 <div className="flex justify-end">
                   <button
                     onClick={handleClose}
-                    className="flex items-center justify-center w-8 h-8 rounded-full bg-black/60 text-white hover:bg-black/80 transition-colors active:scale-95"
+                    className="flex items-center justify-center w-8 h-8 rounded-none bg-parchment/95 text-ink hover:bg-parchment/95 transition-colors active:scale-95"
                   >
                     <X size={16} />
                   </button>
                 </div>
                 <div className="flex items-end justify-between">
-                  <span className="rounded-full bg-primary px-3 py-1 text-xs font-semibold text-primary-foreground capitalize">
+                  <span className="rounded-none bg-primary px-3 py-1 text-xs font-semibold text-primary-foreground capitalize">
                     For {selectedProperty.listingType}
                   </span>
                   <button
                     onClick={handleSave}
-                    className="flex items-center justify-center w-8 h-8 rounded-full bg-black/60 hover:bg-black/80 transition-colors active:scale-95"
+                    className="flex items-center justify-center w-8 h-8 rounded-none bg-parchment/95 hover:bg-parchment/95 transition-colors active:scale-95"
                   >
                     {isSaved
                       ? <BookmarkCheck size={16} className="text-primary" />
-                      : <Bookmark size={16} className="text-white" />}
+                      : <Bookmark size={16} className="text-ink" />}
                   </button>
                 </div>
               </div>
@@ -192,11 +192,11 @@ export default function MobileBottomDrawer() {
 
               {/* Price & Area */}
               <div className="grid grid-cols-2 gap-2">
-                <div className="rounded-2xl border border-border bg-card p-3">
+                <div className="rounded-none border border-border bg-card p-3">
                   <p className="label mb-0.5">Price</p>
                   <p className="text-base font-bold text-foreground">{selectedProperty.priceLabel}</p>
                 </div>
-                <div className="rounded-2xl border border-border bg-card p-3">
+                <div className="rounded-none border border-border bg-card p-3">
                   <p className="label mb-0.5">Area</p>
                   <p className="text-base font-bold text-foreground">{selectedProperty.sizeLabel}</p>
                 </div>
@@ -207,14 +207,14 @@ export default function MobileBottomDrawer() {
                 <div className="flex gap-2 pt-1">
                   <button
                     onClick={handleContact}
-                    className="flex-1 flex items-center justify-center gap-2 rounded-full bg-primary py-3 text-sm font-semibold text-primary-foreground hover:bg-primary/90 active:scale-95 transition-all duration-200"
+                    className="flex-1 flex items-center justify-center gap-2 rounded-none bg-primary py-3 text-sm font-semibold text-primary-foreground hover:bg-primary/90 active:scale-95 transition-all duration-200"
                   >
                     <Phone size={15} />
                     {isAuthenticated ? "Contact" : "Login to Contact"}
                   </button>
                   <button
                     onClick={handleSave}
-                    className={`flex-1 flex items-center justify-center gap-2 rounded-full border py-3 text-sm font-semibold transition-all duration-200 active:scale-95 ${
+                    className={`flex-1 flex items-center justify-center gap-2 rounded-none border py-3 text-sm font-semibold transition-all duration-200 active:scale-95 ${
                       isSaved
                         ? "border-primary/40 bg-secondary text-primary"
                         : "border-border bg-muted text-foreground"
@@ -241,26 +241,26 @@ export default function MobileBottomDrawer() {
                         onChange={(e) => setEnquiryMsg(e.target.value)}
                         placeholder="Hi, I'm interested in this property..."
                         rows={3}
-                        className="w-full rounded-t-xl rounded-b-none border-0 border-b-2 border-border bg-input px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary resize-none transition-colors"
+                        className="w-full rounded-none rounded-b-none border-0 border-b-2 border-border bg-input px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary resize-none transition-colors"
                       />
                       <input
                         value={enquiryPhone}
                         onChange={(e) => setEnquiryPhone(e.target.value)}
                         placeholder="Phone number (optional)"
                         type="tel"
-                        className="w-full rounded-t-xl rounded-b-none border-0 border-b-2 border-border bg-input px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary transition-colors"
+                        className="w-full rounded-none rounded-b-none border-0 border-b-2 border-border bg-input px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary transition-colors"
                       />
                       <div className="flex gap-2 pt-1">
                         <button
                           onClick={() => setShowEnquiry(false)}
-                          className="flex-1 rounded-full border border-border py-2.5 text-sm text-muted-foreground hover:bg-muted active:scale-95 transition-all duration-200"
+                          className="flex-1 rounded-none border border-border py-2.5 text-sm text-muted-foreground hover:bg-muted active:scale-95 transition-all duration-200"
                         >
                           Cancel
                         </button>
                         <button
                           onClick={handleEnquirySubmit}
                           disabled={enquiryMsg.trim().length < 10 || enquirySubmitting}
-                          className="flex-1 flex items-center justify-center gap-1.5 rounded-full bg-primary py-2.5 text-sm font-semibold text-primary-foreground hover:bg-primary/90 disabled:opacity-50 active:scale-95 transition-all duration-200"
+                          className="flex-1 flex items-center justify-center gap-1.5 rounded-none bg-primary py-2.5 text-sm font-semibold text-primary-foreground hover:bg-primary/90 disabled:opacity-50 active:scale-95 transition-all duration-200"
                         >
                           <Send size={14} />
                           {enquirySubmitting ? "Sending..." : "Send"}
@@ -281,11 +281,11 @@ export default function MobileBottomDrawer() {
                   r.furnishedStatus,
                 ].filter(Boolean) as string[];
                 return chips.length > 0 ? (
-                  <div className="rounded-2xl border border-border bg-card p-3">
+                  <div className="rounded-none border border-border bg-card p-3">
                     <p className="label mb-2">Details</p>
                     <div className="flex flex-wrap gap-1.5">
                       {chips.map((c) => (
-                        <span key={c} className="rounded-full bg-secondary px-2.5 py-1 text-xs text-secondary-foreground">{c}</span>
+                        <span key={c} className="rounded-none bg-secondary px-2.5 py-1 text-xs text-secondary-foreground">{c}</span>
                       ))}
                     </div>
                   </div>
@@ -293,11 +293,11 @@ export default function MobileBottomDrawer() {
               })()}
 
               {activePropertyDetail?.amenities && activePropertyDetail.amenities.length > 0 && (
-                <div className="rounded-2xl border border-border bg-card p-3">
+                <div className="rounded-none border border-border bg-card p-3">
                   <p className="label mb-2">Amenities</p>
                   <div className="flex flex-wrap gap-1.5">
                     {activePropertyDetail.amenities.map((a) => (
-                      <span key={a.id} className="rounded-full bg-primary/10 border border-primary/20 px-2.5 py-1 text-xs text-primary">{a.name}</span>
+                      <span key={a.id} className="rounded-none bg-primary/10 border border-primary/20 px-2.5 py-1 text-xs text-primary">{a.name}</span>
                     ))}
                   </div>
                 </div>
@@ -306,7 +306,7 @@ export default function MobileBottomDrawer() {
               {selectedProperty.contactNumber && (
                 <a
                   href={`tel:${selectedProperty.contactNumber}`}
-                  className="flex items-center justify-between rounded-2xl border border-border bg-card px-3 py-2.5 hover:bg-secondary/50 transition-colors active:scale-[0.99]"
+                  className="flex items-center justify-between rounded-none border border-border bg-card px-3 py-2.5 hover:bg-secondary/50 transition-colors active:scale-[0.99]"
                 >
                   <div>
                     <p className="label">Contact</p>
@@ -322,7 +322,7 @@ export default function MobileBottomDrawer() {
           <div className="overflow-y-auto flex-1 px-4 pt-2 pb-4">
             {/* Hero */}
             <div className="mb-6">
-              <div className="relative mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-secondary border border-border">
+              <div className="relative mb-4 flex h-14 w-14 items-center justify-center rounded-none bg-secondary border border-border">
                 {menuData && <menuData.Icon size={26} className="text-primary" />}
               </div>
               <h2 className="mb-1.5 text-xl font-bold text-foreground tracking-tight">{menuData?.title}</h2>
@@ -332,7 +332,7 @@ export default function MobileBottomDrawer() {
             <div className="space-y-3">
               {activeMenu === "map" && (
                 <SidebarCard className="flex flex-col items-center gap-3 py-10 text-center">
-                  <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-border bg-secondary">
+                  <div className="flex h-14 w-14 items-center justify-center rounded-none border border-border bg-secondary">
                     <Map size={24} className="text-primary opacity-60" />
                   </div>
                   <p className="text-sm text-muted-foreground leading-relaxed max-w-52">
@@ -357,7 +357,7 @@ export default function MobileBottomDrawer() {
                     />
                   ) : savedProperties.length === 0 ? (
                     <SidebarCard className="flex flex-col items-center gap-3 py-10 text-center">
-                      <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-border bg-secondary">
+                      <div className="flex h-14 w-14 items-center justify-center rounded-none border border-border bg-secondary">
                         <Bookmark size={24} className="text-primary opacity-60" />
                       </div>
                       <p className="text-sm text-muted-foreground">

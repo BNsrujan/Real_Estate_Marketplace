@@ -27,7 +27,7 @@ function RadioGroupItem({
       data-slot="radio-group-item"
       className={cn(
         // MD3 radio: 20px outer circle
-        "peer relative flex aspect-square size-5 shrink-0 rounded-full outline-none",
+        "peer relative flex aspect-square size-5 shrink-0 rounded-none outline-none",
         "border-2 border-border bg-transparent",
         "transition-all duration-200 ease-[cubic-bezier(0.2,0,0,1)]",
         "after:absolute after:-inset-x-3 after:-inset-y-2",
@@ -47,7 +47,7 @@ function RadioGroupItem({
         data-slot="radio-group-indicator"
         className="flex size-full items-center justify-center"
       >  
-        <span className="block size-2.5 rounded-full bg-primary animate-in zoom-in-50 duration-150" />
+        <span className="block size-2.5 rounded-none bg-primary animate-in zoom-in-50 duration-150" />
       </RadioGroupPrimitive.Indicator>
     </RadioGroupPrimitive.Item>
   )

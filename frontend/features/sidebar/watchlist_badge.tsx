@@ -38,9 +38,9 @@ export default function WatchlistBadge({
           onClick={onClick}
           className="flex flex-col items-center w-full cursor-pointer focus-visible:outline-none"
         >
-          <AvatarGroup className={`ring-2 rounded-md transition-all duration-200 ${active ? 'ring-primary/60' : 'ring-transparent hover:ring-white/20'}`}>
-            <Avatar className='rounded-md'>
-              <AvatarImage src={img0} alt={firstProperty?.images?.[0]?.alt ?? districtName} className='rounded-md' />
+          <AvatarGroup className={`ring-2 rounded-none transition-all duration-200 ${active ? 'ring-primary/60' : 'ring-transparent hover:ring-hairline-strong'}`}>
+            <Avatar className='rounded-none'>
+              <AvatarImage src={img0} alt={firstProperty?.images?.[0]?.alt ?? districtName} className='rounded-none' />
               <AvatarFallback>P</AvatarFallback>
             </Avatar>
             <Avatar>
@@ -57,7 +57,7 @@ export default function WatchlistBadge({
       <TooltipContent
         side="right"
         sideOffset={12}
-        className="bg-foreground border border-border  rounded-2xl shadow-lg p-4 w-56 z-1100"
+        className="bg-foreground border border-border  rounded-none shadow-lg p-4 w-56 z-1100"
       >
         <p className="text-sm font-semibold mb-3 truncate text-background">{districtName} (+{count})</p>
         <div className="flex gap-2 flex-wrap">
@@ -74,7 +74,7 @@ export default function WatchlistBadge({
               alt={img.alt}
               width={48}
               height={48}
-              className="h-12 w-12 rounded-xl object-cover border border-border"
+              className="h-12 w-12 rounded-none object-cover border border-border"
             />
           ))}
         </div>

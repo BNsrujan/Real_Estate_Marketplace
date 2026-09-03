@@ -1,26 +1,16 @@
-"use client";
+import { cn } from '@/lib/utils';
 
-import React from "react";
-import { GlassCard } from "./glass_card";
+interface SidebarCardProps {
+  children: React.ReactNode;
+  className?: string;
+}
 
-export type SidebarCardProps = React.HTMLAttributes<HTMLDivElement> & {
-  title?: string;
-};
-
-export const SidebarCard: React.FC<SidebarCardProps> = ({
-  children,
-  title,
-  className,
-  ...rest
-}) => {
+export function SidebarCard({ children, className }: SidebarCardProps) {
   return (
-    <GlassCard className={className} {...rest}>
-      {title && (
-        <h4 className="mb-3 text-sm font-semibold text-foreground">{title}</h4>
-      )}
+    <div className={cn('border border-hairline bg-parchment p-4', className)}>
       {children}
-    </GlassCard>
+    </div>
   );
-};
+}
 
 export default SidebarCard;

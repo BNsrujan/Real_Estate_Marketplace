@@ -1,8 +1,7 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
 import { X, ChevronRight, ChevronLeft, Home, Landmark, Wheat, Building2, MapPinned, Factory, Check, Upload, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useStore } from '@/shared/store';
@@ -68,7 +67,7 @@ function Step1({ form }: { form: ReturnType<typeof useForm<AllValues>> }) {
               type="button"
               onClick={() => setValue('type', value, { shouldValidate: true })}
               className={cn(
-                'flex flex-col items-center gap-2 rounded-2xl border p-3 text-xs transition-all duration-200 ease-[cubic-bezier(0.2,0,0,1)] active:scale-95',
+                'flex flex-col items-center gap-2 rounded-none border p-3 text-xs transition-all duration-200 ease-[cubic-bezier(0.2,0,0,1)] active:scale-95',
                 type === value
                   ? 'border-primary/40 bg-secondary text-primary'
                   : 'border-border bg-card text-muted-foreground hover:bg-muted hover:text-foreground',
@@ -94,7 +93,7 @@ function Step1({ form }: { form: ReturnType<typeof useForm<AllValues>> }) {
               type="button"
               onClick={() => setValue('listingType', lt, { shouldValidate: true })}
               className={cn(
-                'flex-1 rounded-full border py-2.5 text-sm capitalize transition-all duration-200 ease-[cubic-bezier(0.2,0,0,1)] active:scale-95',
+                'flex-1 rounded-none border py-2.5 text-sm capitalize transition-all duration-200 ease-[cubic-bezier(0.2,0,0,1)] active:scale-95',
                 form.watch('listingType') === lt
                   ? 'border-primary/40 bg-secondary text-primary font-semibold'
                   : 'border-border bg-card text-muted-foreground hover:bg-muted',
@@ -344,7 +343,7 @@ function Step5({ form }: { form: ReturnType<typeof useForm<AllValues>> }) {
 
   return (
     <div className="space-y-5">
-      <div className="flex items-center justify-between rounded-2xl border border-border bg-card px-4 py-3.5 gap-4">
+      <div className="flex items-center justify-between rounded-none border border-border bg-card px-4 py-3.5 gap-4">
         <div>
           <p className="text-sm font-medium text-foreground">Road Access</p>
           <p className="text-xs text-muted-foreground mt-0.5">Does the property have road access?</p>
@@ -369,7 +368,7 @@ function Step5({ form }: { form: ReturnType<typeof useForm<AllValues>> }) {
               ))}
             </select>
           </Field>
-          <div className="flex items-center justify-between rounded-2xl border border-border bg-card px-4 py-3.5 gap-4">
+          <div className="flex items-center justify-between rounded-none border border-border bg-card px-4 py-3.5 gap-4">
             <p className="text-sm font-medium text-foreground">Road Facing</p>
             <Switch
               checked={!!roadFacing}
@@ -421,7 +420,7 @@ function Step6({ form, amenities }: { form: ReturnType<typeof useForm<AllValues>
                 type="button"
                 onClick={() => toggleAmenity(a.id)}
                 className={cn(
-                  'rounded-full border px-3 py-1.5 text-xs transition-all duration-200 ease-[cubic-bezier(0.2,0,0,1)] active:scale-95',
+                  'rounded-none border px-3 py-1.5 text-xs transition-all duration-200 ease-[cubic-bezier(0.2,0,0,1)] active:scale-95',
                   selectedIds.includes(a.id)
                     ? 'border-primary/30 bg-primary/10 text-primary font-medium'
                     : 'border-border bg-card text-muted-foreground hover:bg-muted hover:text-foreground',
@@ -493,7 +492,7 @@ function Step7({ form }: { form: ReturnType<typeof useForm<AllValues>> }) {
       {/* Drop zone */}
       <label
         className={cn(
-          'flex flex-col items-center justify-center rounded-3xl border-2 border-dashed p-8 cursor-pointer transition-all duration-200 ease-[cubic-bezier(0.2,0,0,1)]',
+          'flex flex-col items-center justify-center rounded-none border-2 border-dashed p-8 cursor-pointer transition-all duration-200 ease-[cubic-bezier(0.2,0,0,1)]',
           uploading
             ? 'border-primary/50 bg-primary/5'
             : 'border-border bg-muted/30 hover:border-primary/30 hover:bg-primary/5',
@@ -527,14 +526,14 @@ function Step7({ form }: { form: ReturnType<typeof useForm<AllValues>> }) {
           {imageUrls.map((url, i) => (
             <div
               key={i}
-              className="relative aspect-square rounded-2xl overflow-hidden border border-border cursor-pointer transition-all duration-200 hover:ring-2 hover:ring-primary/30"
+              className="relative aspect-square rounded-none overflow-hidden border border-border cursor-pointer transition-all duration-200 hover:ring-2 hover:ring-primary/30"
               onClick={() => setValue('coverIndex', i)}
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={url} alt="" className="w-full h-full object-cover" />
               {coverIndex === i && (
                 <div className="absolute inset-0 bg-primary/20 flex items-center justify-center">
-                  <span className="rounded-full bg-primary px-2.5 py-0.5 text-[10px] font-semibold text-primary-foreground">
+                  <span className="rounded-none bg-primary px-2.5 py-0.5 text-[10px] font-semibold text-primary-foreground">
                     Cover
                   </span>
                 </div>
@@ -542,7 +541,7 @@ function Step7({ form }: { form: ReturnType<typeof useForm<AllValues>> }) {
               <button
                 type="button"
                 onClick={(e) => { e.stopPropagation(); removeImage(i); }}
-                className="absolute top-1.5 right-1.5 flex h-6 w-6 items-center justify-center rounded-full bg-background/90 text-foreground hover:bg-destructive hover:text-destructive-foreground transition-colors duration-200"
+                className="absolute top-1.5 right-1.5 flex h-6 w-6 items-center justify-center rounded-none bg-background/90 text-foreground hover:bg-destructive hover:text-destructive-foreground transition-colors duration-200"
               >
                 <X size={10} />
               </button>
@@ -636,12 +635,12 @@ export function SellFormModal({ onClose }: SellFormModalProps) {
   const stepProps = { form };
 
   const modal = (
-    <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-      <div className="relative w-full max-w-xl bg-background rounded-3xl border border-border shadow-2xl flex flex-col max-h-[90vh] overflow-hidden">
+    <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-parchment/92 backdrop-blur-sm">
+      <div className="relative w-full max-w-xl bg-background rounded-none border border-border shadow-2xl flex flex-col max-h-[90vh] overflow-hidden">
 
         {/* Atmospheric blurs */}
-        <div aria-hidden="true" className="pointer-events-none absolute -top-24 -right-24 h-64 w-64 rounded-full bg-primary/8 blur-3xl" />
-        <div aria-hidden="true" className="pointer-events-none absolute -bottom-20 -left-20 h-52 w-52 rounded-full bg-secondary/50 blur-3xl" />
+        <div aria-hidden="true" className="pointer-events-none absolute -top-24 -right-24 h-64 w-64 rounded-none bg-primary/8 blur-3xl" />
+        <div aria-hidden="true" className="pointer-events-none absolute -bottom-20 -left-20 h-52 w-52 rounded-none bg-secondary/50 blur-3xl" />
 
         {/* Header */}
         <div className="relative shrink-0 flex items-center justify-between px-6 pt-6 pb-4 border-b border-border">
@@ -654,7 +653,7 @@ export function SellFormModal({ onClose }: SellFormModalProps) {
           <button
             type="button"
             onClick={onClose}
-            className="flex h-9 w-9 items-center justify-center rounded-full bg-muted text-muted-foreground hover:bg-primary/10 hover:text-primary active:scale-95 transition-all duration-200 ease-[cubic-bezier(0.2,0,0,1)]"
+            className="flex h-9 w-9 items-center justify-center rounded-none bg-muted text-muted-foreground hover:bg-primary/10 hover:text-primary active:scale-95 transition-all duration-200 ease-[cubic-bezier(0.2,0,0,1)]"
           >
             <X size={16} />
           </button>
@@ -666,7 +665,7 @@ export function SellFormModal({ onClose }: SellFormModalProps) {
             <div
               key={i}
               className={cn(
-                'h-1 rounded-full flex-1 transition-all duration-300 ease-[cubic-bezier(0.2,0,0,1)]',
+                'h-1 rounded-none flex-1 transition-all duration-300 ease-[cubic-bezier(0.2,0,0,1)]',
                 i < step
                   ? 'bg-primary'
                   : i === step
@@ -681,7 +680,7 @@ export function SellFormModal({ onClose }: SellFormModalProps) {
         <div className="relative flex-1 min-h-0 overflow-y-auto no-scrollbar px-6 py-4">
           {submitted ? (
             <div className="flex flex-col items-center justify-center py-16 gap-4">
-              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 border border-primary/20">
+              <div className="flex h-16 w-16 items-center justify-center rounded-none bg-primary/10 border border-primary/20">
                 <Check size={32} className="text-primary" />
               </div>
               <h3 className="text-xl font-bold text-foreground">Property Listed!</h3>
@@ -691,7 +690,7 @@ export function SellFormModal({ onClose }: SellFormModalProps) {
               <button
                 type="button"
                 onClick={onClose}
-                className="mt-2 rounded-full bg-primary px-8 py-2.5 text-sm font-semibold text-primary-foreground hover:bg-primary/90 active:scale-95 transition-all duration-200 ease-[cubic-bezier(0.2,0,0,1)]"
+                className="mt-2 rounded-none bg-primary px-8 py-2.5 text-sm font-semibold text-primary-foreground hover:bg-primary/90 active:scale-95 transition-all duration-200 ease-[cubic-bezier(0.2,0,0,1)]"
               >
                 Done
               </button>
@@ -716,7 +715,7 @@ export function SellFormModal({ onClose }: SellFormModalProps) {
               type="button"
               onClick={() => setStep((s) => Math.max(s - 1, 0))}
               disabled={step === 0}
-              className="flex items-center gap-1.5 rounded-full border border-border px-4 py-2.5 text-sm text-muted-foreground hover:text-foreground hover:bg-muted active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed transition-all duration-200 ease-[cubic-bezier(0.2,0,0,1)]"
+              className="flex items-center gap-1.5 rounded-none border border-border px-4 py-2.5 text-sm text-muted-foreground hover:text-foreground hover:bg-muted active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed transition-all duration-200 ease-[cubic-bezier(0.2,0,0,1)]"
             >
               <ChevronLeft size={16} />
               Back
@@ -726,7 +725,7 @@ export function SellFormModal({ onClose }: SellFormModalProps) {
               <button
                 type="button"
                 onClick={handleNext}
-                className="flex items-center gap-1.5 rounded-full bg-primary px-6 py-2.5 text-sm font-semibold text-primary-foreground hover:bg-primary/90 active:scale-95 transition-all duration-200 ease-[cubic-bezier(0.2,0,0,1)]"
+                className="flex items-center gap-1.5 rounded-none bg-primary px-6 py-2.5 text-sm font-semibold text-primary-foreground hover:bg-primary/90 active:scale-95 transition-all duration-200 ease-[cubic-bezier(0.2,0,0,1)]"
               >
                 Next
                 <ChevronRight size={16} />
@@ -736,7 +735,7 @@ export function SellFormModal({ onClose }: SellFormModalProps) {
                 type="button"
                 onClick={handleSubmit}
                 disabled={submitting}
-                className="flex items-center gap-2 rounded-full bg-primary px-6 py-2.5 text-sm font-semibold text-primary-foreground hover:bg-primary/90 active:scale-95 disabled:opacity-60 transition-all duration-200 ease-[cubic-bezier(0.2,0,0,1)]"
+                className="flex items-center gap-2 rounded-none bg-primary px-6 py-2.5 text-sm font-semibold text-primary-foreground hover:bg-primary/90 active:scale-95 disabled:opacity-60 transition-all duration-200 ease-[cubic-bezier(0.2,0,0,1)]"
               >
                 {submitting && <Loader2 size={14} className="animate-spin" />}
                 {isAuthenticated ? 'Submit Listing' : 'Login to Submit'}

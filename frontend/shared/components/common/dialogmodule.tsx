@@ -118,7 +118,7 @@ function GoogleButton({
       onClick={onClick}
       disabled={loading}
       className={cn(
-        "w-full flex items-center justify-center gap-3 h-12 rounded-full",
+        "w-full flex items-center justify-center gap-3 h-12 rounded-none",
         "border border-border bg-muted hover:bg-secondary",
         "text-foreground text-sm font-medium",
         "transition-all duration-200 active:scale-95",
@@ -286,7 +286,7 @@ function LoginView({
   return (
     <div className="space-y-3 md:space-y-4">
       {generalError && (
-        <div className="flex items-center gap-2 p-3 rounded-2xl bg-destructive/10 border border-destructive/20 text-destructive text-sm">
+        <div className="flex items-center gap-2 p-3 rounded-none bg-destructive/10 border border-destructive/20 text-destructive text-sm">
           <AlertCircle size={15} />
           <span>{generalError}</span>
         </div>
@@ -298,7 +298,7 @@ function LoginView({
         type="button"
         onClick={onSwitchToOtp}
         className={cn(
-          "w-full flex items-center justify-center gap-3 h-12 rounded-full",
+          "w-full flex items-center justify-center gap-3 h-12 rounded-none",
           "border border-border bg-muted hover:bg-secondary",
           "text-foreground text-sm font-medium transition-all duration-200 active:scale-95",
         )}
@@ -458,7 +458,7 @@ function RegisterView({
   return (
     <div className="space-y-2 md:space-y-4">
       {generalError && (
-        <div className="flex items-center gap-2 p-3 rounded-2xl bg-destructive/10 border border-destructive/20 text-destructive text-sm">
+        <div className="flex items-center gap-2 p-3 rounded-none bg-destructive/10 border border-destructive/20 text-destructive text-sm">
           <AlertCircle size={15} />
           <span>{generalError}</span>
         </div>
@@ -606,7 +606,7 @@ function OtpInputView({
   return (
     <div className="space-y-4 md:space-y-5">
       <div className="flex flex-col items-center gap-2 pb-1">
-        <div className="h-12 w-12 rounded-2xl bg-secondary border border-border flex items-center justify-center">
+        <div className="h-12 w-12 rounded-none bg-secondary border border-border flex items-center justify-center">
           {isEmail ? (
             <Mail size={22} className="text-primary" />
           ) : (
@@ -619,7 +619,7 @@ function OtpInputView({
       </div>
 
       {error && (
-        <div className="flex items-center gap-2 p-3 rounded-2xl bg-destructive/10 border border-destructive/20 text-destructive text-sm">
+        <div className="flex items-center gap-2 p-3 rounded-none bg-destructive/10 border border-destructive/20 text-destructive text-sm">
           <AlertCircle size={15} />
           <span>{error}</span>
         </div>
@@ -745,7 +745,7 @@ function OtpVerifyView({
   return (
     <div className="space-y-4 md:space-y-5">
       <div className="flex flex-col items-center gap-2 pb-1">
-        <div className="h-12 w-12 rounded-2xl bg-secondary border border-border flex items-center justify-center">
+        <div className="h-12 w-12 rounded-none bg-secondary border border-border flex items-center justify-center">
           {type === "email" ? (
             <Mail size={22} className="text-primary" />
           ) : (
@@ -759,7 +759,7 @@ function OtpVerifyView({
       </div>
 
       {error && (
-        <div className="flex items-center gap-2 p-3 rounded-2xl bg-destructive/10 border border-destructive/20 text-destructive text-sm">
+        <div className="flex items-center gap-2 p-3 rounded-none bg-destructive/10 border border-destructive/20 text-destructive text-sm">
           <AlertCircle size={15} />
           <span>{error}</span>
         </div>
@@ -862,16 +862,16 @@ const LoginModal = ({
       <DialogContent
         className={cn(
           "sm:max-w-md bg-background border-border text-foreground ",
-          "rounded-3xl p-6 shadow-2xl overflow-hidden transition-all duration-300",
+          "rounded-none p-6 shadow-2xl overflow-hidden transition-all duration-300",
         )}
       >
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute -top-20 -right-20 h-64 w-64 rounded-full bg-primary/15 blur-3xl"
+          className="pointer-events-none absolute -top-20 -right-20 h-64 w-64 rounded-none bg-primary/15 blur-3xl"
         />
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute -bottom-16 -left-16 h-48 w-48 rounded-full bg-secondary/60 blur-3xl"
+          className="pointer-events-none absolute -bottom-16 -left-16 h-48 w-48 rounded-none bg-secondary/60 blur-3xl"
         />
 
     <DialogHeader className="flex flex-wrap w-fit">
@@ -885,7 +885,7 @@ const LoginModal = ({
                   : "otp-input",
               )
             }
-            className="p-1.5 rounded-full text-muted-foreground hover:text-foreground hover:bg-muted transition-all z-12 w-fit "
+            className="p-1.5 rounded-none text-muted-foreground hover:text-foreground hover:bg-muted transition-all z-12 w-fit "
           >
             <ArrowLeft size={16} />
           </button>
